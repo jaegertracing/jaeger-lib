@@ -40,6 +40,10 @@ func TestInitMetrics(t *testing.T) {
 	assert.EqualValues(t, 5, c["counter"])
 	assert.EqualValues(t, 10, g["gauge"])
 	assert.EqualValues(t, 36863, g["timer.P50"])
+
+	stopwatch := StartStopwatch(testMetrics.Timer)
+	stopwatch.Stop()
+	assert.True(t, 0 < stopwatch.ElapsedTime())
 }
 
 var (
@@ -57,12 +61,12 @@ var (
 )
 
 func TestInitMetricsFailures(t *testing.T) {
-	assert.EqualError(t, initMetrics(&noMetricTag, NullFactory, nil), "Field NoMetricTag is missing a tag 'metric'")
+	assert.EqualError(t, initMetrics(&noMetricTag, nil, nil), "Field NoMetricTag is missing a tag 'metric'")
 
-	assert.EqualError(t, initMetrics(&badTags, NullFactory, nil),
+	assert.EqualError(t, initMetrics(&badTags, nil, nil),
 		"Field [BadTags]: Tag [noValue] is not of the form key=value in 'tags' string [1=one,noValue]")
 
-	assert.EqualError(t, initMetrics(&invalidMetricType, NullFactory, nil),
+	assert.EqualError(t, initMetrics(&invalidMetricType, nil, nil),
 		"Field InvalidMetricType is not a pointer to timer, gauge, or counter")
 }
 
