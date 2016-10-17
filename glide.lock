@@ -1,6 +1,11 @@
-hash: 293a3823d1c5a6501cc70e3e7b8f2b6a759051c508472270382c9307193e5a45
-updated: 2016-10-17T11:54:28.900792282-04:00
+hash: 5a477cf0a2003a589c40096fb4f0d0ba64bceca29493cb5e55e105a5f1784204
+updated: 2016-10-17T14:37:10.287473292-04:00
 imports:
 - name: github.com/codahale/hdrhistogram
-  version: f8ad88b59a584afeee9d334eff879b104439117b
-testImports: []
+  version: 5fd85ec0b4e2dd5d4158d257d943f2e586d86b62
+testImports:
+- name: github.com/stretchr/testify
+  version: 089c7181b8c728499929ff09b62d3fdd8df8adff
+  subpackages:
+  - assert
+  - require
