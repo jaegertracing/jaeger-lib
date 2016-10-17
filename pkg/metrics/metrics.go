@@ -47,7 +47,7 @@ func initMetrics(m interface{}, factory Factory, globalTags map[string]string) e
 				tag := strings.Split(tagPair, "=")
 				if len(tag) != 2 {
 					return fmt.Errorf(
-						"Field [%s]: Tag [%s] is not of the form key=value in 'tags' string [%s] ",
+						"Field [%s]: Tag [%s] is not of the form key=value in 'tags' string [%s]",
 						field.Name, tagPair, tagString)
 				}
 				tags[tag[0]] = tag[1]
