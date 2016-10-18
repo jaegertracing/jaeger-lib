@@ -15,7 +15,7 @@ func TestLocalMetrics(t *testing.T) {
 		assert.Equal(t, numGoroutines, runtime.NumGoroutine(), "Leaked at least one goroutine.")
 	}()
 
-	b := NewLocalBackend()
+	b := NewLocalBackend(time.Millisecond)
 	defer b.Stop()
 
 	f := NewLocalFactory(b)

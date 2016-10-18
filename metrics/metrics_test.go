@@ -14,7 +14,8 @@ func TestInitMetrics(t *testing.T) {
 		Timer   Timer   `metric:"timer"`
 	}{}
 
-	b := NewLocalBackend()
+	b := NewLocalBackend(time.Minute)
+	defer b.Stop()
 	f := NewLocalFactory(b)
 
 	globalTags := map[string]string{"key": "value"}
@@ -78,4 +79,11 @@ func TestInitPanic(t *testing.T) {
 	}()
 
 	Init(&noMetricTag, NullFactory, nil)
+}
+
+func TestNullMetrics(t *testing.T) {
+	// This test is just for cover
+	NullFactory.CreateTimer("name", nil).Record(0)
+	NullFactory.CreateCounter("name", nil).Inc(0)
+	NullFactory.CreateGauge("name", nil).Update(0)
 }

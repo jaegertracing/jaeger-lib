@@ -8,6 +8,10 @@ import (
 	"github.com/codahale/hdrhistogram"
 )
 
+const (
+	defaultTick = time.Minute
+)
+
 // This is intentionally very similar to github.com/codahale/metrics, the
 // main difference being that counters/gauges are scoped to the provider
 // rather than being global (to facilitate testing).
@@ -26,7 +30,7 @@ type LocalBackend struct {
 }
 
 // NewLocalBackend returns a new LocalBackend
-func NewLocalBackend() *LocalBackend {
+func NewLocalBackend(tick time.Duration) *LocalBackend {
 	b := &LocalBackend{
 		counters: make(map[string]*int64),
 		gauges:   make(map[string]*int64),
@@ -36,7 +40,10 @@ func NewLocalBackend() *LocalBackend {
 	}
 
 	go func() {
-		ticker := time.NewTicker(time.Minute)
+		if tick == 0 {
+			tick = defaultTick
+		}
+		ticker := time.NewTicker(tick)
 		for {
 			select {
 			case <-ticker.C:
