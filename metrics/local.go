@@ -9,8 +9,11 @@ import (
 )
 
 const (
-	defaultTick = time.Minute
+	defaultCollectionInterval = time.Minute
 )
+
+// TODO tags are currently ignored by LocalBackend, this should be fixed for local
+// metric tests that are sensitive to the tags
 
 // This is intentionally very similar to github.com/codahale/metrics, the
 // main difference being that counters/gauges are scoped to the provider
@@ -29,8 +32,9 @@ type LocalBackend struct {
 	stopped  chan struct{}
 }
 
-// NewLocalBackend returns a new LocalBackend
-func NewLocalBackend(tick time.Duration) *LocalBackend {
+// NewLocalBackend returns a new LocalBackend. The collectionInterval is the histogram
+// time window for each timer.
+func NewLocalBackend(collectionInterval time.Duration) *LocalBackend {
 	b := &LocalBackend{
 		counters: make(map[string]*int64),
 		gauges:   make(map[string]*int64),
@@ -39,34 +43,37 @@ func NewLocalBackend(tick time.Duration) *LocalBackend {
 		stopped:  make(chan struct{}),
 	}
 
-	go func() {
-		if tick == 0 {
-			tick = defaultTick
-		}
-		ticker := time.NewTicker(tick)
-		for {
-			select {
-			case <-ticker.C:
-				b.tm.Lock()
-				timers := make(map[string]*localBackendTimer, len(b.timers))
-				for timerName, timer := range b.timers {
-					timers[timerName] = timer
-				}
-				b.tm.Unlock()
+	if collectionInterval == 0 {
+		collectionInterval = defaultCollectionInterval
+	}
 
-				for _, t := range b.timers {
-					t.Lock()
-					t.hist.Rotate()
-					t.Unlock()
-				}
-			case <-b.stop:
-				ticker.Stop()
-				close(b.stopped)
-				return
-			}
-		}
-	}()
+	go b.runLoop(collectionInterval)
 	return b
+}
+
+func (b *LocalBackend) runLoop(collectionInterval time.Duration) {
+	ticker := time.NewTicker(collectionInterval)
+	for {
+		select {
+		case <-ticker.C:
+			b.tm.Lock()
+			timers := make(map[string]*localBackendTimer, len(b.timers))
+			for timerName, timer := range b.timers {
+				timers[timerName] = timer
+			}
+			b.tm.Unlock()
+
+			for _, t := range timers {
+				t.Lock()
+				t.hist.Rotate()
+				t.Unlock()
+			}
+		case <-b.stop:
+			ticker.Stop()
+			close(b.stopped)
+			return
+		}
+	}
 }
 
 // IncCounter increments a counter value
