@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -78,6 +79,7 @@ func (b *LocalBackend) runLoop(collectionInterval time.Duration) {
 
 // IncCounter increments a counter value
 func (b *LocalBackend) IncCounter(name string, tags map[string]string, delta int64) {
+	name = b.getKey(name, tags)
 	b.cm.RLock()
 	counter := b.counters[name]
 	b.cm.RUnlock()
@@ -100,6 +102,7 @@ func (b *LocalBackend) IncCounter(name string, tags map[string]string, delta int
 
 // UpdateGauge updates the value of a gauge
 func (b *LocalBackend) UpdateGauge(name string, tags map[string]string, value int64) {
+	name = b.getKey(name, tags)
 	b.gm.RLock()
 	gauge := b.gauges[name]
 	b.gm.RUnlock()
@@ -122,6 +125,7 @@ func (b *LocalBackend) UpdateGauge(name string, tags map[string]string, value in
 
 // RecordTimer records a timing duration
 func (b *LocalBackend) RecordTimer(name string, tags map[string]string, d time.Duration) {
+	name = b.getKey(name, tags)
 	timer := b.findOrCreateTimer(name)
 	timer.Lock()
 	timer.hist.Current.RecordValue(int64(d / time.Millisecond))
@@ -208,6 +212,35 @@ func (b *LocalBackend) Snapshot() (counters, gauges map[string]int64) {
 func (b *LocalBackend) Stop() {
 	close(b.stop)
 	<-b.stopped
+}
+
+// MetricDescr describes a metric with tags
+type MetricDescr struct {
+	Name string
+	Tags map[string]string
+}
+
+// Key converts name+tags into a single string of the form
+// "name|tag1=value1|...|tagN=valueN", where tag names are
+// sorted alphabetically.
+func (m MetricDescr) Key() string {
+	var keys []string
+	for k := range m.Tags {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	key := m.Name
+	for _, k := range keys {
+		key = key + "|" + k + "=" + m.Tags[k]
+	}
+	return key
+}
+
+func (b *LocalBackend) getKey(name string, tags map[string]string) string {
+	return MetricDescr{
+		Name: name,
+		Tags: tags,
+	}.Key()
 }
 
 type stats struct {
