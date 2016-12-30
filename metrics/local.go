@@ -243,6 +243,8 @@ func (l *localGauge) Update(value int64) {
 // LocalFactory stats factory that creates metrics that are stored locally
 type LocalFactory struct {
 	localBackend *LocalBackend
+	namespace    string
+	tags         map[string]string
 }
 
 // NewLocalFactory returns a new LocalMetricsFactory
@@ -252,8 +254,8 @@ func NewLocalFactory(lb *LocalBackend) Factory {
 	}
 }
 
-// CreateCounter returns a local stats counter
-func (l *LocalFactory) CreateCounter(name string, tags map[string]string) Counter {
+// Counter returns a local stats counter
+func (l *LocalFactory) Counter(name string, tags map[string]string) Counter {
 	return &localCounter{
 		stats{
 			name:         name,
@@ -263,8 +265,8 @@ func (l *LocalFactory) CreateCounter(name string, tags map[string]string) Counte
 	}
 }
 
-// CreateTimer returns a local stats timer
-func (l *LocalFactory) CreateTimer(name string, tags map[string]string) Timer {
+// Timer returns a local stats timer.
+func (l *LocalFactory) Timer(name string, tags map[string]string) Timer {
 	return &localTimer{
 		stats{
 			name:         name,
@@ -274,8 +276,19 @@ func (l *LocalFactory) CreateTimer(name string, tags map[string]string) Timer {
 	}
 }
 
-// CreateGauge returns a local stats gauge
-func (l *LocalFactory) CreateGauge(name string, tags map[string]string) Gauge {
+// Gauge returns a local stats gauge.
+func (l *LocalFactory) Gauge(name string, tags map[string]string) Gauge {
+	return &localGauge{
+		stats{
+			name:         name,
+			tags:         tags,
+			localBackend: l.localBackend,
+		},
+	}
+}
+
+// Namespace returns a new namespace.
+func (l *LocalFactory) Namespace(name string, tags map[string]string) Factory {
 	return &localGauge{
 		stats{
 			name:         name,
