@@ -1,3 +1,23 @@
+// Copyright (c) 2016 Uber Technologies, Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
 package metrics
 
 import (
@@ -55,11 +75,11 @@ func initMetrics(m interface{}, factory Factory, globalTags map[string]string) e
 		}
 		var obj interface{}
 		if field.Type.AssignableTo(counterPtrType) {
-			obj = factory.CreateCounter(metric, tags)
+			obj = factory.Counter(metric, tags)
 		} else if field.Type.AssignableTo(gaugePtrType) {
-			obj = factory.CreateGauge(metric, tags)
+			obj = factory.Gauge(metric, tags)
 		} else if field.Type.AssignableTo(timerPtrType) {
-			obj = factory.CreateTimer(metric, tags)
+			obj = factory.Timer(metric, tags)
 		} else {
 			return fmt.Errorf(
 				"Field %s is not a pointer to timer, gauge, or counter",

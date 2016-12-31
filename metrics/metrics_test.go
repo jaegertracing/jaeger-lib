@@ -83,7 +83,8 @@ func TestInitPanic(t *testing.T) {
 
 func TestNullMetrics(t *testing.T) {
 	// This test is just for cover
-	NullFactory.CreateTimer("name", nil).Record(0)
-	NullFactory.CreateCounter("name", nil).Inc(0)
-	NullFactory.CreateGauge("name", nil).Update(0)
+	NullFactory.Timer("name", nil).Record(0)
+	NullFactory.Counter("name", nil).Inc(0)
+	NullFactory.Gauge("name", nil).Update(0)
+	NullFactory.Namespace("name", nil).Gauge("name2", nil).Update(0)
 }

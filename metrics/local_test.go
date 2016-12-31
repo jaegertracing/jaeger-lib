@@ -15,16 +15,21 @@ func TestLocalMetrics(t *testing.T) {
 		assert.Equal(t, numGoroutines, runtime.NumGoroutine(), "Leaked at least one goroutine.")
 	}()
 
-	b := NewLocalBackend(time.Millisecond)
+	b := NewLocalBackend(0) // default interval
 	defer b.Stop()
 
+	tags := map[string]string{
+		"x": "y",
+	}
+
 	f := NewLocalFactory(b)
-	f.CreateCounter("my-counter", nil).Inc(4)
-	f.CreateCounter("my-counter", nil).Inc(6)
-	f.CreateCounter("other-counter", nil).Inc(8)
-	f.CreateGauge("my-gauge", nil).Update(25)
-	f.CreateGauge("my-gauge", nil).Update(43)
-	f.CreateGauge("other-gauge", nil).Update(74)
+	f.Counter("my-counter", tags).Inc(4)
+	f.Counter("my-counter", nil).Inc(6)
+	f.Counter("other-counter", nil).Inc(8)
+	f.Gauge("my-gauge", nil).Update(25)
+	f.Gauge("my-gauge", nil).Update(43)
+	f.Gauge("other-gauge", nil).Update(74)
+	f.Namespace("namespace", tags).Counter("my-counter", nil).Inc(7)
 
 	timings := map[string][]time.Duration{
 		"foo-latency": {
@@ -43,7 +48,7 @@ func TestLocalMetrics(t *testing.T) {
 
 	for metric, timing := range timings {
 		for _, d := range timing {
-			f.CreateTimer(metric, nil).Record(d)
+			f.Timer(metric, nil).Record(d)
 		}
 	}
 
@@ -52,8 +57,9 @@ func TestLocalMetrics(t *testing.T) {
 	require.NotNil(t, g)
 
 	assert.Equal(t, map[string]int64{
-		"my-counter":    10,
-		"other-counter": 8,
+		"my-counter":           10,
+		"other-counter":        8,
+		"namespace.my-counter": 7,
 	}, c)
 
 	assert.Equal(t, map[string]int64{
@@ -72,4 +78,46 @@ func TestLocalMetrics(t *testing.T) {
 		"my-gauge":         43,
 		"other-gauge":      74,
 	}, g)
+}
+
+func TestLocalMetricsInterval(t *testing.T) {
+	numGoroutines := runtime.NumGoroutine()
+	defer func() {
+		assert.Equal(t, numGoroutines, runtime.NumGoroutine(), "Leaked at least one goroutine.")
+	}()
+
+	refreshInterval := time.Millisecond
+	const relativeCheckFrequency = 5 // check 5 times per refreshInterval
+	const maxChecks = 2 * relativeCheckFrequency
+	checkInterval := (refreshInterval * relativeCheckFrequency) / maxChecks
+
+	b := NewLocalBackend(refreshInterval)
+	defer b.Stop()
+
+	f := NewLocalFactory(b)
+	f.Timer("timer", nil).Record(1)
+
+	b.tm.Lock()
+	timer := b.timers["timer"]
+	b.tm.Unlock()
+	assert.NotNil(t, timer)
+
+	// timer.hist.Current is modified on every Rotate(), which is called by LocalBackend after every refreshInterval
+	getCurr := func() interface{} {
+		timer.Lock()
+		defer timer.Unlock()
+		return timer.hist.Current
+	}
+
+	curr := getCurr()
+
+	// wait for twice as long as the refresh interval
+	for i := 0; i < maxChecks; i++ {
+		time.Sleep(checkInterval)
+
+		if getCurr() != curr {
+			return
+		}
+	}
+	t.Fail()
 }
