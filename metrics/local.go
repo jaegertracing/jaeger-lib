@@ -21,6 +21,7 @@
 package metrics
 
 import (
+	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -31,9 +32,6 @@ import (
 const (
 	defaultCollectionInterval = time.Minute
 )
-
-// TODO tags are currently ignored by LocalBackend, this should be fixed for local
-// metric tests that are sensitive to the tags
 
 // This is intentionally very similar to github.com/codahale/metrics, the
 // main difference being that counters/gauges are scoped to the provider
@@ -98,6 +96,7 @@ func (b *LocalBackend) runLoop(collectionInterval time.Duration) {
 
 // IncCounter increments a counter value
 func (b *LocalBackend) IncCounter(name string, tags map[string]string, delta int64) {
+	name = getKey(name, tags)
 	b.cm.Lock()
 	defer b.cm.Unlock()
 	counter := b.counters[name]
@@ -111,6 +110,7 @@ func (b *LocalBackend) IncCounter(name string, tags map[string]string, delta int
 
 // UpdateGauge updates the value of a gauge
 func (b *LocalBackend) UpdateGauge(name string, tags map[string]string, value int64) {
+	name = getKey(name, tags)
 	b.gm.Lock()
 	defer b.gm.Unlock()
 	gauge := b.gauges[name]
@@ -124,6 +124,7 @@ func (b *LocalBackend) UpdateGauge(name string, tags map[string]string, value in
 
 // RecordTimer records a timing duration
 func (b *LocalBackend) RecordTimer(name string, tags map[string]string, d time.Duration) {
+	name = getKey(name, tags)
 	timer := b.findOrCreateTimer(name)
 	timer.Lock()
 	timer.hist.Current.RecordValue(int64(d / time.Millisecond))
@@ -201,6 +202,22 @@ func (b *LocalBackend) Snapshot() (counters, gauges map[string]int64) {
 func (b *LocalBackend) Stop() {
 	close(b.stop)
 	<-b.stopped
+}
+
+// getKey converts name+tags into a single string of the form
+// "name|tag1=value1|...|tagN=valueN", where tag names are
+// sorted alphabetically.
+func getKey(name string, tags map[string]string) string {
+	var keys []string
+	for k := range tags {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	key := name
+	for _, k := range keys {
+		key = key + "|" + k + "=" + tags[k]
+	}
+	return key
 }
 
 type stats struct {
