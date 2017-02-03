@@ -208,11 +208,9 @@ func (b *LocalBackend) Stop() {
 // "name|tag1=value1|...|tagN=valueN", where tag names are
 // sorted alphabetically.
 func getKey(name string, tags map[string]string) string {
-	keys := make([]string, len(tags))
-	var i int
+	keys := make([]string, 0, len(tags))
 	for k := range tags {
-		keys[i] = k
-		i++
+		keys = append(keys, k)
 	}
 	sort.Strings(keys)
 	key := name
