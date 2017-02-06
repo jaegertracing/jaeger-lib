@@ -265,15 +265,18 @@ func (l *localGauge) Update(value int64) {
 
 // LocalFactory stats factory that creates metrics that are stored locally
 type LocalFactory struct {
-	localBackend *LocalBackend
+	LocalBackend *LocalBackend
 	namespace    string
 	tags         map[string]string
 }
 
 // NewLocalFactory returns a new LocalMetricsFactory
-func NewLocalFactory(lb *LocalBackend) Factory {
+func NewLocalFactory(lb *LocalBackend) *LocalFactory {
+	if lb == nil {
+		lb = NewLocalBackend(0)
+	}
 	return &LocalFactory{
-		localBackend: lb,
+		LocalBackend: lb,
 	}
 }
 
@@ -302,7 +305,7 @@ func (l *LocalFactory) Counter(name string, tags map[string]string) Counter {
 		stats{
 			name:         l.newNamespace(name),
 			tags:         l.appendTags(tags),
-			localBackend: l.localBackend,
+			localBackend: l.LocalBackend,
 		},
 	}
 }
@@ -313,7 +316,7 @@ func (l *LocalFactory) Timer(name string, tags map[string]string) Timer {
 		stats{
 			name:         l.newNamespace(name),
 			tags:         l.appendTags(tags),
-			localBackend: l.localBackend,
+			localBackend: l.LocalBackend,
 		},
 	}
 }
@@ -324,7 +327,7 @@ func (l *LocalFactory) Gauge(name string, tags map[string]string) Gauge {
 		stats{
 			name:         l.newNamespace(name),
 			tags:         l.appendTags(tags),
-			localBackend: l.localBackend,
+			localBackend: l.LocalBackend,
 		},
 	}
 }
@@ -334,6 +337,6 @@ func (l *LocalFactory) Namespace(name string, tags map[string]string) Factory {
 	return &LocalFactory{
 		namespace:    l.newNamespace(name),
 		tags:         l.appendTags(tags),
-		localBackend: l.localBackend,
+		LocalBackend: l.LocalBackend,
 	}
 }

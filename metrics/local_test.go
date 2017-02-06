@@ -9,14 +9,13 @@ import (
 )
 
 func TestLocalMetrics(t *testing.T) {
-	b := NewLocalBackend(0) // default interval
-	defer b.Stop()
-
 	tags := map[string]string{
 		"x": "y",
 	}
 
-	f := NewLocalFactory(b)
+	f := NewLocalFactory(nil)
+	b := f.LocalBackend
+	defer b.Stop()
 	f.Counter("my-counter", tags).Inc(4)
 	f.Counter("my-counter", tags).Inc(6)
 	f.Counter("my-counter", nil).Inc(6)
