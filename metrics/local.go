@@ -47,7 +47,7 @@ type LocalBackend struct {
 	gauges   map[string]*int64
 	timers   map[string]*localBackendTimer
 	stop     chan struct{}
-	stopped  chan struct{}
+	wg       sync.WaitGroup
 }
 
 // NewLocalBackend returns a new LocalBackend. The collectionInterval is the histogram
@@ -58,18 +58,19 @@ func NewLocalBackend(collectionInterval time.Duration) *LocalBackend {
 		gauges:   make(map[string]*int64),
 		timers:   make(map[string]*localBackendTimer),
 		stop:     make(chan struct{}),
-		stopped:  make(chan struct{}),
 	}
 
 	if collectionInterval == 0 {
 		collectionInterval = defaultCollectionInterval
 	}
 
+	b.wg.Add(1)
 	go b.runLoop(collectionInterval)
 	return b
 }
 
 func (b *LocalBackend) runLoop(collectionInterval time.Duration) {
+	defer b.wg.Done()
 	ticker := time.NewTicker(collectionInterval)
 	for {
 		select {
@@ -88,7 +89,6 @@ func (b *LocalBackend) runLoop(collectionInterval time.Duration) {
 			}
 		case <-b.stop:
 			ticker.Stop()
-			close(b.stopped)
 			return
 		}
 	}
@@ -201,7 +201,7 @@ func (b *LocalBackend) Snapshot() (counters, gauges map[string]int64) {
 // Stop cleanly closes the background goroutine spawned by NewLocalBackend.
 func (b *LocalBackend) Stop() {
 	close(b.stop)
-	<-b.stopped
+	b.wg.Wait()
 }
 
 // getKey converts name+tags into a single string of the form
