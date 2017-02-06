@@ -69,6 +69,19 @@ func NewLocalBackend(collectionInterval time.Duration) *LocalBackend {
 	return b
 }
 
+// Clear discards accumulated stats
+func (b *LocalBackend) Clear() {
+	b.cm.Lock()
+	defer b.cm.Unlock()
+	b.gm.Lock()
+	defer b.gm.Unlock()
+	b.tm.Lock()
+	defer b.tm.Unlock()
+	b.counters = make(map[string]*int64)
+	b.gauges = make(map[string]*int64)
+	b.timers = make(map[string]*localBackendTimer)
+}
+
 func (b *LocalBackend) runLoop(collectionInterval time.Duration) {
 	defer b.wg.Done()
 	ticker := time.NewTicker(collectionInterval)
