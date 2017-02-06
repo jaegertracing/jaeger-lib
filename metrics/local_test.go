@@ -74,6 +74,11 @@ func TestLocalMetrics(t *testing.T) {
 		"my-gauge":         43,
 		"other-gauge":      74,
 	}, g)
+
+	b.Clear()
+	c, g = b.Snapshot()
+	require.Empty(t, c)
+	require.Empty(t, g)
 }
 
 func TestLocalMetricsInterval(t *testing.T) {
