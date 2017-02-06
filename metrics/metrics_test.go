@@ -38,9 +38,9 @@ func TestInitMetrics(t *testing.T) {
 
 	c, g := b.Snapshot()
 
-	assert.EqualValues(t, 5, c["counter"])
-	assert.EqualValues(t, 10, g["gauge"])
-	assert.EqualValues(t, 36863, g["timer.P50"])
+	assert.EqualValues(t, 5, c["counter|key=value"])
+	assert.EqualValues(t, 10, g["gauge|1=one|2=two|key=value"])
+	assert.EqualValues(t, 36863, g["timer|key=value.P50"])
 
 	stopwatch := StartStopwatch(testMetrics.Timer)
 	stopwatch.Stop()

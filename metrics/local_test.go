@@ -1,7 +1,6 @@
 package metrics
 
 import (
-	"runtime"
 	"testing"
 	"time"
 
@@ -10,11 +9,6 @@ import (
 )
 
 func TestLocalMetrics(t *testing.T) {
-	numGoroutines := runtime.NumGoroutine()
-	defer func() {
-		assert.Equal(t, numGoroutines, runtime.NumGoroutine(), "Leaked at least one goroutine.")
-	}()
-
 	b := NewLocalBackend(0) // default interval
 	defer b.Stop()
 
@@ -24,6 +18,7 @@ func TestLocalMetrics(t *testing.T) {
 
 	f := NewLocalFactory(b)
 	f.Counter("my-counter", tags).Inc(4)
+	f.Counter("my-counter", tags).Inc(6)
 	f.Counter("my-counter", nil).Inc(6)
 	f.Counter("other-counter", nil).Inc(8)
 	f.Gauge("my-gauge", nil).Update(25)
@@ -57,9 +52,10 @@ func TestLocalMetrics(t *testing.T) {
 	require.NotNil(t, g)
 
 	assert.Equal(t, map[string]int64{
-		"my-counter":           10,
-		"other-counter":        8,
-		"namespace.my-counter": 7,
+		"my-counter|x=y":           10,
+		"my-counter":               6,
+		"other-counter":            8,
+		"namespace.my-counter|x=y": 7,
 	}, c)
 
 	assert.Equal(t, map[string]int64{
@@ -81,11 +77,6 @@ func TestLocalMetrics(t *testing.T) {
 }
 
 func TestLocalMetricsInterval(t *testing.T) {
-	numGoroutines := runtime.NumGoroutine()
-	defer func() {
-		assert.Equal(t, numGoroutines, runtime.NumGoroutine(), "Leaked at least one goroutine.")
-	}()
-
 	refreshInterval := time.Millisecond
 	const relativeCheckFrequency = 5 // check 5 times per refreshInterval
 	const maxChecks = 2 * relativeCheckFrequency
