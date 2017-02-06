@@ -1,7 +1,6 @@
 package metrics
 
 import (
-	"runtime"
 	"testing"
 	"time"
 
@@ -10,11 +9,6 @@ import (
 )
 
 func TestLocalMetrics(t *testing.T) {
-	numGoroutines := runtime.NumGoroutine()
-	defer func() {
-		assert.Equal(t, numGoroutines, runtime.NumGoroutine(), "Leaked at least one goroutine.")
-	}()
-
 	b := NewLocalBackend(0) // default interval
 	defer b.Stop()
 
@@ -83,11 +77,6 @@ func TestLocalMetrics(t *testing.T) {
 }
 
 func TestLocalMetricsInterval(t *testing.T) {
-	numGoroutines := runtime.NumGoroutine()
-	defer func() {
-		assert.Equal(t, numGoroutines, runtime.NumGoroutine(), "Leaked at least one goroutine.")
-	}()
-
 	refreshInterval := time.Millisecond
 	const relativeCheckFrequency = 5 // check 5 times per refreshInterval
 	const maxChecks = 2 * relativeCheckFrequency
