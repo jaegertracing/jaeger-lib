@@ -18,25 +18,25 @@ type ExpectedMetric struct {
 // TODO do something similar for Timers
 
 // AssertCounterMetric checks if counter metric exists.
-func AssertCounterMetric(t *testing.T, f *metrics.LocalFactory, expectedMetrics ExpectedMetric) {
+func AssertCounterMetric(t *testing.T, f *metrics.LocalFactory, expectedMetrics ...ExpectedMetric) {
 	counters, _ := f.Snapshot()
-	assertMetrics(t, counters, expectedMetrics)
+	assertMetrics(t, counters, expectedMetrics...)
 }
 
 // AssertGaugeMetric checks if gauge metric exists.
-func AssertGaugeMetric(t *testing.T, f *metrics.LocalFactory, expectedMetrics ExpectedMetric) {
+func AssertGaugeMetric(t *testing.T, f *metrics.LocalFactory, expectedMetrics ...ExpectedMetric) {
 	_, gauges := f.Snapshot()
-	assertMetrics(t, gauges, expectedMetrics)
+	assertMetrics(t, gauges, expectedMetrics...)
 }
 
-// AssertCounterMetrics checks if counter metrics exist.
+// AssertCounterMetrics checks if the existing counter metrics exactly match the expected metrics.
 func AssertCounterMetrics(t *testing.T, f *metrics.LocalFactory, expectedMetrics []ExpectedMetric) {
 	counters, _ := f.Snapshot()
 	assertMetrics(t, counters, expectedMetrics...)
 	assert.Len(t, expectedMetrics, len(counters))
 }
 
-// AssertGaugeMetrics checks if gauge metrics exist.
+// AssertGaugeMetrics checks if the existing gauge metrics exactly match the expected metrics.
 func AssertGaugeMetrics(t *testing.T, f *metrics.LocalFactory, expectedMetrics []ExpectedMetric) {
 	_, gauges := f.Snapshot()
 	assertMetrics(t, gauges, expectedMetrics...)
