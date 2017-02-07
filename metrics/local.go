@@ -109,7 +109,7 @@ func (b *LocalBackend) runLoop(collectionInterval time.Duration) {
 
 // IncCounter increments a counter value
 func (b *LocalBackend) IncCounter(name string, tags map[string]string, delta int64) {
-	name = getKey(name, tags)
+	name = GetKey(name, tags)
 	b.cm.Lock()
 	defer b.cm.Unlock()
 	counter := b.counters[name]
@@ -123,7 +123,7 @@ func (b *LocalBackend) IncCounter(name string, tags map[string]string, delta int
 
 // UpdateGauge updates the value of a gauge
 func (b *LocalBackend) UpdateGauge(name string, tags map[string]string, value int64) {
-	name = getKey(name, tags)
+	name = GetKey(name, tags)
 	b.gm.Lock()
 	defer b.gm.Unlock()
 	gauge := b.gauges[name]
@@ -137,7 +137,7 @@ func (b *LocalBackend) UpdateGauge(name string, tags map[string]string, value in
 
 // RecordTimer records a timing duration
 func (b *LocalBackend) RecordTimer(name string, tags map[string]string, d time.Duration) {
-	name = getKey(name, tags)
+	name = GetKey(name, tags)
 	timer := b.findOrCreateTimer(name)
 	timer.Lock()
 	timer.hist.Current.RecordValue(int64(d / time.Millisecond))
@@ -217,10 +217,10 @@ func (b *LocalBackend) Stop() {
 	b.wg.Wait()
 }
 
-// getKey converts name+tags into a single string of the form
+// GetKey converts name+tags into a single string of the form
 // "name|tag1=value1|...|tagN=valueN", where tag names are
 // sorted alphabetically.
-func getKey(name string, tags map[string]string) string {
+func GetKey(name string, tags map[string]string) string {
 	keys := make([]string, 0, len(tags))
 	for k := range tags {
 		keys = append(keys, k)
@@ -265,18 +265,15 @@ func (l *localGauge) Update(value int64) {
 
 // LocalFactory stats factory that creates metrics that are stored locally
 type LocalFactory struct {
-	LocalBackend *LocalBackend
-	namespace    string
-	tags         map[string]string
+	*LocalBackend
+	namespace string
+	tags      map[string]string
 }
 
 // NewLocalFactory returns a new LocalMetricsFactory
-func NewLocalFactory(lb *LocalBackend) *LocalFactory {
-	if lb == nil {
-		lb = NewLocalBackend(0)
-	}
+func NewLocalFactory(collectionInterval time.Duration) *LocalFactory {
 	return &LocalFactory{
-		LocalBackend: lb,
+		LocalBackend: NewLocalBackend(collectionInterval),
 	}
 }
 

@@ -1,9 +1,11 @@
-package metrics
+package testutils
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/uber/jaeger-lib/metrics"
 )
 
 // ExpectedMetric contains metrics under test.
@@ -16,20 +18,20 @@ type ExpectedMetric struct {
 // TODO do something similar for Timers
 
 // AssertCounterMetrics checks if counter metrics exist.
-func AssertCounterMetrics(t *testing.T, b *LocalBackend, expectedMetrics []ExpectedMetric) {
-	counters, _ := b.Snapshot()
+func AssertCounterMetrics(t *testing.T, f *metrics.LocalFactory, expectedMetrics []ExpectedMetric) {
+	counters, _ := f.Snapshot()
 	assertMetrics(t, counters, expectedMetrics)
 }
 
 // AssertGaugeMetrics checks if gauge metrics exist.
-func AssertGaugeMetrics(t *testing.T, b *LocalBackend, expectedMetrics []ExpectedMetric) {
-	_, gauges := b.Snapshot()
+func AssertGaugeMetrics(t *testing.T, f *metrics.LocalFactory, expectedMetrics []ExpectedMetric) {
+	_, gauges := f.Snapshot()
 	assertMetrics(t, gauges, expectedMetrics)
 }
 
 func assertMetrics(t *testing.T, actualMetrics map[string]int64, expectedMetrics []ExpectedMetric) {
 	for _, expected := range expectedMetrics {
-		key := getKey(expected.Name, expected.Tags)
+		key := metrics.GetKey(expected.Name, expected.Tags)
 		assert.EqualValues(t,
 			expected.Value,
 			actualMetrics[key],
