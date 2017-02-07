@@ -14,7 +14,7 @@ func TestInitMetrics(t *testing.T) {
 		Timer   Timer   `metric:"timer"`
 	}{}
 
-	f := NewLocalFactory(time.Minute)
+	f := NewLocalFactory(0)
 	defer f.Stop()
 
 	globalTags := map[string]string{"key": "value"}

@@ -29,10 +29,6 @@ import (
 	"github.com/codahale/hdrhistogram"
 )
 
-const (
-	defaultCollectionInterval = time.Minute
-)
-
 // This is intentionally very similar to github.com/codahale/metrics, the
 // main difference being that counters/gauges are scoped to the provider
 // rather than being global (to facilitate testing).
@@ -59,11 +55,10 @@ func NewLocalBackend(collectionInterval time.Duration) *LocalBackend {
 		timers:   make(map[string]*localBackendTimer),
 		stop:     make(chan struct{}),
 	}
-
 	if collectionInterval == 0 {
-		collectionInterval = defaultCollectionInterval
+		// Use one histogram time window for all timers
+		return b
 	}
-
 	b.wg.Add(1)
 	go b.runLoop(collectionInterval)
 	return b
