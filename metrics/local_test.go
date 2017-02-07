@@ -9,14 +9,12 @@ import (
 )
 
 func TestLocalMetrics(t *testing.T) {
-	b := NewLocalBackend(0) // default interval
-	defer b.Stop()
-
 	tags := map[string]string{
 		"x": "y",
 	}
 
-	f := NewLocalFactory(b)
+	f := NewLocalFactory(0)
+	defer f.Stop()
 	f.Counter("my-counter", tags).Inc(4)
 	f.Counter("my-counter", tags).Inc(6)
 	f.Counter("my-counter", nil).Inc(6)
@@ -47,7 +45,7 @@ func TestLocalMetrics(t *testing.T) {
 		}
 	}
 
-	c, g := b.Snapshot()
+	c, g := f.Snapshot()
 	require.NotNil(t, c)
 	require.NotNil(t, g)
 
@@ -75,8 +73,8 @@ func TestLocalMetrics(t *testing.T) {
 		"other-gauge":      74,
 	}, g)
 
-	b.Clear()
-	c, g = b.Snapshot()
+	f.Clear()
+	c, g = f.Snapshot()
 	require.Empty(t, c)
 	require.Empty(t, g)
 }
@@ -87,15 +85,14 @@ func TestLocalMetricsInterval(t *testing.T) {
 	const maxChecks = 2 * relativeCheckFrequency
 	checkInterval := (refreshInterval * relativeCheckFrequency) / maxChecks
 
-	b := NewLocalBackend(refreshInterval)
-	defer b.Stop()
+	f := NewLocalFactory(refreshInterval)
+	defer f.Stop()
 
-	f := NewLocalFactory(b)
 	f.Timer("timer", nil).Record(1)
 
-	b.tm.Lock()
-	timer := b.timers["timer"]
-	b.tm.Unlock()
+	f.tm.Lock()
+	timer := f.timers["timer"]
+	f.tm.Unlock()
 	assert.NotNil(t, timer)
 
 	// timer.hist.Current is modified on every Rotate(), which is called by LocalBackend after every refreshInterval

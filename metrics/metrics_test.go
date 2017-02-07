@@ -14,9 +14,8 @@ func TestInitMetrics(t *testing.T) {
 		Timer   Timer   `metric:"timer"`
 	}{}
 
-	b := NewLocalBackend(time.Minute)
-	defer b.Stop()
-	f := NewLocalFactory(b)
+	f := NewLocalFactory(0)
+	defer f.Stop()
 
 	globalTags := map[string]string{"key": "value"}
 
@@ -29,14 +28,14 @@ func TestInitMetrics(t *testing.T) {
 
 	// wait for metrics
 	for i := 0; i < 1000; i++ {
-		c, _ := b.Snapshot()
+		c, _ := f.Snapshot()
 		if _, ok := c["counter"]; ok {
 			break
 		}
 		time.Sleep(1 * time.Millisecond)
 	}
 
-	c, g := b.Snapshot()
+	c, g := f.Snapshot()
 
 	assert.EqualValues(t, 5, c["counter|key=value"])
 	assert.EqualValues(t, 10, g["gauge|1=one|2=two|key=value"])
