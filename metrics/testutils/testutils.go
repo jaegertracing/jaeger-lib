@@ -18,18 +18,18 @@ type ExpectedMetric struct {
 // TODO do something similar for Timers
 
 // AssertCounterMetrics checks if counter metrics exist.
-func AssertCounterMetrics(t *testing.T, f *metrics.LocalFactory, expectedMetrics []ExpectedMetric) {
+func AssertCounterMetrics(t *testing.T, f *metrics.LocalFactory, expectedMetrics ...ExpectedMetric) {
 	counters, _ := f.Snapshot()
-	assertMetrics(t, counters, expectedMetrics)
+	assertMetrics(t, counters, expectedMetrics...)
 }
 
 // AssertGaugeMetrics checks if gauge metrics exist.
-func AssertGaugeMetrics(t *testing.T, f *metrics.LocalFactory, expectedMetrics []ExpectedMetric) {
+func AssertGaugeMetrics(t *testing.T, f *metrics.LocalFactory, expectedMetrics ...ExpectedMetric) {
 	_, gauges := f.Snapshot()
-	assertMetrics(t, gauges, expectedMetrics)
+	assertMetrics(t, gauges, expectedMetrics...)
 }
 
-func assertMetrics(t *testing.T, actualMetrics map[string]int64, expectedMetrics []ExpectedMetric) {
+func assertMetrics(t *testing.T, actualMetrics map[string]int64, expectedMetrics ...ExpectedMetric) {
 	for _, expected := range expectedMetrics {
 		key := metrics.GetKey(expected.Name, expected.Tags)
 		assert.EqualValues(t,
@@ -38,5 +38,4 @@ func assertMetrics(t *testing.T, actualMetrics map[string]int64, expectedMetrics
 			"expected metric name: %s, tags: %+v", expected.Name, expected.Tags,
 		)
 	}
-	assert.Len(t, expectedMetrics, len(actualMetrics))
 }
