@@ -14,4 +14,7 @@ func TestAssertMetrics(t *testing.T) {
 
 	AssertCounterMetrics(t, f, []ExpectedMetric{{Name: "counter", Tags: tags, Value: 1}})
 	AssertGaugeMetrics(t, f, []ExpectedMetric{{Name: "gauge", Tags: tags, Value: 11}})
+
+	AssertCounterMetric(t, f, ExpectedMetric{Name: "counter", Tags: tags, Value: 1})
+	AssertGaugeMetric(t, f, ExpectedMetric{Name: "gauge", Tags: tags, Value: 11})
 }
