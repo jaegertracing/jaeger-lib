@@ -22,7 +22,7 @@ package metrics
 
 // Counter tracks the number of times an event has occurred
 type Counter interface {
-	// Add adds the given value to the counter.
+	// Inc adds the given value to the counter.
 	Inc(int64)
 }
 

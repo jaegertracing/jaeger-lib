@@ -1,11 +1,28 @@
-hash: 5a477cf0a2003a589c40096fb4f0d0ba64bceca29493cb5e55e105a5f1784204
-updated: 2016-10-17T14:37:10.287473292-04:00
+hash: b2df3ac611e65c63f6a20f87b6333b3199cb774fbd70c6aecbc6cae20041e565
+updated: 2017-02-08T22:54:23.683077422-05:00
 imports:
 - name: github.com/codahale/hdrhistogram
-  version: 5fd85ec0b4e2dd5d4158d257d943f2e586d86b62
-testImports:
+  version: f8ad88b59a584afeee9d334eff879b104439117b
+- name: github.com/davecgh/go-spew
+  version: 346938d642f2ec3594ed81d874461961cd0faa76
+  subpackages:
+  - spew
+- name: github.com/go-kit/kit
+  version: 414b9e6bc6c6848e6058611c56ad9d1216af3653
+  subpackages:
+  - metrics
+  - metrics/expvar
+  - metrics/generic
+  - metrics/internal/lv
+- name: github.com/pmezard/go-difflib
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  subpackages:
+  - difflib
 - name: github.com/stretchr/testify
-  version: 089c7181b8c728499929ff09b62d3fdd8df8adff
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   subpackages:
   - assert
   - require
+- name: github.com/VividCortex/gohistogram
+  version: 51564d9861991fb0ad0f531c99ef602d0f9866e6
+testImports: []
