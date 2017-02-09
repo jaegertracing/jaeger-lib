@@ -2,6 +2,5 @@ package: github.com/uber/jaeger-lib
 import:
 - package: github.com/codahale/hdrhistogram
 - package: github.com/go-kit/kit
-  subpackages:
 testImport:
 - package: github.com/stretchr/testify
