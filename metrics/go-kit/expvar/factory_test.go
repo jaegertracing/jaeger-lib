@@ -29,7 +29,7 @@ func TestTimer(t *testing.T) {
 	timer := f.Timer("timer", nil)
 	timer.Record(100*time.Millisecond + 500*time.Microsecond)
 	kv := findExpvar("gokit_expvar_timer.p50")
-	assert.Equal(t, "100.5", kv.Value.String())
+	assert.Equal(t, "0.1005", kv.Value.String())
 }
 
 func TestNamespace(t *testing.T) {

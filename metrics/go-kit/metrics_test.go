@@ -28,5 +28,5 @@ func TestTimer(t *testing.T) {
 	kitHist := generic.NewHistogram("abc", 10)
 	var timer metrics.Timer = NewTimer(kitHist)
 	timer.Record(100*time.Millisecond + 500*time.Microsecond) // 100.5 milliseconds
-	assert.EqualValues(t, 100.5, kitHist.Quantile(0.9))
+	assert.EqualValues(t, 0.1005, kitHist.Quantile(0.9))
 }

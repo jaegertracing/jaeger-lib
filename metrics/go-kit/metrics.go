@@ -48,6 +48,5 @@ func NewTimer(hist kit.Histogram) *Timer {
 
 // Record saves the time passed in.
 func (t *Timer) Record(delta time.Duration) {
-	millis := float64(delta) / float64(time.Millisecond)
-	t.hist.Observe(millis)
+	t.hist.Observe(delta.Seconds())
 }
