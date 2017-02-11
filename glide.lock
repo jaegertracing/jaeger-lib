@@ -1,5 +1,5 @@
-hash: 9d5e336213ce82df6c196df848d09091b0505afa9b3a6b8934a0c84a2e9b9271
-updated: 2017-02-10T19:30:40.315802769-05:00
+hash: 675dd561493cf92bcaf2a0bc7293a53c39b56c4133628ea0e6e713aeeff1c40e
+updated: 2017-02-10T21:32:57.563197936-05:00
 imports:
 - name: github.com/codahale/hdrhistogram
   version: f8ad88b59a584afeee9d334eff879b104439117b
@@ -7,6 +7,8 @@ imports:
   version: 346938d642f2ec3594ed81d874461961cd0faa76
   subpackages:
   - spew
+- name: github.com/facebookgo/clock
+  version: 600d898af40aa09a7a93ecb9265d87b0504b6f03
 - name: github.com/go-kit/kit
   version: a5e3d03d36fa4f9f2915d10d6b17fa0e02b734cc
   subpackages:
@@ -23,6 +25,8 @@ imports:
   subpackages:
   - assert
   - require
+- name: github.com/uber-go/tally
+  version: 43c1379c0577ac1eb74f9f3869cea07191c9992b
 - name: github.com/VividCortex/gohistogram
   version: 51564d9861991fb0ad0f531c99ef602d0f9866e6
 testImports: []
