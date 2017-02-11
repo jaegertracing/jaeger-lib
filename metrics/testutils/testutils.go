@@ -31,7 +31,7 @@ func AssertGaugeMetrics(t *testing.T, f *metrics.LocalFactory, expectedMetrics .
 
 func assertMetrics(t *testing.T, actualMetrics map[string]int64, expectedMetrics ...ExpectedMetric) {
 	for _, expected := range expectedMetrics {
-		key := metrics.GetKey(expected.Name, expected.Tags)
+		key := metrics.GetKey(expected.Name, expected.Tags, "|", "=")
 		assert.EqualValues(t,
 			expected.Value,
 			actualMetrics[key],

@@ -1,5 +1,5 @@
-hash: b2df3ac611e65c63f6a20f87b6333b3199cb774fbd70c6aecbc6cae20041e565
-updated: 2017-02-08T22:54:23.683077422-05:00
+hash: 9d5e336213ce82df6c196df848d09091b0505afa9b3a6b8934a0c84a2e9b9271
+updated: 2017-02-10T19:30:40.315802769-05:00
 imports:
 - name: github.com/codahale/hdrhistogram
   version: f8ad88b59a584afeee9d334eff879b104439117b
@@ -8,7 +8,7 @@ imports:
   subpackages:
   - spew
 - name: github.com/go-kit/kit
-  version: 414b9e6bc6c6848e6058611c56ad9d1216af3653
+  version: a5e3d03d36fa4f9f2915d10d6b17fa0e02b734cc
   subpackages:
   - metrics
   - metrics/expvar
@@ -19,7 +19,7 @@ imports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
+  version: 2402e8e7a02fc811447d11f881aa9746cdc57983
   subpackages:
   - assert
   - require

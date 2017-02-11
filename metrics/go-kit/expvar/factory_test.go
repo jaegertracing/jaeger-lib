@@ -9,6 +9,7 @@ import (
 
 func TestCounter(t *testing.T) {
 	f := NewFactory(10)
+	assert.False(t, f.Capabilities().Tagging)
 	c := f.Counter("gokit_expvar_counter")
 	c.Add(42)
 	kv := findExpvar("gokit_expvar_counter")

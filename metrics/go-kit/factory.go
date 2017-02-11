@@ -12,20 +12,33 @@ type Factory interface {
 	Counter(name string) kit.Counter
 	Gauge(name string) kit.Gauge
 	Histogram(name string) kit.Histogram
+	Capabilities() Capabilities
+}
+
+// Capabilities describes capabilities of a specific metrics factory
+type Capabilities struct {
+	// Tagging indicates whether the factory has the capability for tagged metrics
+	Tagging bool
 }
 
 // Wrap is used to create an adapter from xkit.Factory to metrics.Factory.
 func Wrap(namespace string, f Factory) metrics.Factory {
 	return &factory{
-		scope:   namespace,
-		factory: f,
+		scope:    namespace,
+		factory:  f,
+		scopeSep: ".",
+		tagsSep:  ".",
+		tagKVSep: "_",
 	}
 }
 
 type factory struct {
-	scope   string
-	tags    map[string]string
-	factory Factory
+	scope    string
+	tags     map[string]string
+	factory  Factory
+	scopeSep string
+	tagsSep  string
+	tagKVSep string
 }
 
 func (f *factory) subScope(name string) string {
@@ -35,12 +48,32 @@ func (f *factory) subScope(name string) string {
 	if name == "" {
 		return f.scope
 	}
-	return f.scope + "." + name
+	return f.scope + f.scopeSep + name
+}
+
+// nameAndTagsList returns a name and tags list for the new metrics.
+// The name is a concatenation of nom and the current factory scope.
+// The tags list is a flattened list of passed tags merged with factory tags.
+// If the underlying factory does not support tags, then the tags are
+// transformed into a string and appended to the name.
+func (f *factory) nameAndTagsList(nom string, tags map[string]string) (name string, tagsList []string) {
+	mergedTags := f.mergeTags(tags)
+	name = f.subScope(nom)
+	tagsList = f.tagsList(mergedTags)
+	if len(tagsList) == 0 {
+		return
+	}
+	if f.factory.Capabilities().Tagging {
+		return
+	}
+	name = metrics.GetKey(name, mergedTags, f.tagsSep, f.tagKVSep)
+	tagsList = nil
+	return
 }
 
 func (f *factory) Counter(name string, tags map[string]string) metrics.Counter {
-	counter := f.factory.Counter(f.subScope(name))
-	tagsList := f.tagsList(tags)
+	name, tagsList := f.nameAndTagsList(name, tags)
+	counter := f.factory.Counter(name)
 	if len(tagsList) > 0 {
 		counter = counter.With(tagsList...)
 	}
@@ -48,8 +81,8 @@ func (f *factory) Counter(name string, tags map[string]string) metrics.Counter {
 }
 
 func (f *factory) Timer(name string, tags map[string]string) metrics.Timer {
-	hist := f.factory.Histogram(f.subScope(name))
-	tagsList := f.tagsList(tags)
+	name, tagsList := f.nameAndTagsList(name, tags)
+	hist := f.factory.Histogram(name)
 	if len(tagsList) > 0 {
 		hist = hist.With(tagsList...)
 	}
@@ -57,8 +90,8 @@ func (f *factory) Timer(name string, tags map[string]string) metrics.Timer {
 }
 
 func (f *factory) Gauge(name string, tags map[string]string) metrics.Gauge {
-	gauge := f.factory.Gauge(f.subScope(name))
-	tagsList := f.tagsList(tags)
+	name, tagsList := f.nameAndTagsList(name, tags)
+	gauge := f.factory.Gauge(name)
 	if len(tagsList) > 0 {
 		gauge = gauge.With(tagsList...)
 	}
@@ -67,16 +100,18 @@ func (f *factory) Gauge(name string, tags map[string]string) metrics.Gauge {
 
 func (f *factory) Namespace(name string, tags map[string]string) metrics.Factory {
 	return &factory{
-		scope:   f.subScope(name),
-		tags:    f.mergeTags(tags),
-		factory: f.factory,
+		scope:    f.subScope(name),
+		tags:     f.mergeTags(tags),
+		factory:  f.factory,
+		scopeSep: f.scopeSep,
+		tagsSep:  f.tagsSep,
+		tagKVSep: f.tagKVSep,
 	}
 }
 
 func (f *factory) tagsList(a map[string]string) []string {
-	m := f.mergeTags(a)
-	ret := make([]string, 0, 2*len(m))
-	for k, v := range m {
+	ret := make([]string, 0, 2*len(a))
+	for k, v := range a {
 		ret = append(ret, k, v)
 	}
 	return ret
