@@ -30,3 +30,7 @@ func (f factory) Histogram(name string) metrics.Histogram {
 func (f factory) Gauge(name string) metrics.Gauge {
 	return expvar.NewGauge(name)
 }
+
+func (f factory) Capabilities() xkit.Capabilities {
+	return xkit.Capabilities{Tagging: false}
+}

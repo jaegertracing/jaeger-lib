@@ -44,6 +44,8 @@ type LocalBackend struct {
 	timers   map[string]*localBackendTimer
 	stop     chan struct{}
 	wg       sync.WaitGroup
+	TagsSep  string
+	TagKVSep string
 }
 
 // NewLocalBackend returns a new LocalBackend. The collectionInterval is the histogram
@@ -54,6 +56,8 @@ func NewLocalBackend(collectionInterval time.Duration) *LocalBackend {
 		gauges:   make(map[string]*int64),
 		timers:   make(map[string]*localBackendTimer),
 		stop:     make(chan struct{}),
+		TagsSep:  "|",
+		TagKVSep: "=",
 	}
 	if collectionInterval == 0 {
 		// Use one histogram time window for all timers
@@ -104,7 +108,7 @@ func (b *LocalBackend) runLoop(collectionInterval time.Duration) {
 
 // IncCounter increments a counter value
 func (b *LocalBackend) IncCounter(name string, tags map[string]string, delta int64) {
-	name = GetKey(name, tags)
+	name = GetKey(name, tags, b.TagsSep, b.TagKVSep)
 	b.cm.Lock()
 	defer b.cm.Unlock()
 	counter := b.counters[name]
@@ -118,7 +122,7 @@ func (b *LocalBackend) IncCounter(name string, tags map[string]string, delta int
 
 // UpdateGauge updates the value of a gauge
 func (b *LocalBackend) UpdateGauge(name string, tags map[string]string, value int64) {
-	name = GetKey(name, tags)
+	name = GetKey(name, tags, b.TagsSep, b.TagKVSep)
 	b.gm.Lock()
 	defer b.gm.Unlock()
 	gauge := b.gauges[name]
@@ -132,7 +136,7 @@ func (b *LocalBackend) UpdateGauge(name string, tags map[string]string, value in
 
 // RecordTimer records a timing duration
 func (b *LocalBackend) RecordTimer(name string, tags map[string]string, d time.Duration) {
-	name = GetKey(name, tags)
+	name = GetKey(name, tags, b.TagsSep, b.TagKVSep)
 	timer := b.findOrCreateTimer(name)
 	timer.Lock()
 	timer.hist.Current.RecordValue(int64(d / time.Millisecond))
@@ -215,7 +219,7 @@ func (b *LocalBackend) Stop() {
 // GetKey converts name+tags into a single string of the form
 // "name|tag1=value1|...|tagN=valueN", where tag names are
 // sorted alphabetically.
-func GetKey(name string, tags map[string]string) string {
+func GetKey(name string, tags map[string]string, tagsSep string, tagKVSep string) string {
 	keys := make([]string, 0, len(tags))
 	for k := range tags {
 		keys = append(keys, k)
@@ -223,7 +227,7 @@ func GetKey(name string, tags map[string]string) string {
 	sort.Strings(keys)
 	key := name
 	for _, k := range keys {
-		key = key + "|" + k + "=" + tags[k]
+		key = key + tagsSep + k + tagKVSep + tags[k]
 	}
 	return key
 }
