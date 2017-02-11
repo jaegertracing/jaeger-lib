@@ -44,6 +44,6 @@ func (f *factory) Timer(name string, tags map[string]string) metrics.Timer {
 
 func (f *factory) Namespace(name string, tags map[string]string) metrics.Factory {
 	return &factory{
-		tally: f.tally.SubScope(name),
+		tally: f.tally.SubScope(name).Tagged(tags),
 	}
 }

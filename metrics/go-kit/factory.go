@@ -80,10 +80,7 @@ func (f *factory) nameAndTagsList(nom string, tags map[string]string) (name stri
 	mergedTags := f.mergeTags(tags)
 	name = f.subScope(nom)
 	tagsList = f.tagsList(mergedTags)
-	if len(tagsList) == 0 {
-		return
-	}
-	if f.factory.Capabilities().Tagging {
+	if len(tagsList) == 0 || f.factory.Capabilities().Tagging {
 		return
 	}
 	name = metrics.GetKey(name, mergedTags, f.tagsSep, f.tagKVSep)
