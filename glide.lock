@@ -1,10 +1,10 @@
 hash: 675dd561493cf92bcaf2a0bc7293a53c39b56c4133628ea0e6e713aeeff1c40e
-updated: 2017-02-10T21:32:57.563197936-05:00
+updated: 2017-02-16T14:55:26.229399982-05:00
 imports:
 - name: github.com/codahale/hdrhistogram
   version: f8ad88b59a584afeee9d334eff879b104439117b
 - name: github.com/davecgh/go-spew
-  version: 346938d642f2ec3594ed81d874461961cd0faa76
+  version: 04cdfd42973bb9c8589fd6a731800cf222fde1a9
   subpackages:
   - spew
 - name: github.com/facebookgo/clock
@@ -17,7 +17,7 @@ imports:
   - metrics/generic
   - metrics/internal/lv
 - name: github.com/pmezard/go-difflib
-  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
@@ -29,4 +29,14 @@ imports:
   version: 43c1379c0577ac1eb74f9f3869cea07191c9992b
 - name: github.com/VividCortex/gohistogram
   version: 51564d9861991fb0ad0f531c99ef602d0f9866e6
+- name: go.uber.org/atomic
+  version: 0c9e689d64f004564b79d9a663634756df322902
+- name: go.uber.org/zap
+  version: 066278dd4c1dedb5aa4dbc4a79df2651401810fd
+  subpackages:
+  - buffer
+  - internal/bufferpool
+  - internal/exit
+  - internal/multierror
+  - zapcore
 testImports: []
