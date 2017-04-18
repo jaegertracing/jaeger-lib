@@ -1,5 +1,5 @@
-hash: e6528321fbc04ff60802bf95b6e4f89b9273413f1f6468d2d8a6c2cc729aa15c
-updated: 2017-03-10T15:31:49.90064899-08:00
+hash: a2184b829a69a7e33880eacae5f0dc39be4e0f9dbbad074e19de83172e1ac135
+updated: 2017-04-17T18:09:23.149910885-07:00
 imports:
 - name: github.com/codahale/hdrhistogram
   version: 3a0bb77429bd3a61596f5e8a3172445844342120
@@ -26,7 +26,7 @@ imports:
   - assert
   - require
 - name: github.com/uber-go/tally
-  version: 34be4a565ce6286a0ba91a54a81be3f6181ca2e2
+  version: 4b9d9de43ffcb0b7efe67dab2a92c2d58dbf16ab
 - name: github.com/VividCortex/gohistogram
   version: 51564d9861991fb0ad0f531c99ef602d0f9866e6
 testImports: []
