@@ -29,7 +29,8 @@ import (
 )
 
 // NewFactory creates a new metrics factory using go-kit prometheus package.
-// buckets is the number of buckets to be used in histograms.
+// buckets define the buckets into which observations are counted.
+// If buckets == nil, the default value prometheus.DefBuckets is used.
 func NewFactory(namespace, subsystem string, buckets []float64) xkit.Factory {
 	return factory{
 		namespace: namespace,
