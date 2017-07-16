@@ -21,6 +21,8 @@
 package prometheus
 
 import (
+	"strings"
+
 	"github.com/go-kit/kit/metrics"
 	kitprom "github.com/go-kit/kit/metrics/prometheus"
 	"github.com/prometheus/client_golang/prometheus"
@@ -28,11 +30,16 @@ import (
 	"github.com/uber/jaeger-lib/metrics/go-kit"
 )
 
+var normalizer = strings.NewReplacer(
+	".", "_",
+	"-", "_",
+)
+
 // NewFactory creates a new metrics factory using go-kit prometheus package.
-// buckets define the buckets into which observations are counted.
+// buckets define the buckets into which histogram observations are counted.
 // If buckets == nil, the default value prometheus.DefBuckets is used.
 func NewFactory(namespace, subsystem string, buckets []float64) xkit.Factory {
-	return factory{
+	return &factory{
 		namespace: namespace,
 		subsystem: subsystem,
 		buckets:   buckets,
@@ -45,37 +52,37 @@ type factory struct {
 	buckets   []float64
 }
 
-func (f factory) Counter(name string) metrics.Counter {
+func (f *factory) Counter(name string) metrics.Counter {
 	opts := prometheus.CounterOpts{
 		Namespace: f.namespace,
 		Subsystem: f.subsystem,
-		Name:      name,
+		Name:      normalizer.Replace(name),
 		Help:      name,
 	}
 	return kitprom.NewCounterFrom(opts, nil)
 }
 
-func (f factory) Histogram(name string) metrics.Histogram {
+func (f *factory) Histogram(name string) metrics.Histogram {
 	opts := prometheus.HistogramOpts{
 		Namespace: f.namespace,
 		Subsystem: f.subsystem,
-		Name:      name,
+		Name:      normalizer.Replace(name),
 		Help:      name,
 		Buckets:   f.buckets,
 	}
 	return kitprom.NewHistogramFrom(opts, nil)
 }
 
-func (f factory) Gauge(name string) metrics.Gauge {
+func (f *factory) Gauge(name string) metrics.Gauge {
 	opts := prometheus.GaugeOpts{
 		Namespace: f.namespace,
 		Subsystem: f.subsystem,
-		Name:      name,
+		Name:      normalizer.Replace(name),
 		Help:      name,
 	}
 	return kitprom.NewGaugeFrom(opts, nil)
 }
 
-func (f factory) Capabilities() xkit.Capabilities {
+func (f *factory) Capabilities() xkit.Capabilities {
 	return xkit.Capabilities{Tagging: true}
 }

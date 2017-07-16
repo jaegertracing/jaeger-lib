@@ -64,6 +64,7 @@ type testCase struct {
 	useNamespace  bool
 	namespace     string
 	namespaceTags Tags
+	options       []FactoryOption
 
 	expName string
 	expTags []string
@@ -134,12 +135,13 @@ func TestFactoryScoping(t *testing.T) {
 			},
 			{
 				f:             noTagsFactory,
+				options:       []FactoryOption{ScopeSeparator(":"), TagsSeparator(":")},
 				name:          "z",
 				tags:          Tags{"a": "b"},
 				useNamespace:  true,
 				namespace:     "w",
 				namespaceTags: Tags{"c": "d"},
-				expName:       "w.z.a_b.c_d",
+				expName:       "w:z:a_b:c_d",
 			},
 		}
 		for _, tc := range testCases {
@@ -149,7 +151,7 @@ func TestFactoryScoping(t *testing.T) {
 				factoryName = "noTagsFactory"
 			}
 			t.Run(factoryName+"_"+testSuite.metricType+"_"+testCase.expName, func(t *testing.T) {
-				f := Wrap(testCase.prefix, testCase.f)
+				f := Wrap(testCase.prefix, testCase.f, testCase.options...)
 				if testCase.useNamespace {
 					f = f.Namespace(testCase.namespace, testCase.namespaceTags)
 				}
