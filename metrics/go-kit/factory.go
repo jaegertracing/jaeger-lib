@@ -111,7 +111,6 @@ func (f *factory) nameAndTagsList(nom string, tags map[string]string) (name stri
 
 func (f *factory) Counter(name string, tags map[string]string) metrics.Counter {
 	name, tagsList := f.nameAndTagsList(name, tags)
-	println(name)
 	counter := f.factory.Counter(name)
 	if len(tagsList) > 0 {
 		counter = counter.With(tagsList...)
