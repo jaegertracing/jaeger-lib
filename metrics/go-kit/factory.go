@@ -35,20 +35,41 @@ type Factory interface {
 	Capabilities() Capabilities
 }
 
-// Capabilities describes capabilities of a specific metrics factory
+// Capabilities describes capabilities of a specific metrics factory.
 type Capabilities struct {
 	// Tagging indicates whether the factory has the capability for tagged metrics
 	Tagging bool
 }
 
+// FactoryOption is a function that adjusts some parameters of the factory.
+type FactoryOption func(*factory)
+
 // Wrap is used to create an adapter from xkit.Factory to metrics.Factory.
-func Wrap(namespace string, f Factory) metrics.Factory {
-	return &factory{
+func Wrap(namespace string, f Factory, options ...FactoryOption) metrics.Factory {
+	factory := &factory{
 		scope:    namespace,
 		factory:  f,
 		scopeSep: ".",
 		tagsSep:  ".",
 		tagKVSep: "_",
+	}
+	for i := range options {
+		options[i](factory)
+	}
+	return factory
+}
+
+// ScopeSeparator returns an option that overrides default scope separator.
+func ScopeSeparator(scopeSep string) FactoryOption {
+	return func(f *factory) {
+		f.scopeSep = scopeSep
+	}
+}
+
+// TagsSeparator returns an option that overrides default tags separator.
+func TagsSeparator(tagsSep string) FactoryOption {
+	return func(f *factory) {
+		f.tagsSep = tagsSep
 	}
 }
 
