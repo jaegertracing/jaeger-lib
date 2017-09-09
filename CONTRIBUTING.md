@@ -34,10 +34,9 @@ pull request is most likely to be accepted if it:
 
 ## License
 
-By contributing your code, you agree to license your contribution under the terms
-of the [Apache 2.0 License](./LICENSE).
+By contributing your code, you agree to license your contribution under the terms of the [Apache 2.0 License](LICENSE).
 
-If you are adding a new file it should have a header like below.
+If you are adding a new file it should have a header like below. The easiest way to add such header is to run `make fmt`.
 
 ```
 // Copyright (c) 2017 Uber Technologies, Inc.
