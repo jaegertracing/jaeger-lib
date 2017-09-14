@@ -16,7 +16,7 @@ func NewFactory(client *influx.Influx) xkit.Factory {
 
 type factory struct {
 	buckets int
-	client *influx.Influx
+	client  *influx.Influx
 }
 
 func (f factory) Counter(name string) metrics.Counter {
