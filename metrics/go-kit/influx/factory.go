@@ -3,6 +3,7 @@ package influx
 import (
 	"github.com/go-kit/kit/metrics"
 	"github.com/go-kit/kit/metrics/influx"
+
 	"github.com/uber/jaeger-lib/metrics/go-kit"
 )
 
