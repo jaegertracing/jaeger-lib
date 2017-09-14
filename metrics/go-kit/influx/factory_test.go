@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/go-kit/kit/metrics/influx"
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/metrics/influx"
 	influxdb "github.com/influxdata/influxdb/client/v2"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/uber/jaeger-lib/metrics/go-kit"
 )
