@@ -20,26 +20,44 @@ import (
 	"github.com/go-kit/kit/log/level"
 )
 
+// LoggerOption sets a parameter for the StdlibAdapter.
+type LoggerOption func(*logger)
+
+// MessageKey sets the key for the actual log message. By default, it's "msg".
+func MessageKey(key string) LoggerOption {
+	return func(a *logger) { a.messageKey = key }
+}
+
 // logger wraps a go-kit logger instance in a Jaeger client compatible one.
 type logger struct {
 	infoLogger  log.Logger
 	errorLogger log.Logger
+
+	messageKey string
 }
 
 // NewLogger creates a new Jaeger client logger from a go-kit one.
-func NewLogger(l log.Logger) *logger {
-	return &logger{
-		infoLogger:  level.Info(l),
-		errorLogger: level.Error(l),
+func NewLogger(kitlogger log.Logger, options ...LoggerOption) *logger {
+	l := &logger{
+		infoLogger:  level.Info(kitlogger),
+		errorLogger: level.Error(kitlogger),
+
+		messageKey: "msg",
 	}
+
+	for _, option := range options {
+		option(l)
+	}
+
+	return l
 }
 
 // Error implements the github.com/uber/jaeger-client-go/log.Logger interface.
 func (l *logger) Error(msg string) {
-	l.errorLogger.Log("msg", msg)
+	l.errorLogger.Log(l.messageKey, msg)
 }
 
 // Infof implements the github.com/uber/jaeger-client-go/log.Logger interface.
 func (l *logger) Infof(msg string, args ...interface{}) {
-	l.infoLogger.Log("msg", fmt.Sprintf(msg, args...))
+	l.infoLogger.Log(l.messageKey, fmt.Sprintf(msg, args...))
 }
