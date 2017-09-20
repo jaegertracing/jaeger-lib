@@ -16,11 +16,12 @@ package xkit
 
 import (
 	"fmt"
+
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 )
 
-// LoggerOption sets a parameter for the StdlibAdapter.
+// LoggerOption sets a parameter for the Logger.
 type LoggerOption func(*Logger)
 
 // MessageKey sets the key for the actual log message. By default, it's "msg".
