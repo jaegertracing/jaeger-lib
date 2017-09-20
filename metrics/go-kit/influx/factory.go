@@ -29,7 +29,6 @@ func NewFactory(client *influx.Influx) xkit.Factory {
 }
 
 type factory struct {
-	buckets int
 	client  *influx.Influx
 }
 
