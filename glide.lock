@@ -1,5 +1,5 @@
 hash: 8ca2ebd4305a4aaead18ee8cc5a84da42e95c202d53c1bd78d11436aeb8be8e4
-updated: 2017-09-12T23:48:13.239754093+02:00
+updated: 2017-09-20T01:48:48.588894144+02:00
 imports:
 - name: github.com/beorn7/perks
   version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
@@ -17,6 +17,7 @@ imports:
   version: a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b
   subpackages:
   - log
+  - log/level
   - metrics
   - metrics/expvar
   - metrics/generic
