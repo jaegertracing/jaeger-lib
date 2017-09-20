@@ -29,7 +29,7 @@ func NewFactory(client *influx.Influx) xkit.Factory {
 }
 
 type factory struct {
-	client  *influx.Influx
+	client *influx.Influx
 }
 
 func (f factory) Counter(name string) metrics.Counter {
