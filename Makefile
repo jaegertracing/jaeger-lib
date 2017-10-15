@@ -68,16 +68,16 @@ idl-submodule:
 thrift-image:
 	$(THRIFT) -version
 
-.PHONY: install_ci
-install_ci: install
+.PHONY: install-ci
+install-ci: install
 	go get github.com/wadey/gocovmerge
 	go get github.com/mattn/goveralls
 	go get golang.org/x/tools/cmd/cover
 	go get github.com/golang/lint/golint
 
 
-.PHONY: test_ci
-test_ci:
+.PHONY: test-ci
+test-ci:
 	./scripts/cover.sh $(shell go list $(PACKAGES))
 	make lint
 
