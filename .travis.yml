@@ -14,8 +14,8 @@ env:
     - GO15VENDOREXPERIMENT=1
 
 install:
-  - make install_ci
+  - make install-ci
 
 script:
-  - make test_ci
+  - make test-ci
   - travis_retry goveralls -coverprofile=cover.out -service=travis-ci || true
