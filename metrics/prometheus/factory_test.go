@@ -30,22 +30,48 @@ var _ metrics.Factory = new(Factory)
 func TestCounter(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(registry)
-	f2 := f1.Namespace("bender", map[string]string{"a": "b"})
+	fDummy := f1.Namespace("", nil)
+	f2 := fDummy.Namespace("bender", map[string]string{"a": "b"})
+	f3 := f2.Namespace("", nil)
+	assert.Equal(t, "bender", f3.(*Factory).scope)
+
 	c1 := f2.Counter("rodriguez", map[string]string{"x": "y"})
 	c2 := f2.Counter("rodriguez", map[string]string{"x": "z"})
+	c3 := f2.Counter("rodriguez", map[string]string{"x": "z"}) // same tags as c2
 	c1.Inc(1)
 	c1.Inc(2)
 	c2.Inc(3)
-	c2.Inc(4)
+	c3.Inc(4)
 
 	snapshot, err := registry.Gather()
 	require.NoError(t, err)
 
 	m1 := findMetric(t, snapshot, "bender:rodriguez", map[string]string{"a": "b", "x": "y"})
-	assert.EqualValues(t, 3, m1.GetCounter().GetValue())
+	assert.EqualValues(t, 3, m1.GetCounter().GetValue(), "%+v", m1)
 
 	m2 := findMetric(t, snapshot, "bender:rodriguez", map[string]string{"a": "b", "x": "z"})
 	assert.EqualValues(t, 7, m2.GetCounter().GetValue(), "%+v", m2)
+}
+
+func TestGauge(t *testing.T) {
+	registry := prometheus.NewPedanticRegistry()
+	f1 := New(registry)
+	f2 := f1.Namespace("bender", map[string]string{"a": "b"})
+	g1 := f2.Gauge("rodriguez", map[string]string{"x": "y"})
+	g2 := f2.Gauge("rodriguez", map[string]string{"x": "z"})
+	g1.Update(1)
+	g1.Update(2)
+	g2.Update(3)
+	g2.Update(4)
+
+	snapshot, err := registry.Gather()
+	require.NoError(t, err)
+
+	m1 := findMetric(t, snapshot, "bender:rodriguez", map[string]string{"a": "b", "x": "y"})
+	assert.EqualValues(t, 2, m1.GetGauge().GetValue(), "%+v", m1)
+
+	m2 := findMetric(t, snapshot, "bender:rodriguez", map[string]string{"a": "b", "x": "z"})
+	assert.EqualValues(t, 4, m2.GetGauge().GetValue(), "%+v", m2)
 }
 
 func findMetric(t *testing.T, snapshot []*promModel.MetricFamily, name string, tags map[string]string) *promModel.Metric {

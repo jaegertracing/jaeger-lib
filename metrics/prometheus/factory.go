@@ -24,14 +24,21 @@ import (
 	"github.com/uber/jaeger-lib/metrics"
 )
 
+// Factory implements metrics.Factory backed my Prometheus registry.
+//
+// See New.
 type Factory struct {
 	registerer prometheus.Registerer
 	scope      string
 	tags       map[string]string
 	cVecs      map[string]*prometheus.CounterVec
+	gVecs      map[string]*prometheus.GaugeVec
+	hVecs      map[string]*prometheus.HistogramVec
 	lock       sync.Mutex
 }
 
+// New creates a metrics.Factory backed by Prometheus registry.
+// Typically the first argument should be prometheus.DefaultRegisterer.
 func New(registerer prometheus.Registerer) *Factory {
 	return newFactory(registerer, "", nil)
 }
@@ -42,6 +49,8 @@ func newFactory(registerer prometheus.Registerer, scope string, tags map[string]
 		scope:      scope,
 		tags:       tags,
 		cVecs:      make(map[string]*prometheus.CounterVec),
+		gVecs:      make(map[string]*prometheus.GaugeVec),
+		hVecs:      make(map[string]*prometheus.HistogramVec),
 	}
 }
 
@@ -70,6 +79,41 @@ func (f *Factory) Counter(name string, tags map[string]string) metrics.Counter {
 	}
 }
 
+// Gauge implements Gauge of metrics.Factory.
+func (f *Factory) Gauge(name string, tags map[string]string) metrics.Gauge {
+	name = f.subScope(name)
+	tags = f.mergeTags(tags)
+	opts := prometheus.GaugeOpts{
+		Name: name,
+		Help: name,
+	}
+	labelNames := f.tagNames(tags)
+
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
+	cacheKey := strings.Join(append([]string{name}, labelNames...), "||")
+	gv, gvExists := f.gVecs[cacheKey]
+	if !gvExists {
+		gv = prometheus.NewGaugeVec(opts, labelNames)
+		f.registerer.MustRegister(gv)
+		f.gVecs[cacheKey] = gv
+	}
+	return &gauge{
+		gauge: gv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...),
+	}
+}
+
+// Timer implements Timer of metrics.Factory.
+func (f *Factory) Timer(name string, tags map[string]string) metrics.Timer {
+	panic("Timer() not implemented")
+}
+
+// Namespace implements Namespace of metrics.Factory.
+func (f *Factory) Namespace(name string, tags map[string]string) metrics.Factory {
+	return newFactory(f.registerer, f.subScope(name), f.mergeTags(tags))
+}
+
 type counter struct {
 	counter prometheus.Counter
 }
@@ -78,12 +122,12 @@ func (c *counter) Inc(v int64) {
 	c.counter.Add(float64(v))
 }
 
-func (f *Factory) Timer(name string, tags map[string]string) metrics.Timer { return nil }
+type gauge struct {
+	gauge prometheus.Gauge
+}
 
-func (f *Factory) Gauge(name string, tags map[string]string) metrics.Gauge { return nil }
-
-func (f *Factory) Namespace(name string, tags map[string]string) metrics.Factory {
-	return newFactory(f.registerer, f.subScope(name), f.mergeTags(tags))
+func (g *gauge) Update(v int64) {
+	g.gauge.Set(float64(v))
 }
 
 func (f *Factory) subScope(name string) string {
