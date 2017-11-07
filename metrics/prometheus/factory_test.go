@@ -30,7 +30,7 @@ var _ metrics.Factory = new(Factory)
 
 func TestCounter(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
-	f1 := New(registry)
+	f1 := New(registry, nil)
 	fDummy := f1.Namespace("", nil)
 	f2 := fDummy.Namespace("bender", map[string]string{"a": "b"})
 	f3 := f2.Namespace("", nil)
@@ -56,7 +56,7 @@ func TestCounter(t *testing.T) {
 
 func TestGauge(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
-	f1 := New(registry)
+	f1 := New(registry, nil)
 	f2 := f1.Namespace("bender", map[string]string{"a": "b"})
 	f3 := f2.Namespace("", map[string]string{"a": "b"}) // essentially same as f2
 	g1 := f2.Gauge("rodriguez", map[string]string{"x": "y"})
@@ -79,7 +79,7 @@ func TestGauge(t *testing.T) {
 
 func TestTimer(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
-	f1 := New(registry)
+	f1 := New(registry, nil)
 	f2 := f1.Namespace("bender", map[string]string{"a": "b"})
 	f3 := f2.Namespace("", map[string]string{"a": "b"}) // essentially same as f2
 	t1 := f2.Timer("rodriguez", map[string]string{"x": "y"})
@@ -118,6 +118,22 @@ func TestTimer(t *testing.T) {
 			assert.EqualValues(t, 2, bucket.GetCumulativeCount())
 		}
 	}
+}
+
+func TestTimerCustomBuckts(t *testing.T) {
+	registry := prometheus.NewPedanticRegistry()
+	f1 := New(registry, []float64{1.5})
+	t1 := f1.Timer("bender:rodriguez", map[string]string{"x": "y"})
+	t1.Record(1 * time.Second)
+	t1.Record(2 * time.Second)
+
+	snapshot, err := registry.Gather()
+	require.NoError(t, err)
+
+	m1 := findMetric(t, snapshot, "bender:rodriguez", map[string]string{"x": "y"})
+	assert.EqualValues(t, 2, m1.GetHistogram().GetSampleCount(), "%+v", m1)
+	assert.EqualValues(t, 3, m1.GetHistogram().GetSampleSum(), "%+v", m1)
+	assert.Len(t, m1.GetHistogram().GetBucket(), 1)
 }
 
 func findMetric(t *testing.T, snapshot []*promModel.MetricFamily, name string, tags map[string]string) *promModel.Metric {

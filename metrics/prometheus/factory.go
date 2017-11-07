@@ -25,22 +25,30 @@ import (
 
 // Factory implements metrics.Factory backed my Prometheus registry.
 type Factory struct {
-	scope string
-	tags  map[string]string
-	cache *vectorCache
+	scope   string
+	tags    map[string]string
+	cache   *vectorCache
+	buckets []float64
 }
 
 // New creates a Factory backed by Prometheus registry.
 // Typically the first argument should be prometheus.DefaultRegisterer.
-func New(registerer prometheus.Registerer) *Factory {
-	return newFactory(newVectorCache(registerer), "", nil)
+//
+// Parameter buckets defines the buckets into which Timer observations are counted.
+// Each element in the slice is the upper inclusive bound of a bucket. The
+// values must be sorted in strictly increasing order. There is no need
+// to add a highest bucket with +Inf bound, it will be added
+// implicitly. The default value is prometheus.DefBuckets.
+func New(registerer prometheus.Registerer, buckets []float64) *Factory {
+	return newFactory(newVectorCache(registerer), "", nil, buckets)
 }
 
-func newFactory(cache *vectorCache, scope string, tags map[string]string) *Factory {
+func newFactory(cache *vectorCache, scope string, tags map[string]string, buckets []float64) *Factory {
 	return &Factory{
-		cache: cache,
-		scope: scope,
-		tags:  tags,
+		cache:   cache,
+		scope:   scope,
+		tags:    tags,
+		buckets: buckets,
 	}
 }
 
@@ -79,8 +87,9 @@ func (f *Factory) Timer(name string, tags map[string]string) metrics.Timer {
 	name = f.subScope(name)
 	tags = f.mergeTags(tags)
 	opts := prometheus.HistogramOpts{
-		Name: name,
-		Help: name,
+		Name:    name,
+		Help:    name,
+		Buckets: f.buckets,
 	}
 	labelNames := f.tagNames(tags)
 	hv := f.cache.getOrMakeHistogramVec(opts, labelNames)
@@ -91,7 +100,7 @@ func (f *Factory) Timer(name string, tags map[string]string) metrics.Timer {
 
 // Namespace implements Namespace of metrics.Factory.
 func (f *Factory) Namespace(name string, tags map[string]string) metrics.Factory {
-	return newFactory(f.cache, f.subScope(name), f.mergeTags(tags))
+	return newFactory(f.cache, f.subScope(name), f.mergeTags(tags), f.buckets)
 }
 
 type counter struct {
