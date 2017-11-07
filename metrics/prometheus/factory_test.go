@@ -16,6 +16,7 @@ package prometheus
 
 import (
 	"testing"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	promModel "github.com/prometheus/client_model/go"
@@ -37,7 +38,7 @@ func TestCounter(t *testing.T) {
 
 	c1 := f2.Counter("rodriguez", map[string]string{"x": "y"})
 	c2 := f2.Counter("rodriguez", map[string]string{"x": "z"})
-	c3 := f2.Counter("rodriguez", map[string]string{"x": "z"}) // same tags as c2
+	c3 := f3.Counter("rodriguez", map[string]string{"x": "z"}) // same tags as c2, but from f3
 	c1.Inc(1)
 	c1.Inc(2)
 	c2.Inc(3)
@@ -57,12 +58,14 @@ func TestGauge(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(registry)
 	f2 := f1.Namespace("bender", map[string]string{"a": "b"})
+	f3 := f2.Namespace("", map[string]string{"a": "b"}) // essentially same as f2
 	g1 := f2.Gauge("rodriguez", map[string]string{"x": "y"})
 	g2 := f2.Gauge("rodriguez", map[string]string{"x": "z"})
+	g3 := f3.Gauge("rodriguez", map[string]string{"x": "z"}) // same as g2
 	g1.Update(1)
 	g1.Update(2)
 	g2.Update(3)
-	g2.Update(4)
+	g3.Update(4)
 
 	snapshot, err := registry.Gather()
 	require.NoError(t, err)
@@ -72,6 +75,49 @@ func TestGauge(t *testing.T) {
 
 	m2 := findMetric(t, snapshot, "bender:rodriguez", map[string]string{"a": "b", "x": "z"})
 	assert.EqualValues(t, 4, m2.GetGauge().GetValue(), "%+v", m2)
+}
+
+func TestTimer(t *testing.T) {
+	registry := prometheus.NewPedanticRegistry()
+	f1 := New(registry)
+	f2 := f1.Namespace("bender", map[string]string{"a": "b"})
+	f3 := f2.Namespace("", map[string]string{"a": "b"}) // essentially same as f2
+	t1 := f2.Timer("rodriguez", map[string]string{"x": "y"})
+	t2 := f2.Timer("rodriguez", map[string]string{"x": "z"})
+	t3 := f3.Timer("rodriguez", map[string]string{"x": "z"}) // same as g2
+	t1.Record(1 * time.Second)
+	t1.Record(2 * time.Second)
+	t2.Record(3 * time.Second)
+	t3.Record(4 * time.Second)
+
+	snapshot, err := registry.Gather()
+	require.NoError(t, err)
+
+	m1 := findMetric(t, snapshot, "bender:rodriguez", map[string]string{"a": "b", "x": "y"})
+	assert.EqualValues(t, 2, m1.GetHistogram().GetSampleCount(), "%+v", m1)
+	assert.EqualValues(t, 3, m1.GetHistogram().GetSampleSum(), "%+v", m1)
+	for _, bucket := range m1.GetHistogram().GetBucket() {
+		if bucket.GetUpperBound() < 1 {
+			assert.EqualValues(t, 0, bucket.GetCumulativeCount())
+		} else if bucket.GetUpperBound() < 2 {
+			assert.EqualValues(t, 1, bucket.GetCumulativeCount())
+		} else {
+			assert.EqualValues(t, 2, bucket.GetCumulativeCount())
+		}
+	}
+
+	m2 := findMetric(t, snapshot, "bender:rodriguez", map[string]string{"a": "b", "x": "z"})
+	assert.EqualValues(t, 2, m2.GetHistogram().GetSampleCount(), "%+v", m2)
+	assert.EqualValues(t, 7, m2.GetHistogram().GetSampleSum(), "%+v", m2)
+	for _, bucket := range m2.GetHistogram().GetBucket() {
+		if bucket.GetUpperBound() < 3 {
+			assert.EqualValues(t, 0, bucket.GetCumulativeCount())
+		} else if bucket.GetUpperBound() < 4 {
+			assert.EqualValues(t, 1, bucket.GetCumulativeCount())
+		} else {
+			assert.EqualValues(t, 2, bucket.GetCumulativeCount())
+		}
+	}
 }
 
 func findMetric(t *testing.T, snapshot []*promModel.MetricFamily, name string, tags map[string]string) *promModel.Metric {

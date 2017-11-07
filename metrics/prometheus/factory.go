@@ -16,8 +16,7 @@ package prometheus
 
 import (
 	"sort"
-	"strings"
-	"sync"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -25,32 +24,23 @@ import (
 )
 
 // Factory implements metrics.Factory backed my Prometheus registry.
-//
-// See New.
 type Factory struct {
-	registerer prometheus.Registerer
-	scope      string
-	tags       map[string]string
-	cVecs      map[string]*prometheus.CounterVec
-	gVecs      map[string]*prometheus.GaugeVec
-	hVecs      map[string]*prometheus.HistogramVec
-	lock       sync.Mutex
+	scope string
+	tags  map[string]string
+	cache *vectorCache
 }
 
-// New creates a metrics.Factory backed by Prometheus registry.
+// New creates a Factory backed by Prometheus registry.
 // Typically the first argument should be prometheus.DefaultRegisterer.
 func New(registerer prometheus.Registerer) *Factory {
-	return newFactory(registerer, "", nil)
+	return newFactory(newVectorCache(registerer), "", nil)
 }
 
-func newFactory(registerer prometheus.Registerer, scope string, tags map[string]string) *Factory {
+func newFactory(cache *vectorCache, scope string, tags map[string]string) *Factory {
 	return &Factory{
-		registerer: registerer,
-		scope:      scope,
-		tags:       tags,
-		cVecs:      make(map[string]*prometheus.CounterVec),
-		gVecs:      make(map[string]*prometheus.GaugeVec),
-		hVecs:      make(map[string]*prometheus.HistogramVec),
+		cache: cache,
+		scope: scope,
+		tags:  tags,
 	}
 }
 
@@ -63,17 +53,7 @@ func (f *Factory) Counter(name string, tags map[string]string) metrics.Counter {
 		Help: name,
 	}
 	labelNames := f.tagNames(tags)
-
-	f.lock.Lock()
-	defer f.lock.Unlock()
-
-	cacheKey := strings.Join(append([]string{name}, labelNames...), "||")
-	cv, cvExists := f.cVecs[cacheKey]
-	if !cvExists {
-		cv = prometheus.NewCounterVec(opts, labelNames)
-		f.registerer.MustRegister(cv)
-		f.cVecs[cacheKey] = cv
-	}
+	cv := f.cache.getOrMakeCounterVec(opts, labelNames)
 	return &counter{
 		counter: cv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...),
 	}
@@ -88,17 +68,7 @@ func (f *Factory) Gauge(name string, tags map[string]string) metrics.Gauge {
 		Help: name,
 	}
 	labelNames := f.tagNames(tags)
-
-	f.lock.Lock()
-	defer f.lock.Unlock()
-
-	cacheKey := strings.Join(append([]string{name}, labelNames...), "||")
-	gv, gvExists := f.gVecs[cacheKey]
-	if !gvExists {
-		gv = prometheus.NewGaugeVec(opts, labelNames)
-		f.registerer.MustRegister(gv)
-		f.gVecs[cacheKey] = gv
-	}
+	gv := f.cache.getOrMakeGaugeVec(opts, labelNames)
 	return &gauge{
 		gauge: gv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...),
 	}
@@ -106,12 +76,22 @@ func (f *Factory) Gauge(name string, tags map[string]string) metrics.Gauge {
 
 // Timer implements Timer of metrics.Factory.
 func (f *Factory) Timer(name string, tags map[string]string) metrics.Timer {
-	panic("Timer() not implemented")
+	name = f.subScope(name)
+	tags = f.mergeTags(tags)
+	opts := prometheus.HistogramOpts{
+		Name: name,
+		Help: name,
+	}
+	labelNames := f.tagNames(tags)
+	hv := f.cache.getOrMakeHistogramVec(opts, labelNames)
+	return &timer{
+		histogram: hv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...),
+	}
 }
 
 // Namespace implements Namespace of metrics.Factory.
 func (f *Factory) Namespace(name string, tags map[string]string) metrics.Factory {
-	return newFactory(f.registerer, f.subScope(name), f.mergeTags(tags))
+	return newFactory(f.cache, f.subScope(name), f.mergeTags(tags))
 }
 
 type counter struct {
@@ -128,6 +108,14 @@ type gauge struct {
 
 func (g *gauge) Update(v int64) {
 	g.gauge.Set(float64(v))
+}
+
+type timer struct {
+	histogram prometheus.Histogram
+}
+
+func (t *timer) Record(v time.Duration) {
+	t.histogram.Observe(float64(v.Nanoseconds()) / float64(time.Second/time.Nanosecond))
 }
 
 func (f *Factory) subScope(name string) string {
@@ -163,11 +151,7 @@ func (f *Factory) tagNames(tags map[string]string) []string {
 func (f *Factory) tagsAsLabelValues(labels []string, tags map[string]string) []string {
 	ret := make([]string, 0, len(tags))
 	for _, l := range labels {
-		if v, ok := tags[l]; ok {
-			ret = append(ret, v)
-		} else {
-			ret = append(ret, "")
-		}
+		ret = append(ret, tags[l])
 	}
 	return ret
 }
