@@ -56,11 +56,11 @@ func newFactory(cache *vectorCache, scope string, tags map[string]string, bucket
 func (f *Factory) Counter(name string, tags map[string]string) metrics.Counter {
 	name = f.subScope(name)
 	tags = f.mergeTags(tags)
+	labelNames := f.tagNames(tags)
 	opts := prometheus.CounterOpts{
 		Name: name,
 		Help: name,
 	}
-	labelNames := f.tagNames(tags)
 	cv := f.cache.getOrMakeCounterVec(opts, labelNames)
 	return &counter{
 		counter: cv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...),
@@ -71,11 +71,11 @@ func (f *Factory) Counter(name string, tags map[string]string) metrics.Counter {
 func (f *Factory) Gauge(name string, tags map[string]string) metrics.Gauge {
 	name = f.subScope(name)
 	tags = f.mergeTags(tags)
+	labelNames := f.tagNames(tags)
 	opts := prometheus.GaugeOpts{
 		Name: name,
 		Help: name,
 	}
-	labelNames := f.tagNames(tags)
 	gv := f.cache.getOrMakeGaugeVec(opts, labelNames)
 	return &gauge{
 		gauge: gv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...),
@@ -86,12 +86,12 @@ func (f *Factory) Gauge(name string, tags map[string]string) metrics.Gauge {
 func (f *Factory) Timer(name string, tags map[string]string) metrics.Timer {
 	name = f.subScope(name)
 	tags = f.mergeTags(tags)
+	labelNames := f.tagNames(tags)
 	opts := prometheus.HistogramOpts{
 		Name:    name,
 		Help:    name,
 		Buckets: f.buckets,
 	}
-	labelNames := f.tagNames(tags)
 	hv := f.cache.getOrMakeHistogramVec(opts, labelNames)
 	return &timer{
 		histogram: hv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...),
