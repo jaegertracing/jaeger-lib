@@ -120,17 +120,18 @@ func TestTimer(t *testing.T) {
 	}
 }
 
-func TestTimerCustomBuckts(t *testing.T) {
+func TestTimerCustomBuckets(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(registry, []float64{1.5})
-	t1 := f1.Timer("bender:rodriguez", map[string]string{"x": "y"})
+	// dot and dash in the metric name will be replaced with underscore
+	t1 := f1.Timer("bender.bending-rodriguez", map[string]string{"x": "y"})
 	t1.Record(1 * time.Second)
 	t1.Record(2 * time.Second)
 
 	snapshot, err := registry.Gather()
 	require.NoError(t, err)
 
-	m1 := findMetric(t, snapshot, "bender:rodriguez", map[string]string{"x": "y"})
+	m1 := findMetric(t, snapshot, "bender_bending_rodriguez", map[string]string{"x": "y"})
 	assert.EqualValues(t, 2, m1.GetHistogram().GetSampleCount(), "%+v", m1)
 	assert.EqualValues(t, 3, m1.GetHistogram().GetSampleSum(), "%+v", m1)
 	assert.Len(t, m1.GetHistogram().GetBucket(), 1)

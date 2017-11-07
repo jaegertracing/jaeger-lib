@@ -16,6 +16,7 @@ package prometheus
 
 import (
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -25,10 +26,11 @@ import (
 
 // Factory implements metrics.Factory backed my Prometheus registry.
 type Factory struct {
-	scope   string
-	tags    map[string]string
-	cache   *vectorCache
-	buckets []float64
+	scope      string
+	tags       map[string]string
+	cache      *vectorCache
+	buckets    []float64
+	normalizer *strings.Replacer
 }
 
 // New creates a Factory backed by Prometheus registry.
@@ -40,15 +42,23 @@ type Factory struct {
 // to add a highest bucket with +Inf bound, it will be added
 // implicitly. The default value is prometheus.DefBuckets.
 func New(registerer prometheus.Registerer, buckets []float64) *Factory {
-	return newFactory(newVectorCache(registerer), "", nil, buckets)
+	return newFactory(
+		&Factory{ // dummy struct to be discarded
+			cache:      newVectorCache(registerer),
+			buckets:    buckets,
+			normalizer: strings.NewReplacer(".", "_", "-", "_"),
+		},
+		"",
+		nil)
 }
 
-func newFactory(cache *vectorCache, scope string, tags map[string]string, buckets []float64) *Factory {
+func newFactory(parent *Factory, scope string, tags map[string]string) *Factory {
 	return &Factory{
-		cache:   cache,
-		scope:   scope,
-		tags:    tags,
-		buckets: buckets,
+		cache:      parent.cache,
+		buckets:    parent.buckets,
+		normalizer: parent.normalizer,
+		scope:      scope,
+		tags:       tags,
 	}
 }
 
@@ -100,7 +110,7 @@ func (f *Factory) Timer(name string, tags map[string]string) metrics.Timer {
 
 // Namespace implements Namespace of metrics.Factory.
 func (f *Factory) Namespace(name string, tags map[string]string) metrics.Factory {
-	return newFactory(f.cache, f.subScope(name), f.mergeTags(tags), f.buckets)
+	return newFactory(f, f.subScope(name), f.mergeTags(tags))
 }
 
 type counter struct {
@@ -129,12 +139,16 @@ func (t *timer) Record(v time.Duration) {
 
 func (f *Factory) subScope(name string) string {
 	if f.scope == "" {
-		return name
+		return f.normalize(name)
 	}
 	if name == "" {
-		return f.scope
+		return f.normalize(f.scope)
 	}
-	return f.scope + ":" + name
+	return f.normalize(f.scope + ":" + name)
+}
+
+func (f *Factory) normalize(v string) string {
+	return f.normalizer.Replace(v)
 }
 
 func (f *Factory) mergeTags(tags map[string]string) map[string]string {
