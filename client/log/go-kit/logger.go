@@ -53,12 +53,12 @@ func NewLogger(kitlogger log.Logger, options ...LoggerOption) *Logger {
 	return logger
 }
 
-// Error implements the github.com/uber/jaeger-client-go/log.Logger interface.
+// Error implements the github.com/jaegertracing/jaeger-client-go/log.Logger interface.
 func (l *Logger) Error(msg string) {
 	l.errorLogger.Log(l.messageKey, msg)
 }
 
-// Infof implements the github.com/uber/jaeger-client-go/log.Logger interface.
+// Infof implements the github.com/jaegertracing/jaeger-client-go/log.Logger interface.
 func (l *Logger) Infof(msg string, args ...interface{}) {
 	l.infoLogger.Log(l.messageKey, fmt.Sprintf(msg, args...))
 }

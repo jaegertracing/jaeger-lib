@@ -3,7 +3,7 @@
 set -e
 
 COVER=.cover
-ROOT_PKG=github.com/uber/jaeger-lib/
+ROOT_PKG=github.com/jaegertracing/jaeger-lib/
 
 if [[ -d "$COVER" ]]; then
 	rm -rf "$COVER"

@@ -3,7 +3,7 @@ package testutils
 import (
 	"testing"
 
-	"github.com/uber/jaeger-lib/metrics"
+	"github.com/jaegertracing/jaeger-lib/metrics"
 )
 
 func TestAssertMetrics(t *testing.T) {

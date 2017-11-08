@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	xkit "github.com/uber/jaeger-lib/metrics/go-kit"
+	xkit "github.com/jaegertracing/jaeger-lib/metrics/go-kit"
 )
 
 func TestCounter(t *testing.T) {

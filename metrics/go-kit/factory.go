@@ -17,7 +17,7 @@ package xkit
 import (
 	kit "github.com/go-kit/kit/metrics"
 
-	"github.com/uber/jaeger-lib/metrics"
+	"github.com/jaegertracing/jaeger-lib/metrics"
 )
 
 // Factory provides a unified interface for creating named metrics

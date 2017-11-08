@@ -21,7 +21,7 @@ import (
 	kitprom "github.com/go-kit/kit/metrics/prometheus"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/uber/jaeger-lib/metrics/go-kit"
+	"github.com/jaegertracing/jaeger-lib/metrics/go-kit"
 )
 
 var normalizer = strings.NewReplacer(
