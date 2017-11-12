@@ -61,7 +61,7 @@ func TestGauge(t *testing.T) {
 	f3 := f2.Namespace("", map[string]string{"a": "b"}) // essentially same as f2
 	g1 := f2.Gauge("rodriguez", map[string]string{"x": "y"})
 	g2 := f2.Gauge("rodriguez", map[string]string{"x": "z"})
-	g3 := f3.Gauge("rodriguez", map[string]string{"x": "z"}) // same as g2
+	g3 := f3.Gauge("rodriguez", map[string]string{"x": "z"}) // same as g2, but from f3
 	g1.Update(1)
 	g1.Update(2)
 	g2.Update(3)
@@ -84,7 +84,7 @@ func TestTimer(t *testing.T) {
 	f3 := f2.Namespace("", map[string]string{"a": "b"}) // essentially same as f2
 	t1 := f2.Timer("rodriguez", map[string]string{"x": "y"})
 	t2 := f2.Timer("rodriguez", map[string]string{"x": "z"})
-	t3 := f3.Timer("rodriguez", map[string]string{"x": "z"}) // same as g2
+	t3 := f3.Timer("rodriguez", map[string]string{"x": "z"}) // same as t2, but from f3
 	t1.Record(1 * time.Second)
 	t1.Record(2 * time.Second)
 	t2.Record(3 * time.Second)
@@ -139,20 +139,21 @@ func TestTimerCustomBuckets(t *testing.T) {
 
 func findMetric(t *testing.T, snapshot []*promModel.MetricFamily, name string, tags map[string]string) *promModel.Metric {
 	for _, mf := range snapshot {
-		if mf.GetName() == name {
-			for _, m := range mf.GetMetric() {
-				if len(m.GetLabel()) != len(tags) {
-					t.Fatalf("Mismatching labels for metric %v: want %v, have %v", name, tags, m.GetLabel())
+		if mf.GetName() != name {
+			continue
+		}
+		for _, m := range mf.GetMetric() {
+			if len(m.GetLabel()) != len(tags) {
+				t.Fatalf("Mismatching labels for metric %v: want %v, have %v", name, tags, m.GetLabel())
+			}
+			match := true
+			for _, l := range m.GetLabel() {
+				if v, ok := tags[l.GetName()]; !ok || v != l.GetValue() {
+					match = false
 				}
-				match := true
-				for _, l := range m.GetLabel() {
-					if v, ok := tags[l.GetName()]; !ok || v != l.GetValue() {
-						match = false
-					}
-				}
-				if match {
-					return m
-				}
+			}
+			if match {
+				return m
 			}
 		}
 	}

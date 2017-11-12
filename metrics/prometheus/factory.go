@@ -24,7 +24,7 @@ import (
 	"github.com/uber/jaeger-lib/metrics"
 )
 
-// Factory implements metrics.Factory backed my Prometheus registry.
+// Factory implements metrics.Factory backed by Prometheus registry.
 type Factory struct {
 	scope      string
 	tags       map[string]string

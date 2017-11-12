@@ -42,7 +42,7 @@ func (c *vectorCache) getOrMakeCounterVec(opts prometheus.CounterOpts, labelName
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	cacheKey := strings.Join(append([]string{opts.Name}, labelNames...), "||")
+	cacheKey := c.getCacheKey(opts.Name, labelNames)
 	cv, cvExists := c.cVecs[cacheKey]
 	if !cvExists {
 		cv = prometheus.NewCounterVec(opts, labelNames)
@@ -56,7 +56,7 @@ func (c *vectorCache) getOrMakeGaugeVec(opts prometheus.GaugeOpts, labelNames []
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	cacheKey := strings.Join(append([]string{opts.Name}, labelNames...), "||")
+	cacheKey := c.getCacheKey(opts.Name, labelNames)
 	gv, gvExists := c.gVecs[cacheKey]
 	if !gvExists {
 		gv = prometheus.NewGaugeVec(opts, labelNames)
@@ -70,7 +70,7 @@ func (c *vectorCache) getOrMakeHistogramVec(opts prometheus.HistogramOpts, label
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	cacheKey := strings.Join(append([]string{opts.Name}, labelNames...), "||")
+	cacheKey := c.getCacheKey(opts.Name, labelNames)
 	hv, hvExists := c.hVecs[cacheKey]
 	if !hvExists {
 		hv = prometheus.NewHistogramVec(opts, labelNames)
@@ -78,4 +78,8 @@ func (c *vectorCache) getOrMakeHistogramVec(opts prometheus.HistogramOpts, label
 		c.hVecs[cacheKey] = hv
 	}
 	return hv
+}
+
+func (c *vectorCache) getCacheKey(name string, labels []string) string {
+	return strings.Join(append([]string{name}, labels...), "||")
 }
