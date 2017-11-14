@@ -38,7 +38,7 @@ type options struct {
 	buckets    []float64
 }
 
-// Option  is a function that sets some option for the Factory constructor.
+// Option is a function that sets some option for the Factory constructor.
 type Option func(*options)
 
 // WithRegisterer returns an option that sets the registerer.
