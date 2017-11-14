@@ -4,6 +4,12 @@ Changes by Version
 1.2.1 (unreleased)
 ------------------
 
+- Nothing yet
+
+
+1.2.1 (2017-11-14)
+------------------
+
 - *breaking* Change prometheus.New() to accept options instead of fixed arguments
 
 
