@@ -1,10 +1,10 @@
 Changes by Version
 ==================
 
-1.2.1 (unreleased)
+1.3.0 (2018-01-08)
 ------------------
 
-- Nothing yet
+- Move rate limiter from client to jaeger-lib [#35](https://github.com/jaegertracing/jaeger-lib/pull/35)
 
 
 1.2.1 (2017-11-14)
