@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Uber Technologies, Inc.
+// Copyright (c) 2017, 2018 Uber Technologies, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -72,4 +72,23 @@ func TestMaxBalance(t *testing.T) {
 	}
 	assert.True(t, limiter.CheckCredit(1.0))
 	assert.False(t, limiter.CheckCredit(1.0))
+}
+
+func TestDrain(t *testing.T) {
+	limiter := NewRateLimiter(0.1, 1.0)
+	// stop time
+	ts := time.Now()
+	limiter.(*rateLimiter).lastTick = ts
+	limiter.(*rateLimiter).timeNow = func() time.Time {
+		return ts
+	}
+	// on initialization, should have enough credits for 1 message
+	assert.Equal(t, 1.0, limiter.Drain())
+
+	// move time 20s forward, enough to accumulate credits for 2 messages, but it should still be capped at 1
+	limiter.(*rateLimiter).timeNow = func() time.Time {
+		return ts.Add(time.Second * 20)
+	}
+	assert.Equal(t, 1.0, limiter.Drain())
+	assert.Equal(t, 0.0, limiter.Drain())
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Uber Technologies, Inc.
+// Copyright (c) 2017, 2018 Uber Technologies, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import (
 // RateLimiter is a filter used to check if a message that is worth itemCost units is within the rate limits.
 type RateLimiter interface {
 	CheckCredit(itemCost float64) bool
+	Drain() float64
 }
 
 type rateLimiter struct {
@@ -56,22 +57,37 @@ func NewRateLimiter(creditsPerSecond, maxBalance float64) RateLimiter {
 		timeNow:          time.Now}
 }
 
-func (b *rateLimiter) CheckCredit(itemCost float64) bool {
-	b.Lock()
-	defer b.Unlock()
+// N.B. Call while holding lock
+func (r *rateLimiter) updateBalance() {
 	// calculate how much time passed since the last tick, and update current tick
-	currentTime := b.timeNow()
-	elapsedTime := currentTime.Sub(b.lastTick)
-	b.lastTick = currentTime
+	currentTime := r.timeNow()
+	elapsedTime := currentTime.Sub(r.lastTick)
+	r.lastTick = currentTime
 	// calculate how much credit have we accumulated since the last tick
-	b.balance += elapsedTime.Seconds() * b.creditsPerSecond
-	if b.balance > b.maxBalance {
-		b.balance = b.maxBalance
+	r.balance += elapsedTime.Seconds() * r.creditsPerSecond
+	if r.balance > r.maxBalance {
+		r.balance = r.maxBalance
 	}
+}
+
+func (r *rateLimiter) CheckCredit(itemCost float64) bool {
+	r.Lock()
+	defer r.Unlock()
+	r.updateBalance()
 	// if we have enough credits to pay for current item, then reduce balance and allow
-	if b.balance >= itemCost {
-		b.balance -= itemCost
+	if r.balance >= itemCost {
+		r.balance -= itemCost
 		return true
 	}
 	return false
+}
+
+// Drain returns the balance and sets it to zero internally
+func (r *rateLimiter) Drain() float64 {
+	r.Lock()
+	defer r.Unlock()
+	r.updateBalance()
+	result := r.balance
+	r.balance = 0
+	return result
 }
