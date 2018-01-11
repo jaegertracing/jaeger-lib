@@ -94,5 +94,5 @@ test-ci:
 
 .PHONY: test-only-ci
 test-only-ci:
-	go test -cover ./...
+	go test -cover $(PACKAGES)
 	make lint
