@@ -55,6 +55,7 @@ install:
 	glide --version || go get github.com/Masterminds/glide
 ifeq ($(USE_DEP),true)
 	dep ensure
+	dep status
 else
 	glide install
 endif
