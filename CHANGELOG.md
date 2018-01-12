@@ -1,10 +1,10 @@
 Changes by Version
 ==================
 
-1.3.1 (unreleased)
-------------------
+1.3.1 (2018-01-12)
+-------------------
 
-- Nothing yet
+- Add Gopkg.toml to allow using the lib with `dep`
 
 
 1.3.0 (2018-01-08)
