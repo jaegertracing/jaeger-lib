@@ -1,10 +1,10 @@
 Changes by Version
 ==================
 
-1.3.2 (unreleased)
+1.4.0 (2018-03-05)
 ------------------
 
-- Nothing yet.
+- Reimplement expvar metrics to be tolerant of duplicates (#40)
 
 
 1.3.1 (2018-01-12)
