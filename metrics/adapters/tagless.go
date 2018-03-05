@@ -16,7 +16,8 @@ package adapters
 
 import "github.com/uber/jaeger-lib/metrics"
 
-// FactoryWithoutTags creates metrics with fully qualified name and tags.
+// FactoryWithoutTags creates metrics based on name only, without tags.
+// Suitable for integrating with statsd-like backends that don't support tags.
 type FactoryWithoutTags interface {
 	Counter(name string) metrics.Counter
 	Gauge(name string) metrics.Gauge
