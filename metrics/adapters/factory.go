@@ -65,35 +65,23 @@ type factory struct {
 
 func (f *factory) Counter(name string, tags map[string]string) metrics.Counter {
 	fullName, fullTags, key := f.getKey(name, tags)
-	c, ok := f.cache.getCounter(key)
-	if ok {
-		return c
-	}
-	c = f.factory.Counter(fullName, fullTags)
-	f.cache.setCounter(key, c)
-	return c
+	return f.cache.getOrSetCounter(key, func() metrics.Counter {
+		return f.factory.Counter(fullName, fullTags)
+	})
 }
 
 func (f *factory) Gauge(name string, tags map[string]string) metrics.Gauge {
 	fullName, fullTags, key := f.getKey(name, tags)
-	g, ok := f.cache.getGauge(key)
-	if ok {
-		return g
-	}
-	g = f.factory.Gauge(fullName, fullTags)
-	f.cache.setGauge(key, g)
-	return g
+	return f.cache.getOrSetGauge(key, func() metrics.Gauge {
+		return f.factory.Gauge(fullName, fullTags)
+	})
 }
 
 func (f *factory) Timer(name string, tags map[string]string) metrics.Timer {
 	fullName, fullTags, key := f.getKey(name, tags)
-	t, ok := f.cache.getTimer(key)
-	if ok {
-		return t
-	}
-	t = f.factory.Timer(fullName, fullTags)
-	f.cache.setTimer(key, t)
-	return t
+	return f.cache.getOrSetTimer(key, func() metrics.Timer {
+		return f.factory.Timer(fullName, fullTags)
+	})
 }
 
 func (f *factory) Namespace(name string, tags map[string]string) metrics.Factory {

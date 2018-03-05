@@ -35,41 +35,35 @@ func newCache() *cache {
 	}
 }
 
-func (r *cache) getCounter(name string) (metrics.Counter, bool) {
+func (r *cache) getOrSetCounter(name string, create func() metrics.Counter) metrics.Counter {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	c, ok := r.counters[name]
-	return c, ok
+	if !ok {
+		c = create()
+		r.counters[name] = c
+	}
+	return c
 }
 
-func (r *cache) getGauge(name string) (metrics.Gauge, bool) {
+func (r *cache) getOrSetGauge(name string, create func() metrics.Gauge) metrics.Gauge {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	g, ok := r.gauges[name]
-	return g, ok
+	if !ok {
+		g = create()
+		r.gauges[name] = g
+	}
+	return g
 }
 
-func (r *cache) getTimer(name string) (metrics.Timer, bool) {
+func (r *cache) getOrSetTimer(name string, create func() metrics.Timer) metrics.Timer {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	t, ok := r.timers[name]
-	return t, ok
-}
-
-func (r *cache) setCounter(name string, c metrics.Counter) {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-	r.counters[name] = c
-}
-
-func (r *cache) setGauge(name string, g metrics.Gauge) {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-	r.gauges[name] = g
-}
-
-func (r *cache) setTimer(name string, t metrics.Timer) {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-	r.timers[name] = t
+	if !ok {
+		t = create()
+		r.timers[name] = t
+	}
+	return t
 }

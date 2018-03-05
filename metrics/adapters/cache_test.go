@@ -30,24 +30,17 @@ func TestCache(t *testing.T) {
 
 	c := newCache()
 
-	_, ok := c.getCounter("x")
-	assert.False(t, ok)
-	_, ok = c.getGauge("y")
-	assert.False(t, ok)
-	_, ok = c.getTimer("z")
-	assert.False(t, ok)
-
-	c.setCounter("x", c1)
-	c.setGauge("y", g1)
-	c.setTimer("z", t1)
-
-	c2, ok := c.getCounter("x")
-	assert.True(t, ok)
+	c2 := c.getOrSetCounter("x", func() metrics.Counter { return c1 })
 	assert.Equal(t, c1, c2)
-	g2, ok := c.getGauge("y")
-	assert.True(t, ok)
+	g2 := c.getOrSetGauge("y", func() metrics.Gauge { return g1 })
 	assert.Equal(t, g1, g2)
-	t2, ok := c.getTimer("z")
-	assert.True(t, ok)
+	t2 := c.getOrSetTimer("z", func() metrics.Timer { return t1 })
 	assert.Equal(t, t1, t2)
+
+	c3 := c.getOrSetCounter("x", func() metrics.Counter { panic("c1") })
+	assert.Equal(t, c1, c3)
+	g3 := c.getOrSetGauge("y", func() metrics.Gauge { panic("g1") })
+	assert.Equal(t, g1, g3)
+	t3 := c.getOrSetTimer("z", func() metrics.Timer { panic("t1") })
+	assert.Equal(t, t1, t3)
 }
