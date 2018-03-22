@@ -166,7 +166,7 @@ func (g *gauge) Update(v int64) {
 }
 
 type timer struct {
-	histogram prometheus.Histogram
+	histogram prometheus.Observer
 }
 
 func (t *timer) Record(v time.Duration) {
