@@ -165,8 +165,12 @@ func (g *gauge) Update(v int64) {
 	g.gauge.Set(float64(v))
 }
 
+type observer interface {
+	Observe(v float64)
+}
+
 type timer struct {
-	histogram prometheus.Observer
+	histogram observer
 }
 
 func (t *timer) Record(v time.Duration) {
