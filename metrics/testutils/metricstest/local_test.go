@@ -1,4 +1,4 @@
-package metrics
+package metricstest
 
 import (
 	"testing"
@@ -13,7 +13,7 @@ func TestLocalMetrics(t *testing.T) {
 		"x": "y",
 	}
 
-	f := NewLocalFactory(0)
+	f := NewFactory(0)
 	defer f.Stop()
 	f.Counter("my-counter", tags).Inc(4)
 	f.Counter("my-counter", tags).Inc(6)
@@ -87,7 +87,7 @@ func TestLocalMetricsInterval(t *testing.T) {
 	const maxChecks = 2 * relativeCheckFrequency
 	checkInterval := (refreshInterval * relativeCheckFrequency) / maxChecks
 
-	f := NewLocalFactory(refreshInterval)
+	f := NewFactory(refreshInterval)
 	defer f.Stop()
 
 	f.Timer("timer", nil).Record(1)
@@ -97,7 +97,7 @@ func TestLocalMetricsInterval(t *testing.T) {
 	f.tm.Unlock()
 	assert.NotNil(t, timer)
 
-	// timer.hist.Current is modified on every Rotate(), which is called by LocalBackend after every refreshInterval
+	// timer.hist.Current is modified on every Rotate(), which is called by Backend after every refreshInterval
 	getCurr := func() interface{} {
 		timer.Lock()
 		defer timer.Unlock()

@@ -12,24 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package metrics
+package metricstest
 
 import (
-	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/codahale/hdrhistogram"
+	"github.com/uber/jaeger-lib/metrics"
 )
 
 // This is intentionally very similar to github.com/codahale/metrics, the
 // main difference being that counters/gauges are scoped to the provider
 // rather than being global (to facilitate testing).
 
-// A LocalBackend is a metrics provider which aggregates data in-vm, and
+// A Backend is a metrics provider which aggregates data in-vm, and
 // allows exporting snapshots to shove the data into a remote collector
-type LocalBackend struct {
+type Backend struct {
 	cm       sync.Mutex
 	gm       sync.Mutex
 	tm       sync.Mutex
@@ -42,10 +42,10 @@ type LocalBackend struct {
 	TagKVSep string
 }
 
-// NewLocalBackend returns a new LocalBackend. The collectionInterval is the histogram
+// NewBackend returns a new Backend. The collectionInterval is the histogram
 // time window for each timer.
-func NewLocalBackend(collectionInterval time.Duration) *LocalBackend {
-	b := &LocalBackend{
+func NewBackend(collectionInterval time.Duration) *Backend {
+	b := &Backend{
 		counters: make(map[string]*int64),
 		gauges:   make(map[string]*int64),
 		timers:   make(map[string]*localBackendTimer),
@@ -63,7 +63,7 @@ func NewLocalBackend(collectionInterval time.Duration) *LocalBackend {
 }
 
 // Clear discards accumulated stats
-func (b *LocalBackend) Clear() {
+func (b *Backend) Clear() {
 	b.cm.Lock()
 	defer b.cm.Unlock()
 	b.gm.Lock()
@@ -75,7 +75,7 @@ func (b *LocalBackend) Clear() {
 	b.timers = make(map[string]*localBackendTimer)
 }
 
-func (b *LocalBackend) runLoop(collectionInterval time.Duration) {
+func (b *Backend) runLoop(collectionInterval time.Duration) {
 	defer b.wg.Done()
 	ticker := time.NewTicker(collectionInterval)
 	for {
@@ -101,8 +101,8 @@ func (b *LocalBackend) runLoop(collectionInterval time.Duration) {
 }
 
 // IncCounter increments a counter value
-func (b *LocalBackend) IncCounter(name string, tags map[string]string, delta int64) {
-	name = GetKey(name, tags, b.TagsSep, b.TagKVSep)
+func (b *Backend) IncCounter(name string, tags map[string]string, delta int64) {
+	name = metrics.GetKey(name, tags, b.TagsSep, b.TagKVSep)
 	b.cm.Lock()
 	defer b.cm.Unlock()
 	counter := b.counters[name]
@@ -115,8 +115,8 @@ func (b *LocalBackend) IncCounter(name string, tags map[string]string, delta int
 }
 
 // UpdateGauge updates the value of a gauge
-func (b *LocalBackend) UpdateGauge(name string, tags map[string]string, value int64) {
-	name = GetKey(name, tags, b.TagsSep, b.TagKVSep)
+func (b *Backend) UpdateGauge(name string, tags map[string]string, value int64) {
+	name = metrics.GetKey(name, tags, b.TagsSep, b.TagKVSep)
 	b.gm.Lock()
 	defer b.gm.Unlock()
 	gauge := b.gauges[name]
@@ -129,15 +129,15 @@ func (b *LocalBackend) UpdateGauge(name string, tags map[string]string, value in
 }
 
 // RecordTimer records a timing duration
-func (b *LocalBackend) RecordTimer(name string, tags map[string]string, d time.Duration) {
-	name = GetKey(name, tags, b.TagsSep, b.TagKVSep)
+func (b *Backend) RecordTimer(name string, tags map[string]string, d time.Duration) {
+	name = metrics.GetKey(name, tags, b.TagsSep, b.TagKVSep)
 	timer := b.findOrCreateTimer(name)
 	timer.Lock()
 	timer.hist.Current.RecordValue(int64(d / time.Millisecond))
 	timer.Unlock()
 }
 
-func (b *LocalBackend) findOrCreateTimer(name string) *localBackendTimer {
+func (b *Backend) findOrCreateTimer(name string) *localBackendTimer {
 	b.tm.Lock()
 	defer b.tm.Unlock()
 	if t, ok := b.timers[name]; ok {
@@ -168,7 +168,7 @@ var (
 )
 
 // Snapshot captures a snapshot of the current counter and gauge values
-func (b *LocalBackend) Snapshot() (counters, gauges map[string]int64) {
+func (b *Backend) Snapshot() (counters, gauges map[string]int64) {
 	b.cm.Lock()
 	defer b.cm.Unlock()
 
@@ -204,32 +204,16 @@ func (b *LocalBackend) Snapshot() (counters, gauges map[string]int64) {
 	return
 }
 
-// Stop cleanly closes the background goroutine spawned by NewLocalBackend.
-func (b *LocalBackend) Stop() {
+// Stop cleanly closes the background goroutine spawned by NewBackend.
+func (b *Backend) Stop() {
 	close(b.stop)
 	b.wg.Wait()
-}
-
-// GetKey converts name+tags into a single string of the form
-// "name|tag1=value1|...|tagN=valueN", where tag names are
-// sorted alphabetically.
-func GetKey(name string, tags map[string]string, tagsSep string, tagKVSep string) string {
-	keys := make([]string, 0, len(tags))
-	for k := range tags {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	key := name
-	for _, k := range keys {
-		key = key + tagsSep + k + tagKVSep + tags[k]
-	}
-	return key
 }
 
 type stats struct {
 	name         string
 	tags         map[string]string
-	localBackend *LocalBackend
+	localBackend *Backend
 }
 
 type localTimer struct {
@@ -256,22 +240,22 @@ func (l *localGauge) Update(value int64) {
 	l.localBackend.UpdateGauge(l.name, l.tags, value)
 }
 
-// LocalFactory stats factory that creates metrics that are stored locally
-type LocalFactory struct {
-	*LocalBackend
+// Factory stats factory that creates metrics that are stored locally
+type Factory struct {
+	*Backend
 	namespace string
 	tags      map[string]string
 }
 
-// NewLocalFactory returns a new LocalMetricsFactory
-func NewLocalFactory(collectionInterval time.Duration) *LocalFactory {
-	return &LocalFactory{
-		LocalBackend: NewLocalBackend(collectionInterval),
+// NewFactory returns a new LocalMetricsFactory
+func NewFactory(collectionInterval time.Duration) *Factory {
+	return &Factory{
+		Backend: NewBackend(collectionInterval),
 	}
 }
 
 // appendTags adds the tags to the namespace tags and returns a combined map.
-func (l *LocalFactory) appendTags(tags map[string]string) map[string]string {
+func (l *Factory) appendTags(tags map[string]string) map[string]string {
 	newTags := make(map[string]string)
 	for k, v := range l.tags {
 		newTags[k] = v
@@ -282,7 +266,7 @@ func (l *LocalFactory) appendTags(tags map[string]string) map[string]string {
 	return newTags
 }
 
-func (l *LocalFactory) newNamespace(name string) string {
+func (l *Factory) newNamespace(name string) string {
 	if l.namespace == "" {
 		return name
 	}
@@ -295,43 +279,43 @@ func (l *LocalFactory) newNamespace(name string) string {
 }
 
 // Counter returns a local stats counter
-func (l *LocalFactory) Counter(name string, tags map[string]string) Counter {
+func (l *Factory) Counter(name string, tags map[string]string) metrics.Counter {
 	return &localCounter{
 		stats{
 			name:         l.newNamespace(name),
 			tags:         l.appendTags(tags),
-			localBackend: l.LocalBackend,
+			localBackend: l.Backend,
 		},
 	}
 }
 
 // Timer returns a local stats timer.
-func (l *LocalFactory) Timer(name string, tags map[string]string) Timer {
+func (l *Factory) Timer(name string, tags map[string]string) metrics.Timer {
 	return &localTimer{
 		stats{
 			name:         l.newNamespace(name),
 			tags:         l.appendTags(tags),
-			localBackend: l.LocalBackend,
+			localBackend: l.Backend,
 		},
 	}
 }
 
 // Gauge returns a local stats gauge.
-func (l *LocalFactory) Gauge(name string, tags map[string]string) Gauge {
+func (l *Factory) Gauge(name string, tags map[string]string) metrics.Gauge {
 	return &localGauge{
 		stats{
 			name:         l.newNamespace(name),
 			tags:         l.appendTags(tags),
-			localBackend: l.LocalBackend,
+			localBackend: l.Backend,
 		},
 	}
 }
 
 // Namespace returns a new namespace.
-func (l *LocalFactory) Namespace(name string, tags map[string]string) Factory {
-	return &LocalFactory{
-		namespace:    l.newNamespace(name),
-		tags:         l.appendTags(tags),
-		LocalBackend: l.LocalBackend,
+func (l *Factory) Namespace(name string, tags map[string]string) metrics.Factory {
+	return &Factory{
+		namespace: l.newNamespace(name),
+		tags:      l.appendTags(tags),
+		Backend:   l.Backend,
 	}
 }

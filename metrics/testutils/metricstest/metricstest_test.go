@@ -1,13 +1,11 @@
-package testutils
+package metricstest
 
 import (
 	"testing"
-
-	"github.com/uber/jaeger-lib/metrics"
 )
 
 func TestAssertMetrics(t *testing.T) {
-	f := metrics.NewLocalFactory(0)
+	f := NewFactory(0)
 	tags := map[string]string{"key": "value"}
 	f.IncCounter("counter", tags, 1)
 	f.UpdateGauge("gauge", tags, 11)

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testutils
+package metricstest
 
 import (
 	"testing"
@@ -32,13 +32,13 @@ type ExpectedMetric struct {
 // TODO do something similar for Timers
 
 // AssertCounterMetrics checks if counter metrics exist.
-func AssertCounterMetrics(t *testing.T, f *metrics.LocalFactory, expectedMetrics ...ExpectedMetric) {
+func AssertCounterMetrics(t *testing.T, f *Factory, expectedMetrics ...ExpectedMetric) {
 	counters, _ := f.Snapshot()
 	assertMetrics(t, counters, expectedMetrics...)
 }
 
 // AssertGaugeMetrics checks if gauge metrics exist.
-func AssertGaugeMetrics(t *testing.T, f *metrics.LocalFactory, expectedMetrics ...ExpectedMetric) {
+func AssertGaugeMetrics(t *testing.T, f *Factory, expectedMetrics ...ExpectedMetric) {
 	_, gauges := f.Snapshot()
 	assertMetrics(t, gauges, expectedMetrics...)
 }
