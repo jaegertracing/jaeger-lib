@@ -1,10 +1,12 @@
 Changes by Version
 ==================
 
-1.5.1 (unreleased)
+2.0.0 (unreleased)
 ------------------
 
-- Nothing yet.
+Breaking changes:
+- LocalBackend / Test factory moved to metrics/metricstest/ package (#46) <Patrick Ohly>, 
+- Change AssertCounterMetrics/AssertGaugeMetrics to be functions on the test factory (#51) <Yuri Shkuro>
 
 
 1.5.0 (2018-05-11)
