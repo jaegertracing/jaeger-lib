@@ -21,6 +21,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/jaeger-lib/metrics"
+	"github.com/uber/jaeger-lib/metrics/testutils/metricstest"
 )
 
 func TestDefaultOptions(t *testing.T) {
@@ -70,7 +71,7 @@ func TestFactory(t *testing.T) {
 		{name: "x", tags: tagsA, namespace: "y", nsTags: tagsX, fullName: "y.%sx.a_b.x_y"},
 		{name: "x", tags: tagsX, namespace: "y", nsTags: tagsA, fullName: "y.%sx.a_b.x_y", expectedCounter: "84"},
 	}
-	local := metrics.NewLocalFactory(100 * time.Second)
+	local := metricstest.NewFactory(100 * time.Second)
 	for _, testCase := range testCases {
 		t.Run("", func(t *testing.T) {
 			if testCase.expectedCounter == "" {

@@ -1,25 +1,29 @@
-package metrics
+// Must use separate test package to break import cycle.
+package metrics_test
 
 import (
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/uber/jaeger-lib/metrics"
+	"github.com/uber/jaeger-lib/metrics/testutils/metricstest"
 )
 
 func TestInitMetrics(t *testing.T) {
 	testMetrics := struct {
-		Gauge   Gauge   `metric:"gauge" tags:"1=one,2=two"`
-		Counter Counter `metric:"counter"`
-		Timer   Timer   `metric:"timer"`
+		Gauge   metrics.Gauge   `metric:"gauge" tags:"1=one,2=two"`
+		Counter metrics.Counter `metric:"counter"`
+		Timer   metrics.Timer   `metric:"timer"`
 	}{}
 
-	f := NewLocalFactory(0)
+	f := metricstest.NewFactory(0)
 	defer f.Stop()
 
 	globalTags := map[string]string{"key": "value"}
 
-	err := initMetrics(&testMetrics, f, globalTags)
+	err := metrics.InitOrError(&testMetrics, f, globalTags)
 	assert.NoError(t, err)
 
 	testMetrics.Gauge.Update(10)
@@ -41,18 +45,18 @@ func TestInitMetrics(t *testing.T) {
 	assert.EqualValues(t, 10, g["gauge|1=one|2=two|key=value"])
 	assert.EqualValues(t, 36863, g["timer|key=value.P50"])
 
-	stopwatch := StartStopwatch(testMetrics.Timer)
+	stopwatch := metrics.StartStopwatch(testMetrics.Timer)
 	stopwatch.Stop()
 	assert.True(t, 0 < stopwatch.ElapsedTime())
 }
 
 var (
 	noMetricTag = struct {
-		NoMetricTag Counter
+		NoMetricTag metrics.Counter
 	}{}
 
 	badTags = struct {
-		BadTags Counter `metric:"counter" tags:"1=one,noValue"`
+		BadTags metrics.Counter `metric:"counter" tags:"1=one,noValue"`
 	}{}
 
 	invalidMetricType = struct {
@@ -61,12 +65,12 @@ var (
 )
 
 func TestInitMetricsFailures(t *testing.T) {
-	assert.EqualError(t, initMetrics(&noMetricTag, nil, nil), "Field NoMetricTag is missing a tag 'metric'")
+	assert.EqualError(t, metrics.InitOrError(&noMetricTag, nil, nil), "Field NoMetricTag is missing a tag 'metric'")
 
-	assert.EqualError(t, initMetrics(&badTags, nil, nil),
+	assert.EqualError(t, metrics.InitOrError(&badTags, nil, nil),
 		"Field [BadTags]: Tag [noValue] is not of the form key=value in 'tags' string [1=one,noValue]")
 
-	assert.EqualError(t, initMetrics(&invalidMetricType, nil, nil),
+	assert.EqualError(t, metrics.InitOrError(&invalidMetricType, nil, nil),
 		"Field InvalidMetricType is not a pointer to timer, gauge, or counter")
 }
 
@@ -77,13 +81,13 @@ func TestInitPanic(t *testing.T) {
 		}
 	}()
 
-	Init(&noMetricTag, NullFactory, nil)
+	metrics.Init(&noMetricTag, metrics.NullFactory, nil)
 }
 
 func TestNullMetrics(t *testing.T) {
 	// This test is just for cover
-	NullFactory.Timer("name", nil).Record(0)
-	NullFactory.Counter("name", nil).Inc(0)
-	NullFactory.Gauge("name", nil).Update(0)
-	NullFactory.Namespace("name", nil).Gauge("name2", nil).Update(0)
+	metrics.NullFactory.Timer("name", nil).Record(0)
+	metrics.NullFactory.Counter("name", nil).Inc(0)
+	metrics.NullFactory.Gauge("name", nil).Update(0)
+	metrics.NullFactory.Namespace("name", nil).Gauge("name2", nil).Update(0)
 }

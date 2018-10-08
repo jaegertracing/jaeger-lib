@@ -19,11 +19,13 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+
 	"github.com/uber/jaeger-lib/metrics"
+	"github.com/uber/jaeger-lib/metrics/testutils/metricstest"
 )
 
 func TestCache(t *testing.T) {
-	f := metrics.NewLocalFactory(100 * time.Second)
+	f := metricstest.NewFactory(100 * time.Second)
 	c1 := f.Counter("x", nil)
 	g1 := f.Gauge("y", nil)
 	t1 := f.Timer("z", nil)
