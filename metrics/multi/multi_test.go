@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/uber/jaeger-lib/metrics"
-	"github.com/uber/jaeger-lib/metrics/testutils/metricstest"
+	"github.com/uber/jaeger-lib/metrics/metricstest"
 )
 
 var _ metrics.Factory = &Factory{} // API check
@@ -22,9 +22,9 @@ func TestMultiFactory(t *testing.T) {
 	multi2.Timer("timer", tags).Record(42 * time.Millisecond)
 
 	for _, f := range []*metricstest.Factory{f1, f2} {
-		metricstest.AssertCounterMetrics(t, f,
+		f.AssertCounterMetrics(t,
 			metricstest.ExpectedMetric{Name: "ns2.counter", Tags: tags, Value: 42})
-		metricstest.AssertGaugeMetrics(t, f,
+		f.AssertGaugeMetrics(t,
 			metricstest.ExpectedMetric{Name: "ns2.gauge", Tags: tags, Value: 42})
 		_, g := f.Snapshot()
 		assert.EqualValues(t, 43, g["ns2.timer|x=y.P99"])

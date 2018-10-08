@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/uber/jaeger-lib/metrics"
-	"github.com/uber/jaeger-lib/metrics/testutils/metricstest"
+	"github.com/uber/jaeger-lib/metrics/metricstest"
 )
 
 func TestInitMetrics(t *testing.T) {
