@@ -93,4 +93,5 @@ func TestDetermineWaitTime(t *testing.T) {
 	limiter.(*rateLimiter).timeNow = func() time.Time {
 		return ts.Add(time.Second)
 	}
+	assert.Equal(t, time.Duration(0), limiter.DetermineWaitTime(1.0))
 }

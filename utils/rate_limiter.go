@@ -101,7 +101,7 @@ func (b *rateLimiter) DetermineWaitTime(itemCost float64) time.Duration {
 		return time.Duration(0)
 	}
 	waitTime := time.Nanosecond * time.Duration(creditsRemaining*float64(time.Second.Nanoseconds())/b.creditsPerSecond)
-	alreadyWaitedTime := time.Since(b.lastTick)
+	alreadyWaitedTime := b.timeNow().Sub(b.lastTick)
 	if alreadyWaitedTime >= waitTime {
 		return time.Duration(0)
 	}
