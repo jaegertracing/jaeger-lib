@@ -22,6 +22,7 @@ import (
 // RateLimiter is a filter used to check if a message that is worth itemCost units is within the rate limits.
 type RateLimiter interface {
 	CheckCredit(itemCost float64) bool
+	DetermineWaitTime(itemCost float64) time.Duration
 }
 
 type rateLimiter struct {
@@ -53,12 +54,14 @@ func NewRateLimiter(creditsPerSecond, maxBalance float64) RateLimiter {
 		balance:          maxBalance,
 		maxBalance:       maxBalance,
 		lastTick:         time.Now(),
-		timeNow:          time.Now}
+		timeNow:          time.Now,
+	}
 }
 
 func (b *rateLimiter) CheckCredit(itemCost float64) bool {
 	b.Lock()
 	defer b.Unlock()
+
 	// calculate how much time passed since the last tick, and update current tick
 	currentTime := b.timeNow()
 	elapsedTime := currentTime.Sub(b.lastTick)
@@ -68,10 +71,39 @@ func (b *rateLimiter) CheckCredit(itemCost float64) bool {
 	if b.balance > b.maxBalance {
 		b.balance = b.maxBalance
 	}
+
 	// if we have enough credits to pay for current item, then reduce balance and allow
 	if b.balance >= itemCost {
 		b.balance -= itemCost
 		return true
 	}
 	return false
+}
+
+// DetermineWaitTime approximates the time until itemCost credits will be
+// available to spend. There is no guarantee regarding the accuracy of this
+// approximation, so it should not be used for exact precision, but can be used
+// as a good estimate for scheduling a timer, etc. Therefore, the caller must
+// call CheckCredit and check the result before proceeding with execution. Here
+// is an example of how this method can be used.
+//
+//     for !rateLimiter.CheckCredit(itemCost) {
+//         time.Sleep(rateLimiter.DetermineWaitTime(itemCost))
+//     }
+//
+// Note the use of a for loop instead of a simple if statement.
+func (b *rateLimiter) DetermineWaitTime(itemCost float64) time.Duration {
+	b.Lock()
+	defer b.Unlock()
+
+	creditsRemaining := itemCost - b.balance
+	if creditsRemaining <= 0 {
+		return time.Duration(0)
+	}
+	waitTime := time.Nanosecond * time.Duration(creditsRemaining*float64(time.Second.Nanoseconds())/b.creditsPerSecond)
+	alreadyWaitedTime := time.Since(b.lastTick)
+	if alreadyWaitedTime >= waitTime {
+		return time.Duration(0)
+	}
+	return waitTime - alreadyWaitedTime
 }

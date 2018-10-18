@@ -73,3 +73,24 @@ func TestMaxBalance(t *testing.T) {
 	assert.True(t, limiter.CheckCredit(1.0))
 	assert.False(t, limiter.CheckCredit(1.0))
 }
+
+func TestDetermineWaitTime(t *testing.T) {
+	limiter := NewRateLimiter(1.0, 1.0)
+	ts := time.Now()
+	limiter.(*rateLimiter).timeNow = func() time.Time {
+		return ts
+	}
+
+	// Check that first credit is available now.
+	assert.Equal(t, time.Duration(0), limiter.DetermineWaitTime(1.0))
+
+	// Empty token bucket.
+	assert.True(t, limiter.CheckCredit(1.0))
+
+	assert.False(t, limiter.CheckCredit(1.0))
+	assert.True(t, limiter.DetermineWaitTime(1.0) <= time.Second)
+
+	limiter.(*rateLimiter).timeNow = func() time.Time {
+		return ts.Add(time.Second)
+	}
+}
