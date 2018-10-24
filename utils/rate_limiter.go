@@ -21,8 +21,7 @@ import (
 
 // RateLimiter is a filter used to check if a message that is worth itemCost units is within the rate limits.
 type RateLimiter interface {
-	CheckCredit(itemCost float64) bool
-	DetermineWaitTime(itemCost float64) time.Duration
+	CheckCredit(itemCost float64) (bool, time.Duration)
 }
 
 type rateLimiter struct {
@@ -40,7 +39,8 @@ type rateLimiter struct {
 // credits balance that is replenished every time CheckCredit() method is called (tick) by the amount proportional
 // to the time elapsed since the last tick, up to max of creditsPerSecond. A call to CheckCredit() takes a cost
 // of an item we want to pay with the balance. If the balance exceeds the cost of the item, the item is "purchased"
-// and the balance reduced, indicated by returned value of true. Otherwise the balance is unchanged and return false.
+// and the balance reduced, indicated by returned value of true with a wait time of zero. Otherwise the balance is
+// unchanged and return false with the time until the next credit accrues.
 //
 // This can be used to limit a rate of messages emitted by a service by instantiating the Rate Limiter with the
 // max number of messages a service is allowed to emit per second, and calling CheckCredit(1.0) for each message
@@ -58,7 +58,7 @@ func NewRateLimiter(creditsPerSecond, maxBalance float64) RateLimiter {
 	}
 }
 
-func (b *rateLimiter) CheckCredit(itemCost float64) bool {
+func (b *rateLimiter) CheckCredit(itemCost float64) (bool, time.Duration) {
 	b.Lock()
 	defer b.Unlock()
 
@@ -75,35 +75,11 @@ func (b *rateLimiter) CheckCredit(itemCost float64) bool {
 	// if we have enough credits to pay for current item, then reduce balance and allow
 	if b.balance >= itemCost {
 		b.balance -= itemCost
-		return true
+		return true, 0
 	}
-	return false
-}
-
-// DetermineWaitTime approximates the time until itemCost credits will be
-// available to spend. There is no guarantee regarding the accuracy of this
-// approximation, so it should not be used for exact precision, but can be used
-// as a good estimate for scheduling a timer, etc. Therefore, the caller must
-// call CheckCredit and check the result before proceeding with execution. Here
-// is an example of how this method can be used.
-//
-//     for !rateLimiter.CheckCredit(itemCost) {
-//         time.Sleep(rateLimiter.DetermineWaitTime(itemCost))
-//     }
-//
-// Note the use of a for loop instead of a simple if statement.
-func (b *rateLimiter) DetermineWaitTime(itemCost float64) time.Duration {
-	b.Lock()
-	defer b.Unlock()
 
 	creditsRemaining := itemCost - b.balance
-	if creditsRemaining <= 0 {
-		return time.Duration(0)
-	}
 	waitTime := time.Nanosecond * time.Duration(creditsRemaining*float64(time.Second.Nanoseconds())/b.creditsPerSecond)
 	alreadyWaitedTime := b.timeNow().Sub(b.lastTick)
-	if alreadyWaitedTime >= waitTime {
-		return time.Duration(0)
-	}
-	return waitTime - alreadyWaitedTime
+	return false, waitTime - alreadyWaitedTime
 }

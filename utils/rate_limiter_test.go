@@ -29,30 +29,47 @@ func TestRateLimiter(t *testing.T) {
 	limiter.(*rateLimiter).timeNow = func() time.Time {
 		return ts
 	}
-	assert.True(t, limiter.CheckCredit(1.0))
-	assert.True(t, limiter.CheckCredit(1.0))
-	assert.False(t, limiter.CheckCredit(1.0))
+	ok, waitTime := limiter.CheckCredit(1.0)
+	assert.True(t, ok)
+	assert.Equal(t, time.Duration(0), waitTime)
+	ok, waitTime = limiter.CheckCredit(1.0)
+	assert.True(t, ok)
+	assert.Equal(t, time.Duration(0), waitTime)
+	ok, waitTime = limiter.CheckCredit(1.0)
+	assert.False(t, ok)
+	assert.Equal(t, time.Second/2, waitTime)
 	// move time 250ms forward, not enough credits to pay for 1.0 item
 	limiter.(*rateLimiter).timeNow = func() time.Time {
 		return ts.Add(time.Second / 4)
 	}
-	assert.False(t, limiter.CheckCredit(1.0))
+	ok, waitTime = limiter.CheckCredit(1.0)
+	assert.False(t, ok)
+	assert.Equal(t, time.Second/4, waitTime)
 	// move time 500ms forward, now enough credits to pay for 1.0 item
 	limiter.(*rateLimiter).timeNow = func() time.Time {
 		return ts.Add(time.Second/4 + time.Second/2)
 	}
-	assert.True(t, limiter.CheckCredit(1.0))
-	assert.False(t, limiter.CheckCredit(1.0))
+	ok, waitTime = limiter.CheckCredit(1.0)
+	assert.True(t, ok)
+	assert.Equal(t, time.Duration(0), waitTime)
+	ok, waitTime = limiter.CheckCredit(1.0)
+	assert.False(t, ok)
+	assert.Equal(t, time.Second/4, waitTime)
 	// move time 5s forward, enough to accumulate credits for 10 messages, but it should still be capped at 2
 	limiter.(*rateLimiter).lastTick = ts
 	limiter.(*rateLimiter).timeNow = func() time.Time {
 		return ts.Add(5 * time.Second)
 	}
-	assert.True(t, limiter.CheckCredit(1.0))
-	assert.True(t, limiter.CheckCredit(1.0))
-	assert.False(t, limiter.CheckCredit(1.0))
-	assert.False(t, limiter.CheckCredit(1.0))
-	assert.False(t, limiter.CheckCredit(1.0))
+	for i := 0; i < 2; i++ {
+		ok, waitTime = limiter.CheckCredit(1.0)
+		assert.True(t, ok)
+		assert.Equal(t, time.Duration(0), waitTime)
+	}
+	for i := 0; i < 3; i++ {
+		ok, waitTime = limiter.CheckCredit(1.0)
+		assert.False(t, ok)
+		assert.Equal(t, time.Second/2, waitTime)
+	}
 }
 
 func TestMaxBalance(t *testing.T) {
@@ -64,34 +81,18 @@ func TestMaxBalance(t *testing.T) {
 		return ts
 	}
 	// on initialization, should have enough credits for 1 message
-	assert.True(t, limiter.CheckCredit(1.0))
+	ok, waitTime := limiter.CheckCredit(1.0)
+	assert.True(t, ok)
+	assert.Equal(t, time.Duration(0), waitTime)
 
 	// move time 20s forward, enough to accumulate credits for 2 messages, but it should still be capped at 1
 	limiter.(*rateLimiter).timeNow = func() time.Time {
 		return ts.Add(time.Second * 20)
 	}
-	assert.True(t, limiter.CheckCredit(1.0))
-	assert.False(t, limiter.CheckCredit(1.0))
-}
-
-func TestDetermineWaitTime(t *testing.T) {
-	limiter := NewRateLimiter(1.0, 1.0)
-	ts := time.Now()
-	limiter.(*rateLimiter).timeNow = func() time.Time {
-		return ts
-	}
-
-	// Check that first credit is available now.
-	assert.Equal(t, time.Duration(0), limiter.DetermineWaitTime(1.0))
-
-	// Empty token bucket.
-	assert.True(t, limiter.CheckCredit(1.0))
-
-	assert.False(t, limiter.CheckCredit(1.0))
-	assert.True(t, limiter.DetermineWaitTime(1.0) <= time.Second)
-
-	limiter.(*rateLimiter).timeNow = func() time.Time {
-		return ts.Add(time.Second)
-	}
-	assert.Equal(t, time.Duration(0), limiter.DetermineWaitTime(1.0))
+	ok, waitTime = limiter.CheckCredit(1.0)
+	assert.True(t, ok)
+	assert.Equal(t, time.Duration(0), waitTime)
+	ok, waitTime = limiter.CheckCredit(1.0)
+	assert.False(t, ok)
+	assert.Equal(t, 10*time.Second, waitTime)
 }
