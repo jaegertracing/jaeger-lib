@@ -41,7 +41,7 @@ func TestSeparator(t *testing.T) {
 	c1.Inc(1)
 	snapshot, err := registry.Gather()
 	require.NoError(t, err)
-	m1 := findMetric(t, snapshot, "bender:rodriguez", map[string]string{"a": "b"})
+	m1 := findMetric(t, snapshot, "bender:rodriguez_total", map[string]string{"a": "b"})
 	assert.EqualValues(t, 1, m1.GetCounter().GetValue(), "%+v", m1)
 }
 
@@ -63,10 +63,10 @@ func TestCounter(t *testing.T) {
 	snapshot, err := registry.Gather()
 	require.NoError(t, err)
 
-	m1 := findMetric(t, snapshot, "bender_rodriguez", map[string]string{"a": "b", "x": "y"})
+	m1 := findMetric(t, snapshot, "bender_rodriguez_total", map[string]string{"a": "b", "x": "y"})
 	assert.EqualValues(t, 3, m1.GetCounter().GetValue(), "%+v", m1)
 
-	m2 := findMetric(t, snapshot, "bender_rodriguez", map[string]string{"a": "b", "x": "z"})
+	m2 := findMetric(t, snapshot, "bender_rodriguez_total", map[string]string{"a": "b", "x": "z"})
 	assert.EqualValues(t, 7, m2.GetCounter().GetValue(), "%+v", m2)
 }
 
