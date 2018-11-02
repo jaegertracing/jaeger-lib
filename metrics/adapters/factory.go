@@ -15,7 +15,7 @@
 package adapters
 
 import (
-	"github.com/uber/jaeger-lib/metrics"
+	"github.com/jaegertracing/jaeger-lib/metrics"
 )
 
 // FactoryWithTags creates metrics with fully qualified name and tags.

@@ -23,8 +23,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/uber/jaeger-lib/metrics"
-	. "github.com/uber/jaeger-lib/metrics/prometheus"
+	"github.com/jaegertracing/jaeger-lib/metrics"
+	. "github.com/jaegertracing/jaeger-lib/metrics/prometheus"
 )
 
 var _ metrics.Factory = new(Factory)

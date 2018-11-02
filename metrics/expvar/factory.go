@@ -15,10 +15,10 @@
 package expvar
 
 import (
-	"github.com/uber/jaeger-lib/metrics"
-	"github.com/uber/jaeger-lib/metrics/adapters"
-	xkit "github.com/uber/jaeger-lib/metrics/go-kit"
-	"github.com/uber/jaeger-lib/metrics/go-kit/expvar"
+	"github.com/jaegertracing/jaeger-lib/metrics"
+	"github.com/jaegertracing/jaeger-lib/metrics/adapters"
+	xkit "github.com/jaegertracing/jaeger-lib/metrics/go-kit"
+	"github.com/jaegertracing/jaeger-lib/metrics/go-kit/expvar"
 )
 
 // NewFactory creates a new metrics factory using go-kit expvar package.

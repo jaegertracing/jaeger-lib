@@ -11,7 +11,7 @@ import (
 	influxdb "github.com/influxdata/influxdb/client/v2"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/uber/jaeger-lib/metrics/go-kit"
+	"github.com/jaegertracing/jaeger-lib/metrics/go-kit"
 )
 
 func TestCounter(t *testing.T) {

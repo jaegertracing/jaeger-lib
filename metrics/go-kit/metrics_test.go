@@ -7,7 +7,7 @@ import (
 	"github.com/go-kit/kit/metrics/generic"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/uber/jaeger-lib/metrics"
+	"github.com/jaegertracing/jaeger-lib/metrics"
 )
 
 func TestCounter(t *testing.T) {

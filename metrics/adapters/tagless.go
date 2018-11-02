@@ -14,7 +14,7 @@
 
 package adapters
 
-import "github.com/uber/jaeger-lib/metrics"
+import "github.com/jaegertracing/jaeger-lib/metrics"
 
 // FactoryWithoutTags creates metrics based on name only, without tags.
 // Suitable for integrating with statsd-like backends that don't support tags.

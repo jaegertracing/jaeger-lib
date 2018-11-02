@@ -19,7 +19,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/uber/jaeger-lib/metrics"
+	"github.com/jaegertracing/jaeger-lib/metrics"
 )
 
 // ExpectedMetric contains metrics under test.

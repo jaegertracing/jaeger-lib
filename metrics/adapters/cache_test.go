@@ -20,8 +20,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/uber/jaeger-lib/metrics"
-	"github.com/uber/jaeger-lib/metrics/metricstest"
+	"github.com/jaegertracing/jaeger-lib/metrics"
+	"github.com/jaegertracing/jaeger-lib/metrics/metricstest"
 )
 
 func TestCache(t *testing.T) {
