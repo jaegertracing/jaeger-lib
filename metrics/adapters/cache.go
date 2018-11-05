@@ -17,7 +17,7 @@ package adapters
 import (
 	"sync"
 
-	"github.com/uber/jaeger-lib/metrics"
+	"github.com/jaegertracing/jaeger-lib/metrics"
 )
 
 type cache struct {

@@ -17,7 +17,7 @@ package multi
 import (
 	"time"
 
-	"github.com/uber/jaeger-lib/metrics"
+	"github.com/jaegertracing/jaeger-lib/metrics"
 )
 
 // Factory is a metrics factory that dispatches to multiple metrics backends.

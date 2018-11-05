@@ -1,4 +1,4 @@
-package: github.com/uber/jaeger-lib
+package: github.com/jaegertracing/jaeger-lib
 import:
 - package: github.com/codahale/hdrhistogram
 - package: github.com/go-kit/kit

@@ -22,11 +22,11 @@ file for details.
 This library uses [glide](https://github.com/Masterminds/glide) to manage dependencies.
 
 To get started, make sure you clone the Git repository into the correct location
-`github.com/uber/jaeger-lib` relative to `$GOPATH`:
+`github.com/jaegertracing/jaeger-lib` relative to `$GOPATH`:
 
 ```
-mkdir -p $GOPATH/src/github.com/uber
-cd $GOPATH/src/github.com/uber
+mkdir -p $GOPATH/src/github.com/jaegertracing
+cd $GOPATH/src/github.com/jaegertracing
 git clone git@github.com:jaegertracing/jaeger-lib.git jaeger-lib
 cd jaeger-lib
 ```
@@ -54,14 +54,14 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/uber/jaeger-lib/metrics"
+	"github.com/jaegertracing/jaeger-lib/metrics"
 )
 ```
 
 ## Making A Change
 
 *Before making any significant changes, please [open an
-issue](https://github.com/uber/jaeger-lib/issues).* Discussing your proposed
+issue](https://github.com/jaegertracing/jaeger-lib/issues).* Discussing your proposed
 changes ahead of time will make the contribution process smooth for everyone.
 
 Once we've discussed your changes and you've got your code ready, make sure

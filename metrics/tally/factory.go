@@ -17,7 +17,7 @@ package tally
 import (
 	"github.com/uber-go/tally"
 
-	"github.com/uber/jaeger-lib/metrics"
+	"github.com/jaegertracing/jaeger-lib/metrics"
 )
 
 // Wrap takes a tally Scope and returns jaeger-lib metrics.Factory.

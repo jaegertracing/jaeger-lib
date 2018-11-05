@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"github.com/codahale/hdrhistogram"
-	"github.com/uber/jaeger-lib/metrics"
+	"github.com/jaegertracing/jaeger-lib/metrics"
 )
 
 // This is intentionally very similar to github.com/codahale/metrics, the

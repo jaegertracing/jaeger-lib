@@ -18,7 +18,7 @@ import (
 	"github.com/go-kit/kit/metrics"
 	"github.com/go-kit/kit/metrics/expvar"
 
-	"github.com/uber/jaeger-lib/metrics/go-kit"
+	"github.com/jaegertracing/jaeger-lib/metrics/go-kit"
 )
 
 // NewFactory creates a new metrics factory using go-kit expvar package.
@@ -26,7 +26,7 @@ import (
 //
 // Deprecated: the recommended way is to use metrics/expvar module:
 //
-//	"github.com/uber/jaeger-lib/metrics/expvar"
+//	"github.com/jaegertracing/jaeger-lib/metrics/expvar"
 //
 //	var numBuckets = 10
 //	var metricsFactory = expvar.NewFactory(numBuckets)
