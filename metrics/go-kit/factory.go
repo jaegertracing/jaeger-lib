@@ -103,7 +103,7 @@ func (f *factory) nameAndTagsList(nom string, tags map[string]string) (name stri
 	return
 }
 
-func (f *factory) Counter(name string, tags map[string]string) metrics.Counter {
+func (f *factory) Counter(name string, tags map[string]string, description string) metrics.Counter {
 	name, tagsList := f.nameAndTagsList(name, tags)
 	counter := f.factory.Counter(name)
 	if len(tagsList) > 0 {
@@ -112,7 +112,7 @@ func (f *factory) Counter(name string, tags map[string]string) metrics.Counter {
 	return NewCounter(counter)
 }
 
-func (f *factory) Timer(name string, tags map[string]string) metrics.Timer {
+func (f *factory) Timer(name string, tags map[string]string, description string) metrics.Timer {
 	name, tagsList := f.nameAndTagsList(name, tags)
 	hist := f.factory.Histogram(name)
 	if len(tagsList) > 0 {
@@ -121,7 +121,7 @@ func (f *factory) Timer(name string, tags map[string]string) metrics.Timer {
 	return NewTimer(hist)
 }
 
-func (f *factory) Gauge(name string, tags map[string]string) metrics.Gauge {
+func (f *factory) Gauge(name string, tags map[string]string, description string) metrics.Gauge {
 	name, tagsList := f.nameAndTagsList(name, tags)
 	gauge := f.factory.Gauge(name)
 	if len(tagsList) > 0 {

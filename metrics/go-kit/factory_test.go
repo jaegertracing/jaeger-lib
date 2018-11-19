@@ -166,7 +166,7 @@ func TestFactoryScoping(t *testing.T) {
 }
 
 func testCounter(t *testing.T, testCase testCase, f metrics.Factory) (name func() string, labels func() []string) {
-	c := f.Counter(testCase.name, testCase.tags)
+	c := f.Counter(testCase.name, testCase.tags, "")
 	c.Inc(123)
 	kc := c.(*Counter).counter
 	var gc *generic.Counter
@@ -182,7 +182,7 @@ func testCounter(t *testing.T, testCase testCase, f metrics.Factory) (name func(
 }
 
 func testGauge(t *testing.T, testCase testCase, f metrics.Factory) (name func() string, labels func() []string) {
-	g := f.Gauge(testCase.name, testCase.tags)
+	g := f.Gauge(testCase.name, testCase.tags, "")
 	g.Update(123)
 	gg := g.(*Gauge).gauge.(*generic.Gauge)
 	assert.EqualValues(t, 123.0, gg.Value())
@@ -192,7 +192,7 @@ func testGauge(t *testing.T, testCase testCase, f metrics.Factory) (name func() 
 }
 
 func testTimer(t *testing.T, testCase testCase, f metrics.Factory) (name func() string, labels func() []string) {
-	tm := f.Timer(testCase.name, testCase.tags)
+	tm := f.Timer(testCase.name, testCase.tags, "")
 	tm.Record(123 * time.Millisecond)
 	gt := tm.(*Timer).hist.(*generic.Histogram)
 	assert.InDelta(t, 0.123, gt.Quantile(0.9), 0.00001)

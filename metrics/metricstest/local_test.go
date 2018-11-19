@@ -15,15 +15,15 @@ func TestLocalMetrics(t *testing.T) {
 
 	f := NewFactory(0)
 	defer f.Stop()
-	f.Counter("my-counter", tags).Inc(4)
-	f.Counter("my-counter", tags).Inc(6)
-	f.Counter("my-counter", nil).Inc(6)
-	f.Counter("other-counter", nil).Inc(8)
-	f.Gauge("my-gauge", nil).Update(25)
-	f.Gauge("my-gauge", nil).Update(43)
-	f.Gauge("other-gauge", nil).Update(74)
-	f.Namespace("namespace", tags).Counter("my-counter", nil).Inc(7)
-	f.Namespace("ns.subns", nil).Counter("", map[string]string{"service": "a-service"}).Inc(9)
+	f.Counter("my-counter", tags, "").Inc(4)
+	f.Counter("my-counter", tags, "").Inc(6)
+	f.Counter("my-counter", nil, "").Inc(6)
+	f.Counter("other-counter", nil, "").Inc(8)
+	f.Gauge("my-gauge", nil, "").Update(25)
+	f.Gauge("my-gauge", nil, "").Update(43)
+	f.Gauge("other-gauge", nil, "").Update(74)
+	f.Namespace("namespace", tags).Counter("my-counter", nil, "").Inc(7)
+	f.Namespace("ns.subns", nil).Counter("", map[string]string{"service": "a-service"}, "").Inc(9)
 
 	timings := map[string][]time.Duration{
 		"foo-latency": {
@@ -42,7 +42,7 @@ func TestLocalMetrics(t *testing.T) {
 
 	for metric, timing := range timings {
 		for _, d := range timing {
-			f.Timer(metric, nil).Record(d)
+			f.Timer(metric, nil, "").Record(d)
 		}
 	}
 
@@ -90,7 +90,7 @@ func TestLocalMetricsInterval(t *testing.T) {
 	f := NewFactory(refreshInterval)
 	defer f.Stop()
 
-	f.Timer("timer", nil).Record(1)
+	f.Timer("timer", nil, "").Record(1)
 
 	f.tm.Lock()
 	timer := f.timers["timer"]

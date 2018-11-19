@@ -37,7 +37,7 @@ func TestOptions(t *testing.T) {
 func TestSeparator(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry), WithSeparator(SeparatorColon))
-	c1 := f1.Namespace("bender", nil).Counter("rodriguez", map[string]string{"a": "b"})
+	c1 := f1.Namespace("bender", nil).Counter("rodriguez", map[string]string{"a": "b"}, "Help message")
 	c1.Inc(1)
 	snapshot, err := registry.Gather()
 	require.NoError(t, err)
@@ -52,9 +52,9 @@ func TestCounter(t *testing.T) {
 	f2 := fDummy.Namespace("bender", map[string]string{"a": "b"})
 	f3 := f2.Namespace("", nil)
 
-	c1 := f2.Counter("rodriguez", map[string]string{"x": "y"})
-	c2 := f2.Counter("rodriguez", map[string]string{"x": "z"})
-	c3 := f3.Counter("rodriguez", map[string]string{"x": "z"}) // same tags as c2, but from f3
+	c1 := f2.Counter("rodriguez", map[string]string{"x": "y"}, "Help message")
+	c2 := f2.Counter("rodriguez", map[string]string{"x": "z"}, "Help message")
+	c3 := f3.Counter("rodriguez", map[string]string{"x": "z"}, "Help message") // same tags as c2, but from f3
 	c1.Inc(1)
 	c1.Inc(2)
 	c2.Inc(3)
@@ -63,6 +63,8 @@ func TestCounter(t *testing.T) {
 	snapshot, err := registry.Gather()
 	require.NoError(t, err)
 
+	assert.EqualValues(t, "Help message", snapshot[0].GetHelp())
+
 	m1 := findMetric(t, snapshot, "bender_rodriguez_total", map[string]string{"a": "b", "x": "y"})
 	assert.EqualValues(t, 3, m1.GetCounter().GetValue(), "%+v", m1)
 
@@ -70,14 +72,26 @@ func TestCounter(t *testing.T) {
 	assert.EqualValues(t, 7, m2.GetCounter().GetValue(), "%+v", m2)
 }
 
+func TestCounterDefaultHelp(t *testing.T) {
+	registry := prometheus.NewPedanticRegistry()
+	f1 := New(WithRegisterer(registry))
+	c1 := f1.Counter("rodriguez", map[string]string{"x": "y"}, "")
+	c1.Inc(1)
+
+	snapshot, err := registry.Gather()
+	require.NoError(t, err)
+
+	assert.EqualValues(t, "rodriguez", snapshot[0].GetHelp())
+}
+
 func TestGauge(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry))
 	f2 := f1.Namespace("bender", map[string]string{"a": "b"})
 	f3 := f2.Namespace("", map[string]string{"a": "b"}) // essentially same as f2
-	g1 := f2.Gauge("rodriguez", map[string]string{"x": "y"})
-	g2 := f2.Gauge("rodriguez", map[string]string{"x": "z"})
-	g3 := f3.Gauge("rodriguez", map[string]string{"x": "z"}) // same as g2, but from f3
+	g1 := f2.Gauge("rodriguez", map[string]string{"x": "y"}, "Help message")
+	g2 := f2.Gauge("rodriguez", map[string]string{"x": "z"}, "Help message")
+	g3 := f3.Gauge("rodriguez", map[string]string{"x": "z"}, "Help message") // same as g2, but from f3
 	g1.Update(1)
 	g1.Update(2)
 	g2.Update(3)
@@ -86,6 +100,8 @@ func TestGauge(t *testing.T) {
 	snapshot, err := registry.Gather()
 	require.NoError(t, err)
 
+	assert.EqualValues(t, "Help message", snapshot[0].GetHelp())
+
 	m1 := findMetric(t, snapshot, "bender_rodriguez", map[string]string{"a": "b", "x": "y"})
 	assert.EqualValues(t, 2, m1.GetGauge().GetValue(), "%+v", m1)
 
@@ -93,14 +109,26 @@ func TestGauge(t *testing.T) {
 	assert.EqualValues(t, 4, m2.GetGauge().GetValue(), "%+v", m2)
 }
 
+func TestGaugeDefaultHelp(t *testing.T) {
+	registry := prometheus.NewPedanticRegistry()
+	f1 := New(WithRegisterer(registry))
+	g1 := f1.Gauge("rodriguez", map[string]string{"x": "y"}, "")
+	g1.Update(1)
+
+	snapshot, err := registry.Gather()
+	require.NoError(t, err)
+
+	assert.EqualValues(t, "rodriguez", snapshot[0].GetHelp())
+}
+
 func TestTimer(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry))
 	f2 := f1.Namespace("bender", map[string]string{"a": "b"})
 	f3 := f2.Namespace("", map[string]string{"a": "b"}) // essentially same as f2
-	t1 := f2.Timer("rodriguez", map[string]string{"x": "y"})
-	t2 := f2.Timer("rodriguez", map[string]string{"x": "z"})
-	t3 := f3.Timer("rodriguez", map[string]string{"x": "z"}) // same as t2, but from f3
+	t1 := f2.Timer("rodriguez", map[string]string{"x": "y"}, "Help message")
+	t2 := f2.Timer("rodriguez", map[string]string{"x": "z"}, "Help message")
+	t3 := f3.Timer("rodriguez", map[string]string{"x": "z"}, "Help message") // same as t2, but from f3
 	t1.Record(1 * time.Second)
 	t1.Record(2 * time.Second)
 	t2.Record(3 * time.Second)
@@ -108,6 +136,8 @@ func TestTimer(t *testing.T) {
 
 	snapshot, err := registry.Gather()
 	require.NoError(t, err)
+
+	assert.EqualValues(t, "Help message", snapshot[0].GetHelp())
 
 	m1 := findMetric(t, snapshot, "bender_rodriguez", map[string]string{"a": "b", "x": "y"})
 	assert.EqualValues(t, 2, m1.GetHistogram().GetSampleCount(), "%+v", m1)
@@ -136,11 +166,23 @@ func TestTimer(t *testing.T) {
 	}
 }
 
+func TestTimerDefaultHelp(t *testing.T) {
+	registry := prometheus.NewPedanticRegistry()
+	f1 := New(WithRegisterer(registry))
+	t1 := f1.Timer("rodriguez", map[string]string{"x": "y"}, "")
+	t1.Record(1 * time.Second)
+
+	snapshot, err := registry.Gather()
+	require.NoError(t, err)
+
+	assert.EqualValues(t, "rodriguez", snapshot[0].GetHelp())
+}
+
 func TestTimerCustomBuckets(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry), WithBuckets([]float64{1.5}))
 	// dot and dash in the metric name will be replaced with underscore
-	t1 := f1.Timer("bender.bending-rodriguez", map[string]string{"x": "y"})
+	t1 := f1.Timer("bender.bending-rodriguez", map[string]string{"x": "y"}, "")
 	t1.Record(1 * time.Second)
 	t1.Record(2 * time.Second)
 

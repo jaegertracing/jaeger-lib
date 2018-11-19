@@ -43,12 +43,12 @@ func (c *counter) Inc(delta int64) {
 }
 
 // Counter implements metrics.Factory interface
-func (f *Factory) Counter(name string, tags map[string]string) metrics.Counter {
+func (f *Factory) Counter(name string, tags map[string]string, description string) metrics.Counter {
 	counter := &counter{
 		counters: make([]metrics.Counter, len(f.factories)),
 	}
 	for i, factory := range f.factories {
-		counter.counters[i] = factory.Counter(name, tags)
+		counter.counters[i] = factory.Counter(name, tags, description)
 	}
 	return counter
 }
@@ -64,12 +64,12 @@ func (t *timer) Record(delta time.Duration) {
 }
 
 // Timer implements metrics.Factory interface
-func (f *Factory) Timer(name string, tags map[string]string) metrics.Timer {
+func (f *Factory) Timer(name string, tags map[string]string, description string) metrics.Timer {
 	timer := &timer{
 		timers: make([]metrics.Timer, len(f.factories)),
 	}
 	for i, factory := range f.factories {
-		timer.timers[i] = factory.Timer(name, tags)
+		timer.timers[i] = factory.Timer(name, tags, description)
 	}
 	return timer
 }
@@ -85,12 +85,12 @@ func (t *gauge) Update(value int64) {
 }
 
 // Gauge implements metrics.Factory interface
-func (f *Factory) Gauge(name string, tags map[string]string) metrics.Gauge {
+func (f *Factory) Gauge(name string, tags map[string]string, description string) metrics.Gauge {
 	gauge := &gauge{
 		gauges: make([]metrics.Gauge, len(f.factories)),
 	}
 	for i, factory := range f.factories {
-		gauge.gauges[i] = factory.Gauge(name, tags)
+		gauge.gauges[i] = factory.Gauge(name, tags, description)
 	}
 	return gauge
 }

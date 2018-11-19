@@ -72,13 +72,14 @@ func InitOrError(m interface{}, factory Factory, globalTags map[string]string) e
 				tags[tag[0]] = tag[1]
 			}
 		}
+		description := field.Tag.Get("description")
 		var obj interface{}
 		if field.Type.AssignableTo(counterPtrType) {
-			obj = factory.Counter(metric, tags)
+			obj = factory.Counter(metric, tags, description)
 		} else if field.Type.AssignableTo(gaugePtrType) {
-			obj = factory.Gauge(metric, tags)
+			obj = factory.Gauge(metric, tags, description)
 		} else if field.Type.AssignableTo(timerPtrType) {
-			obj = factory.Timer(metric, tags)
+			obj = factory.Timer(metric, tags, description)
 		} else {
 			return fmt.Errorf(
 				"Field %s is not a pointer to timer, gauge, or counter",

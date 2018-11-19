@@ -12,11 +12,11 @@ import (
 func TestFactory(t *testing.T) {
 	testScope := tally.NewTestScope("pre", map[string]string{"a": "b"})
 	factory := Wrap(testScope).Namespace("fix", map[string]string{"c": "d"})
-	counter := factory.Counter("counter", map[string]string{"x": "y"})
+	counter := factory.Counter("counter", map[string]string{"x": "y"}, "")
 	counter.Inc(42)
-	gauge := factory.Gauge("gauge", map[string]string{"x": "y"})
+	gauge := factory.Gauge("gauge", map[string]string{"x": "y"}, "")
 	gauge.Update(42)
-	timer := factory.Timer("timer", map[string]string{"x": "y"})
+	timer := factory.Timer("timer", map[string]string{"x": "y"}, "")
 	timer.Record(42 * time.Millisecond)
 	snapshot := testScope.Snapshot()
 

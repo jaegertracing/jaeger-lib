@@ -279,7 +279,7 @@ func (l *Factory) newNamespace(name string) string {
 }
 
 // Counter returns a local stats counter
-func (l *Factory) Counter(name string, tags map[string]string) metrics.Counter {
+func (l *Factory) Counter(name string, tags map[string]string, description string) metrics.Counter {
 	return &localCounter{
 		stats{
 			name:         l.newNamespace(name),
@@ -290,7 +290,7 @@ func (l *Factory) Counter(name string, tags map[string]string) metrics.Counter {
 }
 
 // Timer returns a local stats timer.
-func (l *Factory) Timer(name string, tags map[string]string) metrics.Timer {
+func (l *Factory) Timer(name string, tags map[string]string, description string) metrics.Timer {
 	return &localTimer{
 		stats{
 			name:         l.newNamespace(name),
@@ -301,7 +301,7 @@ func (l *Factory) Timer(name string, tags map[string]string) metrics.Timer {
 }
 
 // Gauge returns a local stats gauge.
-func (l *Factory) Gauge(name string, tags map[string]string) metrics.Gauge {
+func (l *Factory) Gauge(name string, tags map[string]string, description string) metrics.Gauge {
 	return &localGauge{
 		stats{
 			name:         l.newNamespace(name),

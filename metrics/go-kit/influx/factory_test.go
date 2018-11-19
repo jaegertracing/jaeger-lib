@@ -19,7 +19,7 @@ func TestCounter(t *testing.T) {
 	inf := NewFactory(in)
 	wf := xkit.Wrap("namespace", inf)
 
-	c := wf.Counter("gokit.infl-counter", map[string]string{"label": "val1"})
+	c := wf.Counter("gokit.infl-counter", map[string]string{"label": "val1"}, "")
 	c.Inc(7)
 
 	assert.Contains(t, reportToString(in), "namespace.gokit.infl-counter,label=val1 count=7")
@@ -30,7 +30,7 @@ func TestGauge(t *testing.T) {
 	inf := NewFactory(in)
 	wf := xkit.Wrap("namespace", inf)
 
-	g := wf.Gauge("gokit.infl-gauge", map[string]string{"x": "y"})
+	g := wf.Gauge("gokit.infl-gauge", map[string]string{"x": "y"}, "")
 	g.Update(42)
 
 	assert.Contains(t, reportToString(in), "namespace.gokit.infl-gauge,x=y value=42")
@@ -41,7 +41,7 @@ func TestTimer(t *testing.T) {
 	inf := NewFactory(in)
 	wf := xkit.Wrap("namespace", inf)
 
-	timer := wf.Timer("gokit.infl-timer", map[string]string{"x": "y"})
+	timer := wf.Timer("gokit.infl-timer", map[string]string{"x": "y"}, "")
 	timer.Record(time.Second * 1)
 	timer.Record(time.Second * 1)
 	timer.Record(time.Second * 10)
@@ -56,7 +56,7 @@ func TestWrapperNamespaces(t *testing.T) {
 
 	wf = wf.Namespace("bar", map[string]string{"bar_tag": "bar_tag"})
 
-	c := wf.Counter("gokit.prom-wrapped-counter", map[string]string{"x": "y"})
+	c := wf.Counter("gokit.prom-wrapped-counter", map[string]string{"x": "y"}, "")
 	c.Inc(42)
 
 	assert.Contains(t, reportToString(in), "namespace.bar.gokit.prom-wrapped-counter,bar_tag=bar_tag,x=y count=42")

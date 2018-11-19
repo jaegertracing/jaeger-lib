@@ -32,7 +32,7 @@ type factory struct {
 	tally tally.Scope
 }
 
-func (f *factory) Counter(name string, tags map[string]string) metrics.Counter {
+func (f *factory) Counter(name string, tags map[string]string, description string) metrics.Counter {
 	scope := f.tally
 	if len(tags) > 0 {
 		scope = scope.Tagged(tags)
@@ -40,7 +40,7 @@ func (f *factory) Counter(name string, tags map[string]string) metrics.Counter {
 	return NewCounter(scope.Counter(name))
 }
 
-func (f *factory) Gauge(name string, tags map[string]string) metrics.Gauge {
+func (f *factory) Gauge(name string, tags map[string]string, description string) metrics.Gauge {
 	scope := f.tally
 	if len(tags) > 0 {
 		scope = scope.Tagged(tags)
@@ -48,7 +48,7 @@ func (f *factory) Gauge(name string, tags map[string]string) metrics.Gauge {
 	return NewGauge(scope.Gauge(name))
 }
 
-func (f *factory) Timer(name string, tags map[string]string) metrics.Timer {
+func (f *factory) Timer(name string, tags map[string]string, description string) metrics.Timer {
 	scope := f.tally
 	if len(tags) > 0 {
 		scope = scope.Tagged(tags)

@@ -65,14 +65,14 @@ func TestFactory(t *testing.T) {
 			if testCase.namespace != "" || testCase.nsTags != nil {
 				ff = f.Namespace(testCase.namespace, testCase.nsTags)
 			}
-			counter := ff.Counter(counterPrefix+testCase.name, testCase.tags)
-			gauge := ff.Gauge(gaugePrefix+testCase.name, testCase.tags)
-			timer := ff.Timer(timerPrefix+testCase.name, testCase.tags)
+			counter := ff.Counter(counterPrefix+testCase.name, testCase.tags, "")
+			gauge := ff.Gauge(gaugePrefix+testCase.name, testCase.tags, "")
+			timer := ff.Timer(timerPrefix+testCase.name, testCase.tags, "")
 
 			// register second time, should not panic
-			ff.Counter(counterPrefix+testCase.name, testCase.tags)
-			ff.Gauge(gaugePrefix+testCase.name, testCase.tags)
-			ff.Timer(timerPrefix+testCase.name, testCase.tags)
+			ff.Counter(counterPrefix+testCase.name, testCase.tags, "")
+			ff.Gauge(gaugePrefix+testCase.name, testCase.tags, "")
+			ff.Timer(timerPrefix+testCase.name, testCase.tags, "")
 
 			counter.Inc(42)
 			gauge.Update(42)

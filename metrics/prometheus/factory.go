@@ -125,13 +125,17 @@ func newFactory(parent *Factory, scope string, tags map[string]string) *Factory 
 }
 
 // Counter implements Counter of metrics.Factory.
-func (f *Factory) Counter(name string, tags map[string]string) metrics.Counter {
+func (f *Factory) Counter(name string, tags map[string]string, description string) metrics.Counter {
+	description = strings.TrimSpace(description)
+	if len(description) == 0 {
+		description = name
+	}
 	name = counterNamingConvention(f.subScope(name))
 	tags = f.mergeTags(tags)
 	labelNames := f.tagNames(tags)
 	opts := prometheus.CounterOpts{
 		Name: name,
-		Help: name,
+		Help: description,
 	}
 	cv := f.cache.getOrMakeCounterVec(opts, labelNames)
 	return &counter{
@@ -140,13 +144,17 @@ func (f *Factory) Counter(name string, tags map[string]string) metrics.Counter {
 }
 
 // Gauge implements Gauge of metrics.Factory.
-func (f *Factory) Gauge(name string, tags map[string]string) metrics.Gauge {
+func (f *Factory) Gauge(name string, tags map[string]string, description string) metrics.Gauge {
+	description = strings.TrimSpace(description)
+	if len(description) == 0 {
+		description = name
+	}
 	name = f.subScope(name)
 	tags = f.mergeTags(tags)
 	labelNames := f.tagNames(tags)
 	opts := prometheus.GaugeOpts{
 		Name: name,
-		Help: name,
+		Help: description,
 	}
 	gv := f.cache.getOrMakeGaugeVec(opts, labelNames)
 	return &gauge{
@@ -155,13 +163,17 @@ func (f *Factory) Gauge(name string, tags map[string]string) metrics.Gauge {
 }
 
 // Timer implements Timer of metrics.Factory.
-func (f *Factory) Timer(name string, tags map[string]string) metrics.Timer {
+func (f *Factory) Timer(name string, tags map[string]string, description string) metrics.Timer {
+	description = strings.TrimSpace(description)
+	if len(description) == 0 {
+		description = name
+	}
 	name = f.subScope(name)
 	tags = f.mergeTags(tags)
 	labelNames := f.tagNames(tags)
 	opts := prometheus.HistogramOpts{
 		Name:    name,
-		Help:    name,
+		Help:    description,
 		Buckets: f.buckets,
 	}
 	hv := f.cache.getOrMakeHistogramVec(opts, labelNames)

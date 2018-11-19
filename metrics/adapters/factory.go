@@ -20,9 +20,9 @@ import (
 
 // FactoryWithTags creates metrics with fully qualified name and tags.
 type FactoryWithTags interface {
-	Counter(name string, tags map[string]string) metrics.Counter
-	Gauge(name string, tags map[string]string) metrics.Gauge
-	Timer(name string, tags map[string]string) metrics.Timer
+	Counter(name string, tags map[string]string, description string) metrics.Counter
+	Gauge(name string, tags map[string]string, description string) metrics.Gauge
+	Timer(name string, tags map[string]string, description string) metrics.Timer
 }
 
 // Options affect how the adapter factory behaves.
@@ -63,24 +63,24 @@ type factory struct {
 	cache   *cache
 }
 
-func (f *factory) Counter(name string, tags map[string]string) metrics.Counter {
+func (f *factory) Counter(name string, tags map[string]string, description string) metrics.Counter {
 	fullName, fullTags, key := f.getKey(name, tags)
 	return f.cache.getOrSetCounter(key, func() metrics.Counter {
-		return f.factory.Counter(fullName, fullTags)
+		return f.factory.Counter(fullName, fullTags, description)
 	})
 }
 
-func (f *factory) Gauge(name string, tags map[string]string) metrics.Gauge {
+func (f *factory) Gauge(name string, tags map[string]string, description string) metrics.Gauge {
 	fullName, fullTags, key := f.getKey(name, tags)
 	return f.cache.getOrSetGauge(key, func() metrics.Gauge {
-		return f.factory.Gauge(fullName, fullTags)
+		return f.factory.Gauge(fullName, fullTags, description)
 	})
 }
 
-func (f *factory) Timer(name string, tags map[string]string) metrics.Timer {
+func (f *factory) Timer(name string, tags map[string]string, description string) metrics.Timer {
 	fullName, fullTags, key := f.getKey(name, tags)
 	return f.cache.getOrSetTimer(key, func() metrics.Timer {
-		return f.factory.Timer(fullName, fullTags)
+		return f.factory.Timer(fullName, fullTags, description)
 	})
 }
 

@@ -17,9 +17,9 @@ func TestMultiFactory(t *testing.T) {
 	multi1 := New(f1, f2)
 	multi2 := multi1.Namespace("ns2", nil)
 	tags := map[string]string{"x": "y"}
-	multi2.Counter("counter", tags).Inc(42)
-	multi2.Gauge("gauge", tags).Update(42)
-	multi2.Timer("timer", tags).Record(42 * time.Millisecond)
+	multi2.Counter("counter", tags, "").Inc(42)
+	multi2.Gauge("gauge", tags, "").Update(42)
+	multi2.Timer("timer", tags, "").Record(42 * time.Millisecond)
 
 	for _, f := range []*metricstest.Factory{f1, f2} {
 		f.AssertCounterMetrics(t,
