@@ -32,32 +32,32 @@ type factory struct {
 	tally tally.Scope
 }
 
-func (f *factory) Counter(name string, tags map[string]string, description string) metrics.Counter {
+func (f *factory) Counter(metricInfo metrics.MetricInfo) metrics.Counter {
 	scope := f.tally
-	if len(tags) > 0 {
-		scope = scope.Tagged(tags)
+	if len(metricInfo.Tags) > 0 {
+		scope = scope.Tagged(metricInfo.Tags)
 	}
-	return NewCounter(scope.Counter(name))
+	return NewCounter(scope.Counter(metricInfo.Name))
 }
 
-func (f *factory) Gauge(name string, tags map[string]string, description string) metrics.Gauge {
+func (f *factory) Gauge(metricInfo metrics.MetricInfo) metrics.Gauge {
 	scope := f.tally
-	if len(tags) > 0 {
-		scope = scope.Tagged(tags)
+	if len(metricInfo.Tags) > 0 {
+		scope = scope.Tagged(metricInfo.Tags)
 	}
-	return NewGauge(scope.Gauge(name))
+	return NewGauge(scope.Gauge(metricInfo.Name))
 }
 
-func (f *factory) Timer(name string, tags map[string]string, description string) metrics.Timer {
+func (f *factory) Timer(metricInfo metrics.MetricInfo) metrics.Timer {
 	scope := f.tally
-	if len(tags) > 0 {
-		scope = scope.Tagged(tags)
+	if len(metricInfo.Tags) > 0 {
+		scope = scope.Tagged(metricInfo.Tags)
 	}
-	return NewTimer(scope.Timer(name))
+	return NewTimer(scope.Timer(metricInfo.Name))
 }
 
-func (f *factory) Namespace(name string, tags map[string]string) metrics.Factory {
+func (f *factory) Namespace(metricScope metrics.MetricScope) metrics.Factory {
 	return &factory{
-		tally: f.tally.SubScope(name).Tagged(tags),
+		tally: f.tally.SubScope(metricScope.Name).Tagged(metricScope.Tags),
 	}
 }

@@ -103,8 +103,8 @@ func (f *factory) nameAndTagsList(nom string, tags map[string]string) (name stri
 	return
 }
 
-func (f *factory) Counter(name string, tags map[string]string, description string) metrics.Counter {
-	name, tagsList := f.nameAndTagsList(name, tags)
+func (f *factory) Counter(metricInfo metrics.MetricInfo) metrics.Counter {
+	name, tagsList := f.nameAndTagsList(metricInfo.Name, metricInfo.Tags)
 	counter := f.factory.Counter(name)
 	if len(tagsList) > 0 {
 		counter = counter.With(tagsList...)
@@ -112,8 +112,8 @@ func (f *factory) Counter(name string, tags map[string]string, description strin
 	return NewCounter(counter)
 }
 
-func (f *factory) Timer(name string, tags map[string]string, description string) metrics.Timer {
-	name, tagsList := f.nameAndTagsList(name, tags)
+func (f *factory) Timer(metricInfo metrics.MetricInfo) metrics.Timer {
+	name, tagsList := f.nameAndTagsList(metricInfo.Name, metricInfo.Tags)
 	hist := f.factory.Histogram(name)
 	if len(tagsList) > 0 {
 		hist = hist.With(tagsList...)
@@ -121,8 +121,8 @@ func (f *factory) Timer(name string, tags map[string]string, description string)
 	return NewTimer(hist)
 }
 
-func (f *factory) Gauge(name string, tags map[string]string, description string) metrics.Gauge {
-	name, tagsList := f.nameAndTagsList(name, tags)
+func (f *factory) Gauge(metricInfo metrics.MetricInfo) metrics.Gauge {
+	name, tagsList := f.nameAndTagsList(metricInfo.Name, metricInfo.Tags)
 	gauge := f.factory.Gauge(name)
 	if len(tagsList) > 0 {
 		gauge = gauge.With(tagsList...)
@@ -130,10 +130,10 @@ func (f *factory) Gauge(name string, tags map[string]string, description string)
 	return NewGauge(gauge)
 }
 
-func (f *factory) Namespace(name string, tags map[string]string) metrics.Factory {
+func (f *factory) Namespace(metricScope metrics.MetricScope) metrics.Factory {
 	return &factory{
-		scope:    f.subScope(name),
-		tags:     f.mergeTags(tags),
+		scope:    f.subScope(metricScope.Name),
+		tags:     f.mergeTags(metricScope.Tags),
 		factory:  f.factory,
 		scopeSep: f.scopeSep,
 		tagsSep:  f.tagsSep,

@@ -80,15 +80,48 @@ func TestFactory(t *testing.T) {
 			ff := &fakeTagless{factory: local}
 			f := WrapFactoryWithoutTags(ff, Options{})
 			if testCase.namespace != "" || testCase.nsTags != nil {
-				f = f.Namespace(testCase.namespace, testCase.nsTags)
+				f = f.Namespace(metrics.MetricScope{
+					Name: testCase.namespace,
+					Tags: testCase.nsTags,
+				})
 			}
-			counter := f.Counter(counterPrefix+testCase.name, testCase.tags, "")
-			gauge := f.Gauge(gaugePrefix+testCase.name, testCase.tags, "")
-			timer := f.Timer(timerPrefix+testCase.name, testCase.tags, "")
+			counter := f.Counter(metrics.MetricInfo{
+				MetricScope: metrics.MetricScope{
+					Name: counterPrefix + testCase.name,
+					Tags: testCase.tags,
+				},
+			})
+			gauge := f.Gauge(metrics.MetricInfo{
+				MetricScope: metrics.MetricScope{
+					Name: gaugePrefix + testCase.name,
+					Tags: testCase.tags,
+				},
+			})
+			timer := f.Timer(metrics.MetricInfo{
+				MetricScope: metrics.MetricScope{
+					Name: timerPrefix + testCase.name,
+					Tags: testCase.tags,
+				},
+			})
 
-			assert.Equal(t, counter, f.Counter(counterPrefix+testCase.name, testCase.tags, ""))
-			assert.Equal(t, gauge, f.Gauge(gaugePrefix+testCase.name, testCase.tags, ""))
-			assert.Equal(t, timer, f.Timer(timerPrefix+testCase.name, testCase.tags, ""))
+			assert.Equal(t, counter, f.Counter(metrics.MetricInfo{
+				MetricScope: metrics.MetricScope{
+					Name: counterPrefix + testCase.name,
+					Tags: testCase.tags,
+				},
+			}))
+			assert.Equal(t, gauge, f.Gauge(metrics.MetricInfo{
+				MetricScope: metrics.MetricScope{
+					Name: gaugePrefix + testCase.name,
+					Tags: testCase.tags,
+				},
+			}))
+			assert.Equal(t, timer, f.Timer(metrics.MetricInfo{
+				MetricScope: metrics.MetricScope{
+					Name: timerPrefix + testCase.name,
+					Tags: testCase.tags,
+				},
+			}))
 
 			assert.Equal(t, fmt.Sprintf(testCase.fullName, counterPrefix), ff.counter)
 			assert.Equal(t, fmt.Sprintf(testCase.fullName, gaugePrefix), ff.gauge)
@@ -106,15 +139,30 @@ type fakeTagless struct {
 
 func (f *fakeTagless) Counter(name string, description string) metrics.Counter {
 	f.counter = name
-	return f.factory.Counter(name, nil, description)
+	return f.factory.Counter(metrics.MetricInfo{
+		MetricScope: metrics.MetricScope{
+			Name: name,
+		},
+		Description: description,
+	})
 }
 
 func (f *fakeTagless) Gauge(name string, description string) metrics.Gauge {
 	f.gauge = name
-	return f.factory.Gauge(name, nil, description)
+	return f.factory.Gauge(metrics.MetricInfo{
+		MetricScope: metrics.MetricScope{
+			Name: name,
+		},
+		Description: description,
+	})
 }
 
 func (f *fakeTagless) Timer(name string, description string) metrics.Timer {
 	f.timer = name
-	return f.factory.Timer(name, nil, description)
+	return f.factory.Timer(metrics.MetricInfo{
+		MetricScope: metrics.MetricScope{
+			Name: name,
+		},
+		Description: description,
+	})
 }

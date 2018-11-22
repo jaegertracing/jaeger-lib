@@ -15,11 +15,28 @@ func TestMultiFactory(t *testing.T) {
 	f1 := metricstest.NewFactory(time.Second)
 	f2 := metricstest.NewFactory(time.Second)
 	multi1 := New(f1, f2)
-	multi2 := multi1.Namespace("ns2", nil)
+	multi2 := multi1.Namespace(metrics.MetricScope{
+		Name: "ns2",
+	})
 	tags := map[string]string{"x": "y"}
-	multi2.Counter("counter", tags, "").Inc(42)
-	multi2.Gauge("gauge", tags, "").Update(42)
-	multi2.Timer("timer", tags, "").Record(42 * time.Millisecond)
+	multi2.Counter(metrics.MetricInfo{
+		MetricScope: metrics.MetricScope{
+			Name: "counter",
+			Tags: tags,
+		},
+	}).Inc(42)
+	multi2.Gauge(metrics.MetricInfo{
+		MetricScope: metrics.MetricScope{
+			Name: "gauge",
+			Tags: tags,
+		},
+	}).Update(42)
+	multi2.Timer(metrics.MetricInfo{
+		MetricScope: metrics.MetricScope{
+			Name: "timer",
+			Tags: tags,
+		},
+	}).Record(42 * time.Millisecond)
 
 	for _, f := range []*metricstest.Factory{f1, f2} {
 		f.AssertCounterMetrics(t,

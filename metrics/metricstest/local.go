@@ -279,43 +279,43 @@ func (l *Factory) newNamespace(name string) string {
 }
 
 // Counter returns a local stats counter
-func (l *Factory) Counter(name string, tags map[string]string, description string) metrics.Counter {
+func (l *Factory) Counter(metricInfo metrics.MetricInfo) metrics.Counter {
 	return &localCounter{
 		stats{
-			name:         l.newNamespace(name),
-			tags:         l.appendTags(tags),
+			name:         l.newNamespace(metricInfo.Name),
+			tags:         l.appendTags(metricInfo.Tags),
 			localBackend: l.Backend,
 		},
 	}
 }
 
 // Timer returns a local stats timer.
-func (l *Factory) Timer(name string, tags map[string]string, description string) metrics.Timer {
+func (l *Factory) Timer(metricInfo metrics.MetricInfo) metrics.Timer {
 	return &localTimer{
 		stats{
-			name:         l.newNamespace(name),
-			tags:         l.appendTags(tags),
+			name:         l.newNamespace(metricInfo.Name),
+			tags:         l.appendTags(metricInfo.Tags),
 			localBackend: l.Backend,
 		},
 	}
 }
 
 // Gauge returns a local stats gauge.
-func (l *Factory) Gauge(name string, tags map[string]string, description string) metrics.Gauge {
+func (l *Factory) Gauge(metricInfo metrics.MetricInfo) metrics.Gauge {
 	return &localGauge{
 		stats{
-			name:         l.newNamespace(name),
-			tags:         l.appendTags(tags),
+			name:         l.newNamespace(metricInfo.Name),
+			tags:         l.appendTags(metricInfo.Tags),
 			localBackend: l.Backend,
 		},
 	}
 }
 
 // Namespace returns a new namespace.
-func (l *Factory) Namespace(name string, tags map[string]string) metrics.Factory {
+func (l *Factory) Namespace(metricScope metrics.MetricScope) metrics.Factory {
 	return &Factory{
-		namespace: l.newNamespace(name),
-		tags:      l.appendTags(tags),
+		namespace: l.newNamespace(metricScope.Name),
+		tags:      l.appendTags(metricScope.Tags),
 		Backend:   l.Backend,
 	}
 }

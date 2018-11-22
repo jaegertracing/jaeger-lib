@@ -43,12 +43,12 @@ func (c *counter) Inc(delta int64) {
 }
 
 // Counter implements metrics.Factory interface
-func (f *Factory) Counter(name string, tags map[string]string, description string) metrics.Counter {
+func (f *Factory) Counter(metricInfo metrics.MetricInfo) metrics.Counter {
 	counter := &counter{
 		counters: make([]metrics.Counter, len(f.factories)),
 	}
 	for i, factory := range f.factories {
-		counter.counters[i] = factory.Counter(name, tags, description)
+		counter.counters[i] = factory.Counter(metricInfo)
 	}
 	return counter
 }
@@ -64,12 +64,12 @@ func (t *timer) Record(delta time.Duration) {
 }
 
 // Timer implements metrics.Factory interface
-func (f *Factory) Timer(name string, tags map[string]string, description string) metrics.Timer {
+func (f *Factory) Timer(metricInfo metrics.MetricInfo) metrics.Timer {
 	timer := &timer{
 		timers: make([]metrics.Timer, len(f.factories)),
 	}
 	for i, factory := range f.factories {
-		timer.timers[i] = factory.Timer(name, tags, description)
+		timer.timers[i] = factory.Timer(metricInfo)
 	}
 	return timer
 }
@@ -85,23 +85,23 @@ func (t *gauge) Update(value int64) {
 }
 
 // Gauge implements metrics.Factory interface
-func (f *Factory) Gauge(name string, tags map[string]string, description string) metrics.Gauge {
+func (f *Factory) Gauge(metricInfo metrics.MetricInfo) metrics.Gauge {
 	gauge := &gauge{
 		gauges: make([]metrics.Gauge, len(f.factories)),
 	}
 	for i, factory := range f.factories {
-		gauge.gauges[i] = factory.Gauge(name, tags, description)
+		gauge.gauges[i] = factory.Gauge(metricInfo)
 	}
 	return gauge
 }
 
 // Namespace implements metrics.Factory interface
-func (f *Factory) Namespace(name string, tags map[string]string) metrics.Factory {
+func (f *Factory) Namespace(metricScope metrics.MetricScope) metrics.Factory {
 	newFactory := &Factory{
 		factories: make([]metrics.Factory, len(f.factories)),
 	}
 	for i, factory := range f.factories {
-		newFactory.factories[i] = factory.Namespace(name, tags)
+		newFactory.factories[i] = factory.Namespace(metricScope)
 	}
 	return newFactory
 }

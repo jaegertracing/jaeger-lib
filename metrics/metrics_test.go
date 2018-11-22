@@ -86,8 +86,26 @@ func TestInitPanic(t *testing.T) {
 
 func TestNullMetrics(t *testing.T) {
 	// This test is just for cover
-	metrics.NullFactory.Timer("name", nil, "").Record(0)
-	metrics.NullFactory.Counter("name", nil, "").Inc(0)
-	metrics.NullFactory.Gauge("name", nil, "").Update(0)
-	metrics.NullFactory.Namespace("name", nil).Gauge("name2", nil, "").Update(0)
+	metrics.NullFactory.Timer(metrics.MetricInfo{
+		MetricScope: metrics.MetricScope{
+			Name: "name",
+		},
+	}).Record(0)
+	metrics.NullFactory.Counter(metrics.MetricInfo{
+		MetricScope: metrics.MetricScope{
+			Name: "name",
+		},
+	}).Inc(0)
+	metrics.NullFactory.Gauge(metrics.MetricInfo{
+		MetricScope: metrics.MetricScope{
+			Name: "name",
+		},
+	}).Update(0)
+	metrics.NullFactory.Namespace(metrics.MetricScope{
+		Name: "name",
+	}).Gauge(metrics.MetricInfo{
+		MetricScope: metrics.MetricScope{
+			Name: "name2",
+		},
+	}).Update(0)
 }

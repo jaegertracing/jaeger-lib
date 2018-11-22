@@ -14,14 +14,26 @@
 
 package metrics
 
+// MetricScope defines the name and tags map associated with a metric
+type MetricScope struct {
+	Name string
+	Tags map[string]string
+}
+
+// MetricInfo defines the information associated with a metric
+type MetricInfo struct {
+	MetricScope
+	Description string
+}
+
 // Factory creates new metrics
 type Factory interface {
-	Counter(name string, tags map[string]string, description string) Counter
-	Timer(name string, tags map[string]string, description string) Timer
-	Gauge(name string, tags map[string]string, description string) Gauge
+	Counter(metric MetricInfo) Counter
+	Timer(metric MetricInfo) Timer
+	Gauge(metric MetricInfo) Gauge
 
 	// Namespace returns a nested metrics factory.
-	Namespace(name string, tags map[string]string) Factory
+	Namespace(metricScope MetricScope) Factory
 }
 
 // NullFactory is a metrics factory that returns NullCounter, NullTimer, and NullGauge.
@@ -29,13 +41,13 @@ var NullFactory Factory = nullFactory{}
 
 type nullFactory struct{}
 
-func (nullFactory) Counter(name string, tags map[string]string, description string) Counter {
+func (nullFactory) Counter(metricInfo MetricInfo) Counter {
 	return NullCounter
 }
-func (nullFactory) Timer(name string, tags map[string]string, description string) Timer {
+func (nullFactory) Timer(metricInfo MetricInfo) Timer {
 	return NullTimer
 }
-func (nullFactory) Gauge(name string, tags map[string]string, description string) Gauge {
+func (nullFactory) Gauge(metricInfo MetricInfo) Gauge {
 	return NullGauge
 }
-func (nullFactory) Namespace(name string, tags map[string]string) Factory { return NullFactory }
+func (nullFactory) Namespace(metricScope MetricScope) Factory { return NullFactory }
