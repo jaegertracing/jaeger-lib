@@ -16,57 +16,39 @@ func TestLocalMetrics(t *testing.T) {
 
 	f := NewFactory(0)
 	defer f.Stop()
-	f.Counter(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "my-counter",
-			Tags: tags,
-		},
+	f.Counter(metrics.Options{
+		Name: "my-counter",
+		Tags: tags,
 	}).Inc(4)
-	f.Counter(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "my-counter",
-			Tags: tags,
-		},
+	f.Counter(metrics.Options{
+		Name: "my-counter",
+		Tags: tags,
 	}).Inc(6)
-	f.Counter(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "my-counter",
-		},
+	f.Counter(metrics.Options{
+		Name: "my-counter",
 	}).Inc(6)
-	f.Counter(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "other-counter",
-		},
+	f.Counter(metrics.Options{
+		Name: "other-counter",
 	}).Inc(8)
-	f.Gauge(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "my-gauge",
-		},
+	f.Gauge(metrics.Options{
+		Name: "my-gauge",
 	}).Update(25)
-	f.Gauge(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "my-gauge",
-		},
+	f.Gauge(metrics.Options{
+		Name: "my-gauge",
 	}).Update(43)
-	f.Gauge(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "other-gauge",
-		},
+	f.Gauge(metrics.Options{
+		Name: "other-gauge",
 	}).Update(74)
-	f.Namespace(metrics.MetricScope{
+	f.Namespace(metrics.Scope{
 		Name: "namespace",
 		Tags: tags,
-	}).Counter(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "my-counter",
-		},
+	}).Counter(metrics.Options{
+		Name: "my-counter",
 	}).Inc(7)
-	f.Namespace(metrics.MetricScope{
+	f.Namespace(metrics.Scope{
 		Name: "ns.subns",
-	}).Counter(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Tags: map[string]string{"service": "a-service"},
-		},
+	}).Counter(metrics.Options{
+		Tags: map[string]string{"service": "a-service"},
 	}).Inc(9)
 
 	timings := map[string][]time.Duration{
@@ -86,10 +68,8 @@ func TestLocalMetrics(t *testing.T) {
 
 	for metric, timing := range timings {
 		for _, d := range timing {
-			f.Timer(metrics.MetricInfo{
-				MetricScope: metrics.MetricScope{
-					Name: metric,
-				},
+			f.Timer(metrics.Options{
+				Name: metric,
 			}).Record(d)
 		}
 	}
@@ -138,10 +118,8 @@ func TestLocalMetricsInterval(t *testing.T) {
 	f := NewFactory(refreshInterval)
 	defer f.Stop()
 
-	f.Timer(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "timer",
-		},
+	f.Timer(metrics.Options{
+		Name: "timer",
 	}).Record(1)
 
 	f.tm.Lock()

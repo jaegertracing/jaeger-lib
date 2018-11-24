@@ -153,7 +153,7 @@ func TestFactoryScoping(t *testing.T) {
 			t.Run(factoryName+"_"+testSuite.metricType+"_"+testCase.expName, func(t *testing.T) {
 				f := Wrap(testCase.prefix, testCase.f, testCase.options...)
 				if testCase.useNamespace {
-					f = f.Namespace(metrics.MetricScope{
+					f = f.Namespace(metrics.Scope{
 						Name: testCase.namespace,
 						Tags: testCase.namespaceTags,
 					})
@@ -169,11 +169,9 @@ func TestFactoryScoping(t *testing.T) {
 }
 
 func testCounter(t *testing.T, testCase testCase, f metrics.Factory) (name func() string, labels func() []string) {
-	c := f.Counter(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: testCase.name,
-			Tags: testCase.tags,
-		},
+	c := f.Counter(metrics.Options{
+		Name: testCase.name,
+		Tags: testCase.tags,
 	})
 	c.Inc(123)
 	kc := c.(*Counter).counter
@@ -190,11 +188,9 @@ func testCounter(t *testing.T, testCase testCase, f metrics.Factory) (name func(
 }
 
 func testGauge(t *testing.T, testCase testCase, f metrics.Factory) (name func() string, labels func() []string) {
-	g := f.Gauge(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: testCase.name,
-			Tags: testCase.tags,
-		},
+	g := f.Gauge(metrics.Options{
+		Name: testCase.name,
+		Tags: testCase.tags,
 	})
 	g.Update(123)
 	gg := g.(*Gauge).gauge.(*generic.Gauge)
@@ -205,11 +201,9 @@ func testGauge(t *testing.T, testCase testCase, f metrics.Factory) (name func() 
 }
 
 func testTimer(t *testing.T, testCase testCase, f metrics.Factory) (name func() string, labels func() []string) {
-	tm := f.Timer(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: testCase.name,
-			Tags: testCase.tags,
-		},
+	tm := f.Timer(metrics.Options{
+		Name: testCase.name,
+		Tags: testCase.tags,
 	})
 	tm.Record(123 * time.Millisecond)
 	gt := tm.(*Timer).hist.(*generic.Histogram)

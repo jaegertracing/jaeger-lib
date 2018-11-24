@@ -64,48 +64,36 @@ func TestFactory(t *testing.T) {
 			}
 			ff := f
 			if testCase.namespace != "" || testCase.nsTags != nil {
-				ff = f.Namespace(metrics.MetricScope{
+				ff = f.Namespace(metrics.Scope{
 					Name: testCase.namespace,
 					Tags: testCase.nsTags,
 				})
 			}
-			counter := ff.Counter(metrics.MetricInfo{
-				MetricScope: metrics.MetricScope{
-					Name: counterPrefix + testCase.name,
-					Tags: testCase.tags,
-				},
+			counter := ff.Counter(metrics.Options{
+				Name: counterPrefix + testCase.name,
+				Tags: testCase.tags,
 			})
-			gauge := ff.Gauge(metrics.MetricInfo{
-				MetricScope: metrics.MetricScope{
-					Name: gaugePrefix + testCase.name,
-					Tags: testCase.tags,
-				},
+			gauge := ff.Gauge(metrics.Options{
+				Name: gaugePrefix + testCase.name,
+				Tags: testCase.tags,
 			})
-			timer := ff.Timer(metrics.MetricInfo{
-				MetricScope: metrics.MetricScope{
-					Name: timerPrefix + testCase.name,
-					Tags: testCase.tags,
-				},
+			timer := ff.Timer(metrics.Options{
+				Name: timerPrefix + testCase.name,
+				Tags: testCase.tags,
 			})
 
 			// register second time, should not panic
-			ff.Counter(metrics.MetricInfo{
-				MetricScope: metrics.MetricScope{
-					Name: counterPrefix + testCase.name,
-					Tags: testCase.tags,
-				},
+			ff.Counter(metrics.Options{
+				Name: counterPrefix + testCase.name,
+				Tags: testCase.tags,
 			})
-			ff.Gauge(metrics.MetricInfo{
-				MetricScope: metrics.MetricScope{
-					Name: gaugePrefix + testCase.name,
-					Tags: testCase.tags,
-				},
+			ff.Gauge(metrics.Options{
+				Name: gaugePrefix + testCase.name,
+				Tags: testCase.tags,
 			})
-			ff.Timer(metrics.MetricInfo{
-				MetricScope: metrics.MetricScope{
-					Name: timerPrefix + testCase.name,
-					Tags: testCase.tags,
-				},
+			ff.Timer(metrics.Options{
+				Name: timerPrefix + testCase.name,
+				Tags: testCase.tags,
 			})
 
 			counter.Inc(42)

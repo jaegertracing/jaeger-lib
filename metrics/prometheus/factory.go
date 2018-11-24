@@ -125,13 +125,13 @@ func newFactory(parent *Factory, scope string, tags map[string]string) *Factory 
 }
 
 // Counter implements Counter of metrics.Factory.
-func (f *Factory) Counter(metricInfo metrics.MetricInfo) metrics.Counter {
-	description := strings.TrimSpace(metricInfo.Description)
+func (f *Factory) Counter(options metrics.Options) metrics.Counter {
+	description := strings.TrimSpace(options.Description)
 	if len(description) == 0 {
-		description = metricInfo.Name
+		description = options.Name
 	}
-	name := counterNamingConvention(f.subScope(metricInfo.Name))
-	tags := f.mergeTags(metricInfo.Tags)
+	name := counterNamingConvention(f.subScope(options.Name))
+	tags := f.mergeTags(options.Tags)
 	labelNames := f.tagNames(tags)
 	opts := prometheus.CounterOpts{
 		Name: name,
@@ -144,13 +144,13 @@ func (f *Factory) Counter(metricInfo metrics.MetricInfo) metrics.Counter {
 }
 
 // Gauge implements Gauge of metrics.Factory.
-func (f *Factory) Gauge(metricInfo metrics.MetricInfo) metrics.Gauge {
-	description := strings.TrimSpace(metricInfo.Description)
+func (f *Factory) Gauge(options metrics.Options) metrics.Gauge {
+	description := strings.TrimSpace(options.Description)
 	if len(description) == 0 {
-		description = metricInfo.Name
+		description = options.Name
 	}
-	name := f.subScope(metricInfo.Name)
-	tags := f.mergeTags(metricInfo.Tags)
+	name := f.subScope(options.Name)
+	tags := f.mergeTags(options.Tags)
 	labelNames := f.tagNames(tags)
 	opts := prometheus.GaugeOpts{
 		Name: name,
@@ -163,13 +163,13 @@ func (f *Factory) Gauge(metricInfo metrics.MetricInfo) metrics.Gauge {
 }
 
 // Timer implements Timer of metrics.Factory.
-func (f *Factory) Timer(metricInfo metrics.MetricInfo) metrics.Timer {
-	description := strings.TrimSpace(metricInfo.Description)
+func (f *Factory) Timer(options metrics.Options) metrics.Timer {
+	description := strings.TrimSpace(options.Description)
 	if len(description) == 0 {
-		description = metricInfo.Name
+		description = options.Name
 	}
-	name := f.subScope(metricInfo.Name)
-	tags := f.mergeTags(metricInfo.Tags)
+	name := f.subScope(options.Name)
+	tags := f.mergeTags(options.Tags)
 	labelNames := f.tagNames(tags)
 	opts := prometheus.HistogramOpts{
 		Name:    name,
@@ -183,8 +183,8 @@ func (f *Factory) Timer(metricInfo metrics.MetricInfo) metrics.Timer {
 }
 
 // Namespace implements Namespace of metrics.Factory.
-func (f *Factory) Namespace(metricScope metrics.MetricScope) metrics.Factory {
-	return newFactory(f, f.subScope(metricScope.Name), f.mergeTags(metricScope.Tags))
+func (f *Factory) Namespace(scope metrics.Scope) metrics.Factory {
+	return newFactory(f, f.subScope(scope.Name), f.mergeTags(scope.Tags))
 }
 
 type counter struct {

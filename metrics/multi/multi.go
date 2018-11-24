@@ -43,12 +43,12 @@ func (c *counter) Inc(delta int64) {
 }
 
 // Counter implements metrics.Factory interface
-func (f *Factory) Counter(metricInfo metrics.MetricInfo) metrics.Counter {
+func (f *Factory) Counter(options metrics.Options) metrics.Counter {
 	counter := &counter{
 		counters: make([]metrics.Counter, len(f.factories)),
 	}
 	for i, factory := range f.factories {
-		counter.counters[i] = factory.Counter(metricInfo)
+		counter.counters[i] = factory.Counter(options)
 	}
 	return counter
 }
@@ -64,12 +64,12 @@ func (t *timer) Record(delta time.Duration) {
 }
 
 // Timer implements metrics.Factory interface
-func (f *Factory) Timer(metricInfo metrics.MetricInfo) metrics.Timer {
+func (f *Factory) Timer(options metrics.Options) metrics.Timer {
 	timer := &timer{
 		timers: make([]metrics.Timer, len(f.factories)),
 	}
 	for i, factory := range f.factories {
-		timer.timers[i] = factory.Timer(metricInfo)
+		timer.timers[i] = factory.Timer(options)
 	}
 	return timer
 }
@@ -85,23 +85,23 @@ func (t *gauge) Update(value int64) {
 }
 
 // Gauge implements metrics.Factory interface
-func (f *Factory) Gauge(metricInfo metrics.MetricInfo) metrics.Gauge {
+func (f *Factory) Gauge(options metrics.Options) metrics.Gauge {
 	gauge := &gauge{
 		gauges: make([]metrics.Gauge, len(f.factories)),
 	}
 	for i, factory := range f.factories {
-		gauge.gauges[i] = factory.Gauge(metricInfo)
+		gauge.gauges[i] = factory.Gauge(options)
 	}
 	return gauge
 }
 
 // Namespace implements metrics.Factory interface
-func (f *Factory) Namespace(metricScope metrics.MetricScope) metrics.Factory {
+func (f *Factory) Namespace(scope metrics.Scope) metrics.Factory {
 	newFactory := &Factory{
 		factories: make([]metrics.Factory, len(f.factories)),
 	}
 	for i, factory := range f.factories {
-		newFactory.factories[i] = factory.Namespace(metricScope)
+		newFactory.factories[i] = factory.Namespace(scope)
 	}
 	return newFactory
 }

@@ -63,32 +63,32 @@ type factory struct {
 	cache   *cache
 }
 
-func (f *factory) Counter(metricInfo metrics.MetricInfo) metrics.Counter {
-	fullName, fullTags, key := f.getKey(metricInfo.Name, metricInfo.Tags)
+func (f *factory) Counter(options metrics.Options) metrics.Counter {
+	fullName, fullTags, key := f.getKey(options.Name, options.Tags)
 	return f.cache.getOrSetCounter(key, func() metrics.Counter {
-		return f.factory.Counter(fullName, fullTags, metricInfo.Description)
+		return f.factory.Counter(fullName, fullTags, options.Description)
 	})
 }
 
-func (f *factory) Gauge(metricInfo metrics.MetricInfo) metrics.Gauge {
-	fullName, fullTags, key := f.getKey(metricInfo.Name, metricInfo.Tags)
+func (f *factory) Gauge(options metrics.Options) metrics.Gauge {
+	fullName, fullTags, key := f.getKey(options.Name, options.Tags)
 	return f.cache.getOrSetGauge(key, func() metrics.Gauge {
-		return f.factory.Gauge(fullName, fullTags, metricInfo.Description)
+		return f.factory.Gauge(fullName, fullTags, options.Description)
 	})
 }
 
-func (f *factory) Timer(metricInfo metrics.MetricInfo) metrics.Timer {
-	fullName, fullTags, key := f.getKey(metricInfo.Name, metricInfo.Tags)
+func (f *factory) Timer(options metrics.Options) metrics.Timer {
+	fullName, fullTags, key := f.getKey(options.Name, options.Tags)
 	return f.cache.getOrSetTimer(key, func() metrics.Timer {
-		return f.factory.Timer(fullName, fullTags, metricInfo.Description)
+		return f.factory.Timer(fullName, fullTags, options.Description)
 	})
 }
 
-func (f *factory) Namespace(metricScope metrics.MetricScope) metrics.Factory {
+func (f *factory) Namespace(scope metrics.Scope) metrics.Factory {
 	return &factory{
 		cache:   f.cache,
-		scope:   f.subScope(metricScope.Name),
-		tags:    f.mergeTags(metricScope.Tags),
+		scope:   f.subScope(scope.Name),
+		tags:    f.mergeTags(scope.Tags),
 		factory: f.factory,
 		Options: f.Options,
 	}

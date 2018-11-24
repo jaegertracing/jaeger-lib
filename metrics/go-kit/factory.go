@@ -103,8 +103,8 @@ func (f *factory) nameAndTagsList(nom string, tags map[string]string) (name stri
 	return
 }
 
-func (f *factory) Counter(metricInfo metrics.MetricInfo) metrics.Counter {
-	name, tagsList := f.nameAndTagsList(metricInfo.Name, metricInfo.Tags)
+func (f *factory) Counter(options metrics.Options) metrics.Counter {
+	name, tagsList := f.nameAndTagsList(options.Name, options.Tags)
 	counter := f.factory.Counter(name)
 	if len(tagsList) > 0 {
 		counter = counter.With(tagsList...)
@@ -112,8 +112,8 @@ func (f *factory) Counter(metricInfo metrics.MetricInfo) metrics.Counter {
 	return NewCounter(counter)
 }
 
-func (f *factory) Timer(metricInfo metrics.MetricInfo) metrics.Timer {
-	name, tagsList := f.nameAndTagsList(metricInfo.Name, metricInfo.Tags)
+func (f *factory) Timer(options metrics.Options) metrics.Timer {
+	name, tagsList := f.nameAndTagsList(options.Name, options.Tags)
 	hist := f.factory.Histogram(name)
 	if len(tagsList) > 0 {
 		hist = hist.With(tagsList...)
@@ -121,8 +121,8 @@ func (f *factory) Timer(metricInfo metrics.MetricInfo) metrics.Timer {
 	return NewTimer(hist)
 }
 
-func (f *factory) Gauge(metricInfo metrics.MetricInfo) metrics.Gauge {
-	name, tagsList := f.nameAndTagsList(metricInfo.Name, metricInfo.Tags)
+func (f *factory) Gauge(options metrics.Options) metrics.Gauge {
+	name, tagsList := f.nameAndTagsList(options.Name, options.Tags)
 	gauge := f.factory.Gauge(name)
 	if len(tagsList) > 0 {
 		gauge = gauge.With(tagsList...)
@@ -130,10 +130,10 @@ func (f *factory) Gauge(metricInfo metrics.MetricInfo) metrics.Gauge {
 	return NewGauge(gauge)
 }
 
-func (f *factory) Namespace(metricScope metrics.MetricScope) metrics.Factory {
+func (f *factory) Namespace(scope metrics.Scope) metrics.Factory {
 	return &factory{
-		scope:    f.subScope(metricScope.Name),
-		tags:     f.mergeTags(metricScope.Tags),
+		scope:    f.subScope(scope.Name),
+		tags:     f.mergeTags(scope.Tags),
 		factory:  f.factory,
 		scopeSep: f.scopeSep,
 		tagsSep:  f.tagsSep,

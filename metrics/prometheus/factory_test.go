@@ -37,13 +37,11 @@ func TestOptions(t *testing.T) {
 func TestSeparator(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry), WithSeparator(SeparatorColon))
-	c1 := f1.Namespace(metrics.MetricScope{
+	c1 := f1.Namespace(metrics.Scope{
 		Name: "bender",
-	}).Counter(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "rodriguez",
-			Tags: map[string]string{"a": "b"},
-		},
+	}).Counter(metrics.Options{
+		Name:        "rodriguez",
+		Tags:        map[string]string{"a": "b"},
 		Description: "Help message",
 	})
 	c1.Inc(1)
@@ -56,32 +54,26 @@ func TestSeparator(t *testing.T) {
 func TestCounter(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry))
-	fDummy := f1.Namespace(metrics.MetricScope{})
-	f2 := fDummy.Namespace(metrics.MetricScope{
+	fDummy := f1.Namespace(metrics.Scope{})
+	f2 := fDummy.Namespace(metrics.Scope{
 		Name: "bender",
 		Tags: map[string]string{"a": "b"},
 	})
-	f3 := f2.Namespace(metrics.MetricScope{})
+	f3 := f2.Namespace(metrics.Scope{})
 
-	c1 := f2.Counter(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "rodriguez",
-			Tags: map[string]string{"x": "y"},
-		},
+	c1 := f2.Counter(metrics.Options{
+		Name:        "rodriguez",
+		Tags:        map[string]string{"x": "y"},
 		Description: "Help message",
 	})
-	c2 := f2.Counter(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "rodriguez",
-			Tags: map[string]string{"x": "z"},
-		},
+	c2 := f2.Counter(metrics.Options{
+		Name:        "rodriguez",
+		Tags:        map[string]string{"x": "z"},
 		Description: "Help message",
 	})
-	c3 := f3.Counter(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "rodriguez",
-			Tags: map[string]string{"x": "z"},
-		},
+	c3 := f3.Counter(metrics.Options{
+		Name:        "rodriguez",
+		Tags:        map[string]string{"x": "z"},
 		Description: "Help message",
 	}) // same tags as c2, but from f3
 	c1.Inc(1)
@@ -104,11 +96,9 @@ func TestCounter(t *testing.T) {
 func TestCounterDefaultHelp(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry))
-	c1 := f1.Counter(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "rodriguez",
-			Tags: map[string]string{"x": "y"},
-		},
+	c1 := f1.Counter(metrics.Options{
+		Name: "rodriguez",
+		Tags: map[string]string{"x": "y"},
 	})
 	c1.Inc(1)
 
@@ -121,32 +111,26 @@ func TestCounterDefaultHelp(t *testing.T) {
 func TestGauge(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry))
-	f2 := f1.Namespace(metrics.MetricScope{
+	f2 := f1.Namespace(metrics.Scope{
 		Name: "bender",
 		Tags: map[string]string{"a": "b"},
 	})
-	f3 := f2.Namespace(metrics.MetricScope{
+	f3 := f2.Namespace(metrics.Scope{
 		Tags: map[string]string{"a": "b"},
 	}) // essentially same as f2
-	g1 := f2.Gauge(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "rodriguez",
-			Tags: map[string]string{"x": "y"},
-		},
+	g1 := f2.Gauge(metrics.Options{
+		Name:        "rodriguez",
+		Tags:        map[string]string{"x": "y"},
 		Description: "Help message",
 	})
-	g2 := f2.Gauge(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "rodriguez",
-			Tags: map[string]string{"x": "z"},
-		},
+	g2 := f2.Gauge(metrics.Options{
+		Name:        "rodriguez",
+		Tags:        map[string]string{"x": "z"},
 		Description: "Help message",
 	})
-	g3 := f3.Gauge(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "rodriguez",
-			Tags: map[string]string{"x": "z"},
-		},
+	g3 := f3.Gauge(metrics.Options{
+		Name:        "rodriguez",
+		Tags:        map[string]string{"x": "z"},
 		Description: "Help message",
 	}) // same as g2, but from f3
 	g1.Update(1)
@@ -169,11 +153,9 @@ func TestGauge(t *testing.T) {
 func TestGaugeDefaultHelp(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry))
-	g1 := f1.Gauge(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "rodriguez",
-			Tags: map[string]string{"x": "y"},
-		},
+	g1 := f1.Gauge(metrics.Options{
+		Name: "rodriguez",
+		Tags: map[string]string{"x": "y"},
 	})
 	g1.Update(1)
 
@@ -186,32 +168,26 @@ func TestGaugeDefaultHelp(t *testing.T) {
 func TestTimer(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry))
-	f2 := f1.Namespace(metrics.MetricScope{
+	f2 := f1.Namespace(metrics.Scope{
 		Name: "bender",
 		Tags: map[string]string{"a": "b"},
 	})
-	f3 := f2.Namespace(metrics.MetricScope{
+	f3 := f2.Namespace(metrics.Scope{
 		Tags: map[string]string{"a": "b"},
 	}) // essentially same as f2
-	t1 := f2.Timer(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "rodriguez",
-			Tags: map[string]string{"x": "y"},
-		},
+	t1 := f2.Timer(metrics.Options{
+		Name:        "rodriguez",
+		Tags:        map[string]string{"x": "y"},
 		Description: "Help message",
 	})
-	t2 := f2.Timer(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "rodriguez",
-			Tags: map[string]string{"x": "z"},
-		},
+	t2 := f2.Timer(metrics.Options{
+		Name:        "rodriguez",
+		Tags:        map[string]string{"x": "z"},
 		Description: "Help message",
 	})
-	t3 := f3.Timer(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "rodriguez",
-			Tags: map[string]string{"x": "z"},
-		},
+	t3 := f3.Timer(metrics.Options{
+		Name:        "rodriguez",
+		Tags:        map[string]string{"x": "z"},
 		Description: "Help message",
 	}) // same as t2, but from f3
 	t1.Record(1 * time.Second)
@@ -254,11 +230,9 @@ func TestTimer(t *testing.T) {
 func TestTimerDefaultHelp(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry))
-	t1 := f1.Timer(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "rodriguez",
-			Tags: map[string]string{"x": "y"},
-		},
+	t1 := f1.Timer(metrics.Options{
+		Name: "rodriguez",
+		Tags: map[string]string{"x": "y"},
 	})
 	t1.Record(1 * time.Second)
 
@@ -272,11 +246,9 @@ func TestTimerCustomBuckets(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry), WithBuckets([]float64{1.5}))
 	// dot and dash in the metric name will be replaced with underscore
-	t1 := f1.Timer(metrics.MetricInfo{
-		MetricScope: metrics.MetricScope{
-			Name: "bender.bending-rodriguez",
-			Tags: map[string]string{"x": "y"},
-		},
+	t1 := f1.Timer(metrics.Options{
+		Name: "bender.bending-rodriguez",
+		Tags: map[string]string{"x": "y"},
 	})
 	t1.Record(1 * time.Second)
 	t1.Record(2 * time.Second)
