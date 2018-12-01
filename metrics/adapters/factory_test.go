@@ -125,26 +125,26 @@ type fakeTagless struct {
 	timer   string
 }
 
-func (f *fakeTagless) Counter(name string, description string) metrics.Counter {
+func (f *fakeTagless) Counter(name string, help string) metrics.Counter {
 	f.counter = name
 	return f.factory.Counter(metrics.Options{
-		Name:        name,
-		Description: description,
+		Name: name,
+		Help: help,
 	})
 }
 
-func (f *fakeTagless) Gauge(name string, description string) metrics.Gauge {
+func (f *fakeTagless) Gauge(name string, help string) metrics.Gauge {
 	f.gauge = name
 	return f.factory.Gauge(metrics.Options{
-		Name:        name,
-		Description: description,
+		Name: name,
+		Help: help,
 	})
 }
 
-func (f *fakeTagless) Timer(name string, description string) metrics.Timer {
+func (f *fakeTagless) Timer(name string, help string) metrics.Timer {
 	f.timer = name
 	return f.factory.Timer(metrics.Options{
-		Name:        name,
-		Description: description,
+		Name: name,
+		Help: help,
 	})
 }

@@ -40,9 +40,9 @@ func TestSeparator(t *testing.T) {
 	c1 := f1.Namespace(metrics.Scope{
 		Name: "bender",
 	}).Counter(metrics.Options{
-		Name:        "rodriguez",
-		Tags:        map[string]string{"a": "b"},
-		Description: "Help message",
+		Name: "rodriguez",
+		Tags: map[string]string{"a": "b"},
+		Help: "Help message",
 	})
 	c1.Inc(1)
 	snapshot, err := registry.Gather()
@@ -62,19 +62,19 @@ func TestCounter(t *testing.T) {
 	f3 := f2.Namespace(metrics.Scope{})
 
 	c1 := f2.Counter(metrics.Options{
-		Name:        "rodriguez",
-		Tags:        map[string]string{"x": "y"},
-		Description: "Help message",
+		Name: "rodriguez",
+		Tags: map[string]string{"x": "y"},
+		Help: "Help message",
 	})
 	c2 := f2.Counter(metrics.Options{
-		Name:        "rodriguez",
-		Tags:        map[string]string{"x": "z"},
-		Description: "Help message",
+		Name: "rodriguez",
+		Tags: map[string]string{"x": "z"},
+		Help: "Help message",
 	})
 	c3 := f3.Counter(metrics.Options{
-		Name:        "rodriguez",
-		Tags:        map[string]string{"x": "z"},
-		Description: "Help message",
+		Name: "rodriguez",
+		Tags: map[string]string{"x": "z"},
+		Help: "Help message",
 	}) // same tags as c2, but from f3
 	c1.Inc(1)
 	c1.Inc(2)
@@ -119,19 +119,19 @@ func TestGauge(t *testing.T) {
 		Tags: map[string]string{"a": "b"},
 	}) // essentially same as f2
 	g1 := f2.Gauge(metrics.Options{
-		Name:        "rodriguez",
-		Tags:        map[string]string{"x": "y"},
-		Description: "Help message",
+		Name: "rodriguez",
+		Tags: map[string]string{"x": "y"},
+		Help: "Help message",
 	})
 	g2 := f2.Gauge(metrics.Options{
-		Name:        "rodriguez",
-		Tags:        map[string]string{"x": "z"},
-		Description: "Help message",
+		Name: "rodriguez",
+		Tags: map[string]string{"x": "z"},
+		Help: "Help message",
 	})
 	g3 := f3.Gauge(metrics.Options{
-		Name:        "rodriguez",
-		Tags:        map[string]string{"x": "z"},
-		Description: "Help message",
+		Name: "rodriguez",
+		Tags: map[string]string{"x": "z"},
+		Help: "Help message",
 	}) // same as g2, but from f3
 	g1.Update(1)
 	g1.Update(2)
@@ -176,19 +176,19 @@ func TestTimer(t *testing.T) {
 		Tags: map[string]string{"a": "b"},
 	}) // essentially same as f2
 	t1 := f2.Timer(metrics.Options{
-		Name:        "rodriguez",
-		Tags:        map[string]string{"x": "y"},
-		Description: "Help message",
+		Name: "rodriguez",
+		Tags: map[string]string{"x": "y"},
+		Help: "Help message",
 	})
 	t2 := f2.Timer(metrics.Options{
-		Name:        "rodriguez",
-		Tags:        map[string]string{"x": "z"},
-		Description: "Help message",
+		Name: "rodriguez",
+		Tags: map[string]string{"x": "z"},
+		Help: "Help message",
 	})
 	t3 := f3.Timer(metrics.Options{
-		Name:        "rodriguez",
-		Tags:        map[string]string{"x": "z"},
-		Description: "Help message",
+		Name: "rodriguez",
+		Tags: map[string]string{"x": "z"},
+		Help: "Help message",
 	}) // same as t2, but from f3
 	t1.Record(1 * time.Second)
 	t1.Record(2 * time.Second)

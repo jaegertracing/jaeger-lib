@@ -22,9 +22,9 @@ type Scope struct {
 
 // Options defines the information associated with a metric
 type Options struct {
-	Name        string
-	Tags        map[string]string
-	Description string
+	Name string
+	Tags map[string]string
+	Help string
 }
 
 // Factory creates new metrics

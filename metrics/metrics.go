@@ -72,12 +72,12 @@ func InitOrError(m interface{}, factory Factory, globalTags map[string]string) e
 				tags[tag[0]] = tag[1]
 			}
 		}
-		description := field.Tag.Get("description")
+		help := field.Tag.Get("help")
 		var obj interface{}
 		options := Options{
-			Name:        metric,
-			Tags:        tags,
-			Description: description,
+			Name: metric,
+			Tags: tags,
+			Help: help,
 		}
 		if field.Type.AssignableTo(counterPtrType) {
 			obj = factory.Counter(options)

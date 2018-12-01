@@ -36,14 +36,14 @@ type factory struct {
 	factory xkit.Factory
 }
 
-func (f *factory) Counter(name string, description string) metrics.Counter {
+func (f *factory) Counter(name string, help string) metrics.Counter {
 	return xkit.NewCounter(f.factory.Counter(name))
 }
 
-func (f *factory) Gauge(name string, description string) metrics.Gauge {
+func (f *factory) Gauge(name string, help string) metrics.Gauge {
 	return xkit.NewGauge(f.factory.Gauge(name))
 }
 
-func (f *factory) Timer(name string, description string) metrics.Timer {
+func (f *factory) Timer(name string, help string) metrics.Timer {
 	return xkit.NewTimer(f.factory.Histogram(name))
 }
