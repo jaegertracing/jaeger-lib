@@ -80,7 +80,7 @@ func TestFactory(t *testing.T) {
 			ff := &fakeTagless{factory: local}
 			f := WrapFactoryWithoutTags(ff, Options{})
 			if testCase.namespace != "" || testCase.nsTags != nil {
-				f = f.Namespace(metrics.Scope{
+				f = f.Namespace(metrics.NSOptions{
 					Name: testCase.namespace,
 					Tags: testCase.nsTags,
 				})

@@ -96,7 +96,7 @@ func (f *Factory) Gauge(options metrics.Options) metrics.Gauge {
 }
 
 // Namespace implements metrics.Factory interface
-func (f *Factory) Namespace(scope metrics.Scope) metrics.Factory {
+func (f *Factory) Namespace(scope metrics.NSOptions) metrics.Factory {
 	newFactory := &Factory{
 		factories: make([]metrics.Factory, len(f.factories)),
 	}

@@ -12,7 +12,7 @@ import (
 
 func TestFactory(t *testing.T) {
 	testScope := tally.NewTestScope("pre", map[string]string{"a": "b"})
-	factory := Wrap(testScope).Namespace(metrics.Scope{
+	factory := Wrap(testScope).Namespace(metrics.NSOptions{
 		Name: "fix",
 		Tags: map[string]string{"c": "d"},
 	})

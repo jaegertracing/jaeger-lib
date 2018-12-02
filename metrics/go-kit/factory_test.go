@@ -153,7 +153,7 @@ func TestFactoryScoping(t *testing.T) {
 			t.Run(factoryName+"_"+testSuite.metricType+"_"+testCase.expName, func(t *testing.T) {
 				f := Wrap(testCase.prefix, testCase.f, testCase.options...)
 				if testCase.useNamespace {
-					f = f.Namespace(metrics.Scope{
+					f = f.Namespace(metrics.NSOptions{
 						Name: testCase.namespace,
 						Tags: testCase.namespaceTags,
 					})

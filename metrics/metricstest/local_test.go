@@ -39,13 +39,13 @@ func TestLocalMetrics(t *testing.T) {
 	f.Gauge(metrics.Options{
 		Name: "other-gauge",
 	}).Update(74)
-	f.Namespace(metrics.Scope{
+	f.Namespace(metrics.NSOptions{
 		Name: "namespace",
 		Tags: tags,
 	}).Counter(metrics.Options{
 		Name: "my-counter",
 	}).Inc(7)
-	f.Namespace(metrics.Scope{
+	f.Namespace(metrics.NSOptions{
 		Name: "ns.subns",
 	}).Counter(metrics.Options{
 		Tags: map[string]string{"service": "a-service"},

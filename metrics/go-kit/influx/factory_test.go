@@ -64,7 +64,7 @@ func TestWrapperNamespaces(t *testing.T) {
 	inf := NewFactory(in)
 	wf := xkit.Wrap("namespace", inf)
 
-	wf = wf.Namespace(metrics.Scope{
+	wf = wf.Namespace(metrics.NSOptions{
 		Name: "bar",
 		Tags: map[string]string{"bar_tag": "bar_tag"},
 	})

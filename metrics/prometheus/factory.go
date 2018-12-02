@@ -183,7 +183,7 @@ func (f *Factory) Timer(options metrics.Options) metrics.Timer {
 }
 
 // Namespace implements Namespace of metrics.Factory.
-func (f *Factory) Namespace(scope metrics.Scope) metrics.Factory {
+func (f *Factory) Namespace(scope metrics.NSOptions) metrics.Factory {
 	return newFactory(f, f.subScope(scope.Name), f.mergeTags(scope.Tags))
 }
 

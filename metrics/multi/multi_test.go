@@ -15,7 +15,7 @@ func TestMultiFactory(t *testing.T) {
 	f1 := metricstest.NewFactory(time.Second)
 	f2 := metricstest.NewFactory(time.Second)
 	multi1 := New(f1, f2)
-	multi2 := multi1.Namespace(metrics.Scope{
+	multi2 := multi1.Namespace(metrics.NSOptions{
 		Name: "ns2",
 	})
 	tags := map[string]string{"x": "y"}

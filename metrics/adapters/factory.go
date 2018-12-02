@@ -84,7 +84,7 @@ func (f *factory) Timer(options metrics.Options) metrics.Timer {
 	})
 }
 
-func (f *factory) Namespace(scope metrics.Scope) metrics.Factory {
+func (f *factory) Namespace(scope metrics.NSOptions) metrics.Factory {
 	return &factory{
 		cache:   f.cache,
 		scope:   f.subScope(scope.Name),

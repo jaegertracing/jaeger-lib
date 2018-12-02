@@ -37,7 +37,7 @@ func TestOptions(t *testing.T) {
 func TestSeparator(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry), WithSeparator(SeparatorColon))
-	c1 := f1.Namespace(metrics.Scope{
+	c1 := f1.Namespace(metrics.NSOptions{
 		Name: "bender",
 	}).Counter(metrics.Options{
 		Name: "rodriguez",
@@ -54,12 +54,12 @@ func TestSeparator(t *testing.T) {
 func TestCounter(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry))
-	fDummy := f1.Namespace(metrics.Scope{})
-	f2 := fDummy.Namespace(metrics.Scope{
+	fDummy := f1.Namespace(metrics.NSOptions{})
+	f2 := fDummy.Namespace(metrics.NSOptions{
 		Name: "bender",
 		Tags: map[string]string{"a": "b"},
 	})
-	f3 := f2.Namespace(metrics.Scope{})
+	f3 := f2.Namespace(metrics.NSOptions{})
 
 	c1 := f2.Counter(metrics.Options{
 		Name: "rodriguez",
@@ -111,11 +111,11 @@ func TestCounterDefaultHelp(t *testing.T) {
 func TestGauge(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry))
-	f2 := f1.Namespace(metrics.Scope{
+	f2 := f1.Namespace(metrics.NSOptions{
 		Name: "bender",
 		Tags: map[string]string{"a": "b"},
 	})
-	f3 := f2.Namespace(metrics.Scope{
+	f3 := f2.Namespace(metrics.NSOptions{
 		Tags: map[string]string{"a": "b"},
 	}) // essentially same as f2
 	g1 := f2.Gauge(metrics.Options{
@@ -168,11 +168,11 @@ func TestGaugeDefaultHelp(t *testing.T) {
 func TestTimer(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry))
-	f2 := f1.Namespace(metrics.Scope{
+	f2 := f1.Namespace(metrics.NSOptions{
 		Name: "bender",
 		Tags: map[string]string{"a": "b"},
 	})
-	f3 := f2.Namespace(metrics.Scope{
+	f3 := f2.Namespace(metrics.NSOptions{
 		Tags: map[string]string{"a": "b"},
 	}) // essentially same as f2
 	t1 := f2.Timer(metrics.Options{

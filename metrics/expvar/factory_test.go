@@ -64,7 +64,7 @@ func TestFactory(t *testing.T) {
 			}
 			ff := f
 			if testCase.namespace != "" || testCase.nsTags != nil {
-				ff = f.Namespace(metrics.Scope{
+				ff = f.Namespace(metrics.NSOptions{
 					Name: testCase.namespace,
 					Tags: testCase.nsTags,
 				})

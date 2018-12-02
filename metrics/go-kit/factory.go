@@ -130,7 +130,7 @@ func (f *factory) Gauge(options metrics.Options) metrics.Gauge {
 	return NewGauge(gauge)
 }
 
-func (f *factory) Namespace(scope metrics.Scope) metrics.Factory {
+func (f *factory) Namespace(scope metrics.NSOptions) metrics.Factory {
 	return &factory{
 		scope:    f.subScope(scope.Name),
 		tags:     f.mergeTags(scope.Tags),

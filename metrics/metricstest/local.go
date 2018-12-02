@@ -312,7 +312,7 @@ func (l *Factory) Gauge(options metrics.Options) metrics.Gauge {
 }
 
 // Namespace returns a new namespace.
-func (l *Factory) Namespace(scope metrics.Scope) metrics.Factory {
+func (l *Factory) Namespace(scope metrics.NSOptions) metrics.Factory {
 	return &Factory{
 		namespace: l.newNamespace(scope.Name),
 		tags:      l.appendTags(scope.Tags),

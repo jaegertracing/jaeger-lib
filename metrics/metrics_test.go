@@ -95,7 +95,7 @@ func TestNullMetrics(t *testing.T) {
 	metrics.NullFactory.Gauge(metrics.Options{
 		Name: "name",
 	}).Update(0)
-	metrics.NullFactory.Namespace(metrics.Scope{
+	metrics.NullFactory.Namespace(metrics.NSOptions{
 		Name: "name",
 	}).Gauge(metrics.Options{
 		Name: "name2",
