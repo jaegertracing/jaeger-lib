@@ -20,9 +20,9 @@ import (
 
 // FactoryWithTags creates metrics with fully qualified name and tags.
 type FactoryWithTags interface {
-	Counter(name string, tags map[string]string) metrics.Counter
-	Gauge(name string, tags map[string]string) metrics.Gauge
-	Timer(name string, tags map[string]string) metrics.Timer
+	Counter(name string, tags map[string]string, help string) metrics.Counter
+	Gauge(name string, tags map[string]string, help string) metrics.Gauge
+	Timer(name string, tags map[string]string, help string) metrics.Timer
 }
 
 // Options affect how the adapter factory behaves.
@@ -63,32 +63,32 @@ type factory struct {
 	cache   *cache
 }
 
-func (f *factory) Counter(name string, tags map[string]string) metrics.Counter {
-	fullName, fullTags, key := f.getKey(name, tags)
+func (f *factory) Counter(options metrics.Options) metrics.Counter {
+	fullName, fullTags, key := f.getKey(options.Name, options.Tags)
 	return f.cache.getOrSetCounter(key, func() metrics.Counter {
-		return f.factory.Counter(fullName, fullTags)
+		return f.factory.Counter(fullName, fullTags, options.Help)
 	})
 }
 
-func (f *factory) Gauge(name string, tags map[string]string) metrics.Gauge {
-	fullName, fullTags, key := f.getKey(name, tags)
+func (f *factory) Gauge(options metrics.Options) metrics.Gauge {
+	fullName, fullTags, key := f.getKey(options.Name, options.Tags)
 	return f.cache.getOrSetGauge(key, func() metrics.Gauge {
-		return f.factory.Gauge(fullName, fullTags)
+		return f.factory.Gauge(fullName, fullTags, options.Help)
 	})
 }
 
-func (f *factory) Timer(name string, tags map[string]string) metrics.Timer {
-	fullName, fullTags, key := f.getKey(name, tags)
+func (f *factory) Timer(options metrics.Options) metrics.Timer {
+	fullName, fullTags, key := f.getKey(options.Name, options.Tags)
 	return f.cache.getOrSetTimer(key, func() metrics.Timer {
-		return f.factory.Timer(fullName, fullTags)
+		return f.factory.Timer(fullName, fullTags, options.Help)
 	})
 }
 
-func (f *factory) Namespace(name string, tags map[string]string) metrics.Factory {
+func (f *factory) Namespace(scope metrics.NSOptions) metrics.Factory {
 	return &factory{
 		cache:   f.cache,
-		scope:   f.subScope(name),
-		tags:    f.mergeTags(tags),
+		scope:   f.subScope(scope.Name),
+		tags:    f.mergeTags(scope.Tags),
 		factory: f.factory,
 		Options: f.Options,
 	}

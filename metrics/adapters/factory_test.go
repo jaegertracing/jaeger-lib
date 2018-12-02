@@ -80,15 +80,36 @@ func TestFactory(t *testing.T) {
 			ff := &fakeTagless{factory: local}
 			f := WrapFactoryWithoutTags(ff, Options{})
 			if testCase.namespace != "" || testCase.nsTags != nil {
-				f = f.Namespace(testCase.namespace, testCase.nsTags)
+				f = f.Namespace(metrics.NSOptions{
+					Name: testCase.namespace,
+					Tags: testCase.nsTags,
+				})
 			}
-			counter := f.Counter(counterPrefix+testCase.name, testCase.tags)
-			gauge := f.Gauge(gaugePrefix+testCase.name, testCase.tags)
-			timer := f.Timer(timerPrefix+testCase.name, testCase.tags)
+			counter := f.Counter(metrics.Options{
+				Name: counterPrefix + testCase.name,
+				Tags: testCase.tags,
+			})
+			gauge := f.Gauge(metrics.Options{
+				Name: gaugePrefix + testCase.name,
+				Tags: testCase.tags,
+			})
+			timer := f.Timer(metrics.Options{
+				Name: timerPrefix + testCase.name,
+				Tags: testCase.tags,
+			})
 
-			assert.Equal(t, counter, f.Counter(counterPrefix+testCase.name, testCase.tags))
-			assert.Equal(t, gauge, f.Gauge(gaugePrefix+testCase.name, testCase.tags))
-			assert.Equal(t, timer, f.Timer(timerPrefix+testCase.name, testCase.tags))
+			assert.Equal(t, counter, f.Counter(metrics.Options{
+				Name: counterPrefix + testCase.name,
+				Tags: testCase.tags,
+			}))
+			assert.Equal(t, gauge, f.Gauge(metrics.Options{
+				Name: gaugePrefix + testCase.name,
+				Tags: testCase.tags,
+			}))
+			assert.Equal(t, timer, f.Timer(metrics.Options{
+				Name: timerPrefix + testCase.name,
+				Tags: testCase.tags,
+			}))
 
 			assert.Equal(t, fmt.Sprintf(testCase.fullName, counterPrefix), ff.counter)
 			assert.Equal(t, fmt.Sprintf(testCase.fullName, gaugePrefix), ff.gauge)
@@ -104,17 +125,26 @@ type fakeTagless struct {
 	timer   string
 }
 
-func (f *fakeTagless) Counter(name string) metrics.Counter {
+func (f *fakeTagless) Counter(name string, help string) metrics.Counter {
 	f.counter = name
-	return f.factory.Counter(name, nil)
+	return f.factory.Counter(metrics.Options{
+		Name: name,
+		Help: help,
+	})
 }
 
-func (f *fakeTagless) Gauge(name string) metrics.Gauge {
+func (f *fakeTagless) Gauge(name string, help string) metrics.Gauge {
 	f.gauge = name
-	return f.factory.Gauge(name, nil)
+	return f.factory.Gauge(metrics.Options{
+		Name: name,
+		Help: help,
+	})
 }
 
-func (f *fakeTagless) Timer(name string) metrics.Timer {
+func (f *fakeTagless) Timer(name string, help string) metrics.Timer {
 	f.timer = name
-	return f.factory.Timer(name, nil)
+	return f.factory.Timer(metrics.Options{
+		Name: name,
+		Help: help,
+	})
 }

@@ -14,14 +14,27 @@
 
 package metrics
 
+// NSOptions defines the name and tags map associated with a metric
+type NSOptions struct {
+	Name string
+	Tags map[string]string
+}
+
+// Options defines the information associated with a metric
+type Options struct {
+	Name string
+	Tags map[string]string
+	Help string
+}
+
 // Factory creates new metrics
 type Factory interface {
-	Counter(name string, tags map[string]string) Counter
-	Timer(name string, tags map[string]string) Timer
-	Gauge(name string, tags map[string]string) Gauge
+	Counter(metric Options) Counter
+	Timer(metric Options) Timer
+	Gauge(metric Options) Gauge
 
 	// Namespace returns a nested metrics factory.
-	Namespace(name string, tags map[string]string) Factory
+	Namespace(scope NSOptions) Factory
 }
 
 // NullFactory is a metrics factory that returns NullCounter, NullTimer, and NullGauge.
@@ -29,7 +42,13 @@ var NullFactory Factory = nullFactory{}
 
 type nullFactory struct{}
 
-func (nullFactory) Counter(name string, tags map[string]string) Counter   { return NullCounter }
-func (nullFactory) Timer(name string, tags map[string]string) Timer       { return NullTimer }
-func (nullFactory) Gauge(name string, tags map[string]string) Gauge       { return NullGauge }
-func (nullFactory) Namespace(name string, tags map[string]string) Factory { return NullFactory }
+func (nullFactory) Counter(options Options) Counter {
+	return NullCounter
+}
+func (nullFactory) Timer(options Options) Timer {
+	return NullTimer
+}
+func (nullFactory) Gauge(options Options) Gauge {
+	return NullGauge
+}
+func (nullFactory) Namespace(scope NSOptions) Factory { return NullFactory }

@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/uber/jaeger-lib/metrics"
 )
 
 var (
@@ -63,16 +64,37 @@ func TestFactory(t *testing.T) {
 			}
 			ff := f
 			if testCase.namespace != "" || testCase.nsTags != nil {
-				ff = f.Namespace(testCase.namespace, testCase.nsTags)
+				ff = f.Namespace(metrics.NSOptions{
+					Name: testCase.namespace,
+					Tags: testCase.nsTags,
+				})
 			}
-			counter := ff.Counter(counterPrefix+testCase.name, testCase.tags)
-			gauge := ff.Gauge(gaugePrefix+testCase.name, testCase.tags)
-			timer := ff.Timer(timerPrefix+testCase.name, testCase.tags)
+			counter := ff.Counter(metrics.Options{
+				Name: counterPrefix + testCase.name,
+				Tags: testCase.tags,
+			})
+			gauge := ff.Gauge(metrics.Options{
+				Name: gaugePrefix + testCase.name,
+				Tags: testCase.tags,
+			})
+			timer := ff.Timer(metrics.Options{
+				Name: timerPrefix + testCase.name,
+				Tags: testCase.tags,
+			})
 
 			// register second time, should not panic
-			ff.Counter(counterPrefix+testCase.name, testCase.tags)
-			ff.Gauge(gaugePrefix+testCase.name, testCase.tags)
-			ff.Timer(timerPrefix+testCase.name, testCase.tags)
+			ff.Counter(metrics.Options{
+				Name: counterPrefix + testCase.name,
+				Tags: testCase.tags,
+			})
+			ff.Gauge(metrics.Options{
+				Name: gaugePrefix + testCase.name,
+				Tags: testCase.tags,
+			})
+			ff.Timer(metrics.Options{
+				Name: timerPrefix + testCase.name,
+				Tags: testCase.tags,
+			})
 
 			counter.Inc(42)
 			gauge.Update(42)

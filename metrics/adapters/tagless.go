@@ -19,9 +19,9 @@ import "github.com/uber/jaeger-lib/metrics"
 // FactoryWithoutTags creates metrics based on name only, without tags.
 // Suitable for integrating with statsd-like backends that don't support tags.
 type FactoryWithoutTags interface {
-	Counter(name string) metrics.Counter
-	Gauge(name string) metrics.Gauge
-	Timer(name string) metrics.Timer
+	Counter(name string, help string) metrics.Counter
+	Gauge(name string, help string) metrics.Gauge
+	Timer(name string, help string) metrics.Timer
 }
 
 // WrapFactoryWithoutTags creates a real metrics.Factory that supports subscopes.
@@ -41,19 +41,19 @@ type tagless struct {
 	factory FactoryWithoutTags
 }
 
-func (f *tagless) Counter(name string, tags map[string]string) metrics.Counter {
+func (f *tagless) Counter(name string, tags map[string]string, help string) metrics.Counter {
 	fullName := f.getFullName(name, tags)
-	return f.factory.Counter(fullName)
+	return f.factory.Counter(fullName, help)
 }
 
-func (f *tagless) Gauge(name string, tags map[string]string) metrics.Gauge {
+func (f *tagless) Gauge(name string, tags map[string]string, help string) metrics.Gauge {
 	fullName := f.getFullName(name, tags)
-	return f.factory.Gauge(fullName)
+	return f.factory.Gauge(fullName, help)
 }
 
-func (f *tagless) Timer(name string, tags map[string]string) metrics.Timer {
+func (f *tagless) Timer(name string, tags map[string]string, help string) metrics.Timer {
 	fullName := f.getFullName(name, tags)
-	return f.factory.Timer(fullName)
+	return f.factory.Timer(fullName, help)
 }
 
 func (f *tagless) getFullName(name string, tags map[string]string) string {

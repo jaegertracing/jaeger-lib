@@ -279,43 +279,43 @@ func (l *Factory) newNamespace(name string) string {
 }
 
 // Counter returns a local stats counter
-func (l *Factory) Counter(name string, tags map[string]string) metrics.Counter {
+func (l *Factory) Counter(options metrics.Options) metrics.Counter {
 	return &localCounter{
 		stats{
-			name:         l.newNamespace(name),
-			tags:         l.appendTags(tags),
+			name:         l.newNamespace(options.Name),
+			tags:         l.appendTags(options.Tags),
 			localBackend: l.Backend,
 		},
 	}
 }
 
 // Timer returns a local stats timer.
-func (l *Factory) Timer(name string, tags map[string]string) metrics.Timer {
+func (l *Factory) Timer(options metrics.Options) metrics.Timer {
 	return &localTimer{
 		stats{
-			name:         l.newNamespace(name),
-			tags:         l.appendTags(tags),
+			name:         l.newNamespace(options.Name),
+			tags:         l.appendTags(options.Tags),
 			localBackend: l.Backend,
 		},
 	}
 }
 
 // Gauge returns a local stats gauge.
-func (l *Factory) Gauge(name string, tags map[string]string) metrics.Gauge {
+func (l *Factory) Gauge(options metrics.Options) metrics.Gauge {
 	return &localGauge{
 		stats{
-			name:         l.newNamespace(name),
-			tags:         l.appendTags(tags),
+			name:         l.newNamespace(options.Name),
+			tags:         l.appendTags(options.Tags),
 			localBackend: l.Backend,
 		},
 	}
 }
 
 // Namespace returns a new namespace.
-func (l *Factory) Namespace(name string, tags map[string]string) metrics.Factory {
+func (l *Factory) Namespace(scope metrics.NSOptions) metrics.Factory {
 	return &Factory{
-		namespace: l.newNamespace(name),
-		tags:      l.appendTags(tags),
+		namespace: l.newNamespace(scope.Name),
+		tags:      l.appendTags(scope.Tags),
 		Backend:   l.Backend,
 	}
 }

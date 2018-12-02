@@ -125,13 +125,17 @@ func newFactory(parent *Factory, scope string, tags map[string]string) *Factory 
 }
 
 // Counter implements Counter of metrics.Factory.
-func (f *Factory) Counter(name string, tags map[string]string) metrics.Counter {
-	name = counterNamingConvention(f.subScope(name))
-	tags = f.mergeTags(tags)
+func (f *Factory) Counter(options metrics.Options) metrics.Counter {
+	help := strings.TrimSpace(options.Help)
+	if len(help) == 0 {
+		help = options.Name
+	}
+	name := counterNamingConvention(f.subScope(options.Name))
+	tags := f.mergeTags(options.Tags)
 	labelNames := f.tagNames(tags)
 	opts := prometheus.CounterOpts{
 		Name: name,
-		Help: name,
+		Help: help,
 	}
 	cv := f.cache.getOrMakeCounterVec(opts, labelNames)
 	return &counter{
@@ -140,13 +144,17 @@ func (f *Factory) Counter(name string, tags map[string]string) metrics.Counter {
 }
 
 // Gauge implements Gauge of metrics.Factory.
-func (f *Factory) Gauge(name string, tags map[string]string) metrics.Gauge {
-	name = f.subScope(name)
-	tags = f.mergeTags(tags)
+func (f *Factory) Gauge(options metrics.Options) metrics.Gauge {
+	help := strings.TrimSpace(options.Help)
+	if len(help) == 0 {
+		help = options.Name
+	}
+	name := f.subScope(options.Name)
+	tags := f.mergeTags(options.Tags)
 	labelNames := f.tagNames(tags)
 	opts := prometheus.GaugeOpts{
 		Name: name,
-		Help: name,
+		Help: help,
 	}
 	gv := f.cache.getOrMakeGaugeVec(opts, labelNames)
 	return &gauge{
@@ -155,13 +163,17 @@ func (f *Factory) Gauge(name string, tags map[string]string) metrics.Gauge {
 }
 
 // Timer implements Timer of metrics.Factory.
-func (f *Factory) Timer(name string, tags map[string]string) metrics.Timer {
-	name = f.subScope(name)
-	tags = f.mergeTags(tags)
+func (f *Factory) Timer(options metrics.Options) metrics.Timer {
+	help := strings.TrimSpace(options.Help)
+	if len(help) == 0 {
+		help = options.Name
+	}
+	name := f.subScope(options.Name)
+	tags := f.mergeTags(options.Tags)
 	labelNames := f.tagNames(tags)
 	opts := prometheus.HistogramOpts{
 		Name:    name,
-		Help:    name,
+		Help:    help,
 		Buckets: f.buckets,
 	}
 	hv := f.cache.getOrMakeHistogramVec(opts, labelNames)
@@ -171,8 +183,8 @@ func (f *Factory) Timer(name string, tags map[string]string) metrics.Timer {
 }
 
 // Namespace implements Namespace of metrics.Factory.
-func (f *Factory) Namespace(name string, tags map[string]string) metrics.Factory {
-	return newFactory(f, f.subScope(name), f.mergeTags(tags))
+func (f *Factory) Namespace(scope metrics.NSOptions) metrics.Factory {
+	return newFactory(f, f.subScope(scope.Name), f.mergeTags(scope.Tags))
 }
 
 type counter struct {
