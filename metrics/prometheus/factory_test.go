@@ -175,17 +175,17 @@ func TestTimer(t *testing.T) {
 	f3 := f2.Namespace(metrics.NSOptions{
 		Tags: map[string]string{"a": "b"},
 	}) // essentially same as f2
-	t1 := f2.Timer(metrics.Options{
+	t1 := f2.Timer(metrics.TimerOptions{
 		Name: "rodriguez",
 		Tags: map[string]string{"x": "y"},
 		Help: "Help message",
 	})
-	t2 := f2.Timer(metrics.Options{
+	t2 := f2.Timer(metrics.TimerOptions{
 		Name: "rodriguez",
 		Tags: map[string]string{"x": "z"},
 		Help: "Help message",
 	})
-	t3 := f3.Timer(metrics.Options{
+	t3 := f3.Timer(metrics.TimerOptions{
 		Name: "rodriguez",
 		Tags: map[string]string{"x": "z"},
 		Help: "Help message",
@@ -230,7 +230,7 @@ func TestTimer(t *testing.T) {
 func TestTimerDefaultHelp(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry))
-	t1 := f1.Timer(metrics.Options{
+	t1 := f1.Timer(metrics.TimerOptions{
 		Name: "rodriguez",
 		Tags: map[string]string{"x": "y"},
 	})
@@ -246,9 +246,10 @@ func TestTimerCustomBuckets(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry), WithBuckets([]float64{1.5}))
 	// dot and dash in the metric name will be replaced with underscore
-	t1 := f1.Timer(metrics.Options{
-		Name: "bender.bending-rodriguez",
-		Tags: map[string]string{"x": "y"},
+	t1 := f1.Timer(metrics.TimerOptions{
+		Name:    "bender.bending-rodriguez",
+		Tags:    map[string]string{"x": "y"},
+		Buckets: []time.Duration{time.Nanosecond, 5 * time.Nanosecond},
 	})
 	t1.Record(1 * time.Second)
 	t1.Record(2 * time.Second)
@@ -259,7 +260,7 @@ func TestTimerCustomBuckets(t *testing.T) {
 	m1 := findMetric(t, snapshot, "bender_bending_rodriguez", map[string]string{"x": "y"})
 	assert.EqualValues(t, 2, m1.GetHistogram().GetSampleCount(), "%+v", m1)
 	assert.EqualValues(t, 3, m1.GetHistogram().GetSampleSum(), "%+v", m1)
-	assert.Len(t, m1.GetHistogram().GetBucket(), 1)
+	assert.Len(t, m1.GetHistogram().GetBucket(), 2)
 }
 
 func TestHistogram(t *testing.T) {

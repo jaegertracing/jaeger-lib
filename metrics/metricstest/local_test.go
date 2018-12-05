@@ -68,7 +68,7 @@ func TestLocalMetrics(t *testing.T) {
 
 	for metric, timing := range timings {
 		for _, d := range timing {
-			f.Timer(metrics.Options{
+			f.Timer(metrics.TimerOptions{
 				Name: metric,
 			}).Record(d)
 		}
@@ -128,7 +128,7 @@ func TestLocalMetricsInterval(t *testing.T) {
 	f := NewFactory(refreshInterval)
 	defer f.Stop()
 
-	f.Timer(metrics.Options{
+	f.Timer(metrics.TimerOptions{
 		Name: "timer",
 	}).Record(1)
 

@@ -102,7 +102,7 @@ func InitOrError(m interface{}, factory Factory, globalTags map[string]string) e
 				Help: help,
 			})
 		} else if field.Type.AssignableTo(timerPtrType) {
-			obj = factory.Timer(Options{
+			obj = factory.Timer(TimerOptions{
 				Name: metric,
 				Tags: tags,
 				Help: help,

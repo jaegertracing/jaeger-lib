@@ -261,10 +261,11 @@ func (b *Backend) Stop() {
 }
 
 type stats struct {
-	name         string
-	tags         map[string]string
-	buckets      []float64
-	localBackend *Backend
+	name            string
+	tags            map[string]string
+	buckets         []float64
+	durationBuckets []time.Duration
+	localBackend    *Backend
 }
 
 type localTimer struct {
@@ -349,12 +350,13 @@ func (l *Factory) Counter(options metrics.Options) metrics.Counter {
 }
 
 // Timer returns a local stats timer.
-func (l *Factory) Timer(options metrics.Options) metrics.Timer {
+func (l *Factory) Timer(options metrics.TimerOptions) metrics.Timer {
 	return &localTimer{
 		stats{
-			name:         l.newNamespace(options.Name),
-			tags:         l.appendTags(options.Tags),
-			localBackend: l.Backend,
+			name:            l.newNamespace(options.Name),
+			tags:            l.appendTags(options.Tags),
+			durationBuckets: options.Buckets,
+			localBackend:    l.Backend,
 		},
 	}
 }

@@ -14,6 +14,10 @@
 
 package metrics
 
+import (
+	"time"
+)
+
 // NSOptions defines the name and tags map associated with a metric
 type NSOptions struct {
 	Name string
@@ -27,6 +31,14 @@ type Options struct {
 	Help string
 }
 
+// TimerOptions defines the information associated with a metric
+type TimerOptions struct {
+	Name    string
+	Tags    map[string]string
+	Help    string
+	Buckets []time.Duration
+}
+
 // HistogramOptions defines the information associated with a metric
 type HistogramOptions struct {
 	Name    string
@@ -38,7 +50,7 @@ type HistogramOptions struct {
 // Factory creates new metrics
 type Factory interface {
 	Counter(metric Options) Counter
-	Timer(metric Options) Timer
+	Timer(metric TimerOptions) Timer
 	Gauge(metric Options) Gauge
 	Histogram(metric HistogramOptions) Histogram
 
@@ -54,7 +66,7 @@ type nullFactory struct{}
 func (nullFactory) Counter(options Options) Counter {
 	return NullCounter
 }
-func (nullFactory) Timer(options Options) Timer {
+func (nullFactory) Timer(options TimerOptions) Timer {
 	return NullTimer
 }
 func (nullFactory) Gauge(options Options) Gauge {

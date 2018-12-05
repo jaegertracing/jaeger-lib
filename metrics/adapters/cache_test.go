@@ -28,7 +28,7 @@ func TestCache(t *testing.T) {
 	f := metricstest.NewFactory(100 * time.Second)
 	c1 := f.Counter(metrics.Options{Name: "x"})
 	g1 := f.Gauge(metrics.Options{Name: "y"})
-	t1 := f.Timer(metrics.Options{Name: "z"})
+	t1 := f.Timer(metrics.TimerOptions{Name: "z"})
 	h1 := f.Histogram(metrics.HistogramOptions{Name: "h"})
 
 	c := newCache()

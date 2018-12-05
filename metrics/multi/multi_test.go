@@ -27,7 +27,7 @@ func TestMultiFactory(t *testing.T) {
 		Name: "gauge",
 		Tags: tags,
 	}).Update(42)
-	multi2.Timer(metrics.Options{
+	multi2.Timer(metrics.TimerOptions{
 		Name: "timer",
 		Tags: tags,
 	}).Record(42 * time.Millisecond)

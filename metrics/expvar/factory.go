@@ -15,6 +15,8 @@
 package expvar
 
 import (
+	"time"
+
 	"github.com/uber/jaeger-lib/metrics"
 	"github.com/uber/jaeger-lib/metrics/adapters"
 	xkit "github.com/uber/jaeger-lib/metrics/go-kit"
@@ -44,7 +46,7 @@ func (f *factory) Gauge(name string, help string) metrics.Gauge {
 	return xkit.NewGauge(f.factory.Gauge(name))
 }
 
-func (f *factory) Timer(name string, help string) metrics.Timer {
+func (f *factory) Timer(name string, help string, buckets []time.Duration) metrics.Timer {
 	return xkit.NewTimer(f.factory.Histogram(name))
 }
 

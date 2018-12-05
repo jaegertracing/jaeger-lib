@@ -43,6 +43,7 @@ func TestFactory(t *testing.T) {
 		name            string
 		tags            map[string]string
 		buckets         []float64
+		durationBuckets []time.Duration
 		namespace       string
 		nsTags          map[string]string
 		fullName        string
@@ -80,9 +81,10 @@ func TestFactory(t *testing.T) {
 				Name: gaugePrefix + testCase.name,
 				Tags: testCase.tags,
 			})
-			timer := ff.Timer(metrics.Options{
-				Name: timerPrefix + testCase.name,
-				Tags: testCase.tags,
+			timer := ff.Timer(metrics.TimerOptions{
+				Name:    timerPrefix + testCase.name,
+				Tags:    testCase.tags,
+				Buckets: testCase.durationBuckets,
 			})
 			histogram := ff.Histogram(metrics.HistogramOptions{
 				Name:    histogramPrefix + testCase.name,
@@ -99,9 +101,10 @@ func TestFactory(t *testing.T) {
 				Name: gaugePrefix + testCase.name,
 				Tags: testCase.tags,
 			})
-			ff.Timer(metrics.Options{
-				Name: timerPrefix + testCase.name,
-				Tags: testCase.tags,
+			ff.Timer(metrics.TimerOptions{
+				Name:    timerPrefix + testCase.name,
+				Tags:    testCase.tags,
+				Buckets: testCase.durationBuckets,
 			})
 			ff.Histogram(metrics.HistogramOptions{
 				Name:    histogramPrefix + testCase.name,

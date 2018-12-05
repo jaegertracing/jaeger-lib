@@ -15,6 +15,8 @@
 package adapters
 
 import (
+	"time"
+
 	"github.com/uber/jaeger-lib/metrics"
 )
 
@@ -22,7 +24,7 @@ import (
 type FactoryWithTags interface {
 	Counter(name string, tags map[string]string, help string) metrics.Counter
 	Gauge(name string, tags map[string]string, help string) metrics.Gauge
-	Timer(name string, tags map[string]string, help string) metrics.Timer
+	Timer(name string, tags map[string]string, help string, buckets []time.Duration) metrics.Timer
 	Histogram(name string, tags map[string]string, help string, buckets []float64) metrics.Histogram
 }
 
@@ -78,10 +80,10 @@ func (f *factory) Gauge(options metrics.Options) metrics.Gauge {
 	})
 }
 
-func (f *factory) Timer(options metrics.Options) metrics.Timer {
+func (f *factory) Timer(options metrics.TimerOptions) metrics.Timer {
 	fullName, fullTags, key := f.getKey(options.Name, options.Tags)
 	return f.cache.getOrSetTimer(key, func() metrics.Timer {
-		return f.factory.Timer(fullName, fullTags, options.Help)
+		return f.factory.Timer(fullName, fullTags, options.Help, options.Buckets)
 	})
 }
 

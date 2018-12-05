@@ -112,7 +112,7 @@ func (f *factory) Counter(options metrics.Options) metrics.Counter {
 	return NewCounter(counter)
 }
 
-func (f *factory) Timer(options metrics.Options) metrics.Timer {
+func (f *factory) Timer(options metrics.TimerOptions) metrics.Timer {
 	name, tagsList := f.nameAndTagsList(options.Name, options.Tags)
 	hist := f.factory.Histogram(name)
 	if len(tagsList) > 0 {

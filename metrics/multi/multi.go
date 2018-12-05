@@ -64,7 +64,7 @@ func (t *timer) Record(delta time.Duration) {
 }
 
 // Timer implements metrics.Factory interface
-func (f *Factory) Timer(options metrics.Options) metrics.Timer {
+func (f *Factory) Timer(options metrics.TimerOptions) metrics.Timer {
 	timer := &timer{
 		timers: make([]metrics.Timer, len(f.factories)),
 	}

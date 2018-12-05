@@ -163,7 +163,7 @@ func (f *Factory) Gauge(options metrics.Options) metrics.Gauge {
 }
 
 // Timer implements Timer of metrics.Factory.
-func (f *Factory) Timer(options metrics.Options) metrics.Timer {
+func (f *Factory) Timer(options metrics.TimerOptions) metrics.Timer {
 	help := strings.TrimSpace(options.Help)
 	if len(help) == 0 {
 		help = options.Name
@@ -174,12 +174,20 @@ func (f *Factory) Timer(options metrics.Options) metrics.Timer {
 	opts := prometheus.HistogramOpts{
 		Name:    name,
 		Help:    help,
-		Buckets: f.buckets,
+		Buckets: asFloatBuckets(options.Buckets),
 	}
 	hv := f.cache.getOrMakeHistogramVec(opts, labelNames)
 	return &timer{
 		histogram: hv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...),
 	}
+}
+
+func asFloatBuckets(buckets []time.Duration) []float64 {
+	data := make([]float64, len(buckets))
+	for i := range data {
+		data[i] = float64(buckets[i])
+	}
+	return data
 }
 
 // Histogram implements Histogram of metrics.Factory.

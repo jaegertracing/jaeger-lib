@@ -57,10 +57,11 @@ type metricFunc func(t *testing.T, testCase testCase, f metrics.Factory) (name f
 type testCase struct {
 	f Factory
 
-	prefix  string
-	name    string
-	tags    Tags
-	buckets []float64
+	prefix          string
+	name            string
+	tags            Tags
+	buckets         []float64
+	durationBuckets []time.Duration
 
 	useNamespace  bool
 	namespace     string
@@ -203,9 +204,10 @@ func testGauge(t *testing.T, testCase testCase, f metrics.Factory) (name func() 
 }
 
 func testTimer(t *testing.T, testCase testCase, f metrics.Factory) (name func() string, labels func() []string) {
-	tm := f.Timer(metrics.Options{
-		Name: testCase.name,
-		Tags: testCase.tags,
+	tm := f.Timer(metrics.TimerOptions{
+		Name:    testCase.name,
+		Tags:    testCase.tags,
+		Buckets: testCase.durationBuckets,
 	})
 	tm.Record(123 * time.Millisecond)
 	gt := tm.(*Timer).hist.(*generic.Histogram)

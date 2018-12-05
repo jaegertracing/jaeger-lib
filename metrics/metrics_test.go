@@ -97,7 +97,7 @@ func TestInitPanic(t *testing.T) {
 
 func TestNullMetrics(t *testing.T) {
 	// This test is just for cover
-	metrics.NullFactory.Timer(metrics.Options{
+	metrics.NullFactory.Timer(metrics.TimerOptions{
 		Name: "name",
 	}).Record(0)
 	metrics.NullFactory.Counter(metrics.Options{

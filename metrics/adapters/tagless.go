@@ -14,14 +14,18 @@
 
 package adapters
 
-import "github.com/uber/jaeger-lib/metrics"
+import (
+	"time"
+
+	"github.com/uber/jaeger-lib/metrics"
+)
 
 // FactoryWithoutTags creates metrics based on name only, without tags.
 // Suitable for integrating with statsd-like backends that don't support tags.
 type FactoryWithoutTags interface {
 	Counter(name string, help string) metrics.Counter
 	Gauge(name string, help string) metrics.Gauge
-	Timer(name string, help string) metrics.Timer
+	Timer(name string, help string, buckets []time.Duration) metrics.Timer
 	Histogram(name string, help string, buckets []float64) metrics.Histogram
 }
 
@@ -52,9 +56,9 @@ func (f *tagless) Gauge(name string, tags map[string]string, help string) metric
 	return f.factory.Gauge(fullName, help)
 }
 
-func (f *tagless) Timer(name string, tags map[string]string, help string) metrics.Timer {
+func (f *tagless) Timer(name string, tags map[string]string, help string, buckets []time.Duration) metrics.Timer {
 	fullName := f.getFullName(name, tags)
-	return f.factory.Timer(fullName, help)
+	return f.factory.Timer(fullName, help, buckets)
 }
 
 func (f *tagless) Histogram(name string, tags map[string]string, help string, buckets []float64) metrics.Histogram {

@@ -26,7 +26,7 @@ func TestFactory(t *testing.T) {
 		Tags: map[string]string{"x": "y"},
 	})
 	gauge.Update(42)
-	timer := factory.Timer(metrics.Options{
+	timer := factory.Timer(metrics.TimerOptions{
 		Name: "timer",
 		Tags: map[string]string{"x": "y"},
 	})

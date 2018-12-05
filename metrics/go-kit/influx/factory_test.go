@@ -48,7 +48,7 @@ func TestTimer(t *testing.T) {
 	inf := NewFactory(in)
 	wf := xkit.Wrap("namespace", inf)
 
-	timer := wf.Timer(metrics.Options{
+	timer := wf.Timer(metrics.TimerOptions{
 		Name: "gokit.infl-timer",
 		Tags: map[string]string{"x": "y"},
 	})
