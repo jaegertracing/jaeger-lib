@@ -74,6 +74,10 @@ func TestLocalMetrics(t *testing.T) {
 		}
 	}
 
+	f.Histogram(metrics.HistogramOptions{
+		Name: "my-histo",
+	}).Record(321)
+
 	c, g := f.Snapshot()
 	require.NotNil(t, c)
 	require.NotNil(t, g)
@@ -100,6 +104,12 @@ func TestLocalMetrics(t *testing.T) {
 		"foo-latency.P99":  36863,
 		"foo-latency.P999": 36863,
 		"my-gauge":         43,
+		"my-histo.P50":     335,
+		"my-histo.P75":     335,
+		"my-histo.P90":     335,
+		"my-histo.P95":     335,
+		"my-histo.P99":     335,
+		"my-histo.P999":    335,
 		"other-gauge":      74,
 	}, g)
 

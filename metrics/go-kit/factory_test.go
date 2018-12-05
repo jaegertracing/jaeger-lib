@@ -57,9 +57,10 @@ type metricFunc func(t *testing.T, testCase testCase, f metrics.Factory) (name f
 type testCase struct {
 	f Factory
 
-	prefix string
-	name   string
-	tags   Tags
+	prefix  string
+	name    string
+	tags    Tags
+	buckets []float64
 
 	useNamespace  bool
 	namespace     string
@@ -80,6 +81,7 @@ func TestFactoryScoping(t *testing.T) {
 		{"counter", testCounter},
 		{"gauge", testGauge},
 		{"timer", testTimer},
+		{"histogram", testHistogram},
 	}
 	for _, ts := range testSuites {
 		testSuite := ts // capture loop var
@@ -208,6 +210,20 @@ func testTimer(t *testing.T, testCase testCase, f metrics.Factory) (name func() 
 	tm.Record(123 * time.Millisecond)
 	gt := tm.(*Timer).hist.(*generic.Histogram)
 	assert.InDelta(t, 0.123, gt.Quantile(0.9), 0.00001)
+	name = func() string { return gt.Name }
+	labels = gt.LabelValues
+	return
+}
+
+func testHistogram(t *testing.T, testCase testCase, f metrics.Factory) (name func() string, labels func() []string) {
+	histogram := f.Histogram(metrics.HistogramOptions{
+		Name:    testCase.name,
+		Tags:    testCase.tags,
+		Buckets: testCase.buckets,
+	})
+	histogram.Record(123)
+	gt := histogram.(*Histogram).hist.(*generic.Histogram)
+	assert.InDelta(t, 123, gt.Quantile(0.9), 0.00001)
 	name = func() string { return gt.Name }
 	labels = gt.LabelValues
 	return

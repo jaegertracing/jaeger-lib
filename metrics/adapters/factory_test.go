@@ -44,9 +44,10 @@ func TestSubScope(t *testing.T) {
 
 func TestFactory(t *testing.T) {
 	var (
-		counterPrefix = "counter_"
-		gaugePrefix   = "gauge_"
-		timerPrefix   = "timer_"
+		counterPrefix   = "counter_"
+		gaugePrefix     = "gauge_"
+		timerPrefix     = "timer_"
+		histogramPrefix = "histogram_"
 
 		tagsA = map[string]string{"a": "b"}
 		tagsX = map[string]string{"x": "y"}
@@ -55,6 +56,7 @@ func TestFactory(t *testing.T) {
 	testCases := []struct {
 		name            string
 		tags            map[string]string
+		buckets         []float64
 		namespace       string
 		nsTags          map[string]string
 		fullName        string
@@ -97,6 +99,11 @@ func TestFactory(t *testing.T) {
 				Name: timerPrefix + testCase.name,
 				Tags: testCase.tags,
 			})
+			histogram := f.Histogram(metrics.HistogramOptions{
+				Name:    histogramPrefix + testCase.name,
+				Tags:    testCase.tags,
+				Buckets: testCase.buckets,
+			})
 
 			assert.Equal(t, counter, f.Counter(metrics.Options{
 				Name: counterPrefix + testCase.name,
@@ -110,19 +117,26 @@ func TestFactory(t *testing.T) {
 				Name: timerPrefix + testCase.name,
 				Tags: testCase.tags,
 			}))
+			assert.Equal(t, histogram, f.Histogram(metrics.HistogramOptions{
+				Name:    histogramPrefix + testCase.name,
+				Tags:    testCase.tags,
+				Buckets: testCase.buckets,
+			}))
 
 			assert.Equal(t, fmt.Sprintf(testCase.fullName, counterPrefix), ff.counter)
 			assert.Equal(t, fmt.Sprintf(testCase.fullName, gaugePrefix), ff.gauge)
 			assert.Equal(t, fmt.Sprintf(testCase.fullName, timerPrefix), ff.timer)
+			assert.Equal(t, fmt.Sprintf(testCase.fullName, histogramPrefix), ff.histogram)
 		})
 	}
 }
 
 type fakeTagless struct {
-	factory metrics.Factory
-	counter string
-	gauge   string
-	timer   string
+	factory   metrics.Factory
+	counter   string
+	gauge     string
+	timer     string
+	histogram string
 }
 
 func (f *fakeTagless) Counter(name string, help string) metrics.Counter {
@@ -146,5 +160,14 @@ func (f *fakeTagless) Timer(name string, help string) metrics.Timer {
 	return f.factory.Timer(metrics.Options{
 		Name: name,
 		Help: help,
+	})
+}
+
+func (f *fakeTagless) Histogram(name string, help string, buckets []float64) metrics.Histogram {
+	f.histogram = name
+	return f.factory.Histogram(metrics.HistogramOptions{
+		Name:    name,
+		Help:    help,
+		Buckets: buckets,
 	})
 }

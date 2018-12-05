@@ -31,6 +31,10 @@ func TestMultiFactory(t *testing.T) {
 		Name: "timer",
 		Tags: tags,
 	}).Record(42 * time.Millisecond)
+	multi2.Histogram(metrics.HistogramOptions{
+		Name: "histogram",
+		Tags: tags,
+	}).Record(42)
 
 	for _, f := range []*metricstest.Factory{f1, f2} {
 		f.AssertCounterMetrics(t,
@@ -39,5 +43,6 @@ func TestMultiFactory(t *testing.T) {
 			metricstest.ExpectedMetric{Name: "ns2.gauge", Tags: tags, Value: 42})
 		_, g := f.Snapshot()
 		assert.EqualValues(t, 43, g["ns2.timer|x=y.P99"])
+		assert.EqualValues(t, 43, g["ns2.histogram|x=y.P99"])
 	}
 }

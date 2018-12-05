@@ -17,6 +17,7 @@ package metrics
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -47,6 +48,7 @@ func InitOrError(m interface{}, factory Factory, globalTags map[string]string) e
 	counterPtrType := reflect.TypeOf((*Counter)(nil)).Elem()
 	gaugePtrType := reflect.TypeOf((*Gauge)(nil)).Elem()
 	timerPtrType := reflect.TypeOf((*Timer)(nil)).Elem()
+	histogramPtrType := reflect.TypeOf((*Histogram)(nil)).Elem()
 
 	v := reflect.ValueOf(m).Elem()
 	t := v.Type()
@@ -55,6 +57,7 @@ func InitOrError(m interface{}, factory Factory, globalTags map[string]string) e
 		for k, v := range globalTags {
 			tags[k] = v
 		}
+		var buckets []float64
 		field := t.Field(i)
 		metric := field.Tag.Get("metric")
 		if metric == "" {
@@ -72,19 +75,45 @@ func InitOrError(m interface{}, factory Factory, globalTags map[string]string) e
 				tags[tag[0]] = tag[1]
 			}
 		}
+		if bucketString := field.Tag.Get("buckets"); bucketString != "" {
+			bucketValues := strings.Split(bucketString, ",")
+			for _, bucket := range bucketValues {
+				b, err := strconv.ParseFloat(bucket, 64)
+				if err != nil {
+					return fmt.Errorf(
+						"Field [%s]: Bucket [%s] could not be converted to float64 in 'buckets' stirng [%s]",
+						field.Name, bucket, bucketString)
+				}
+				buckets = append(buckets, b)
+			}
+		}
 		help := field.Tag.Get("help")
 		var obj interface{}
-		options := Options{
-			Name: metric,
-			Tags: tags,
-			Help: help,
-		}
 		if field.Type.AssignableTo(counterPtrType) {
-			obj = factory.Counter(options)
+			obj = factory.Counter(Options{
+				Name: metric,
+				Tags: tags,
+				Help: help,
+			})
 		} else if field.Type.AssignableTo(gaugePtrType) {
-			obj = factory.Gauge(options)
+			obj = factory.Gauge(Options{
+				Name: metric,
+				Tags: tags,
+				Help: help,
+			})
 		} else if field.Type.AssignableTo(timerPtrType) {
-			obj = factory.Timer(options)
+			obj = factory.Timer(Options{
+				Name: metric,
+				Tags: tags,
+				Help: help,
+			})
+		} else if field.Type.AssignableTo(histogramPtrType) {
+			obj = factory.Histogram(HistogramOptions{
+				Name:    metric,
+				Tags:    tags,
+				Help:    help,
+				Buckets: buckets,
+			})
 		} else {
 			return fmt.Errorf(
 				"Field %s is not a pointer to timer, gauge, or counter",

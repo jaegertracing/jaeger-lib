@@ -29,6 +29,7 @@ func TestCache(t *testing.T) {
 	c1 := f.Counter(metrics.Options{Name: "x"})
 	g1 := f.Gauge(metrics.Options{Name: "y"})
 	t1 := f.Timer(metrics.Options{Name: "z"})
+	h1 := f.Histogram(metrics.HistogramOptions{Name: "h"})
 
 	c := newCache()
 
@@ -38,6 +39,8 @@ func TestCache(t *testing.T) {
 	assert.Equal(t, g1, g2)
 	t2 := c.getOrSetTimer("z", func() metrics.Timer { return t1 })
 	assert.Equal(t, t1, t2)
+	h2 := c.getOrSetHistogram("h", func() metrics.Histogram { return h1 })
+	assert.Equal(t, h1, h2)
 
 	c3 := c.getOrSetCounter("x", func() metrics.Counter { panic("c1") })
 	assert.Equal(t, c1, c3)
@@ -45,4 +48,6 @@ func TestCache(t *testing.T) {
 	assert.Equal(t, g1, g3)
 	t3 := c.getOrSetTimer("z", func() metrics.Timer { panic("t1") })
 	assert.Equal(t, t1, t3)
+	h3 := c.getOrSetHistogram("h", func() metrics.Histogram { panic("h1") })
+	assert.Equal(t, h1, h3)
 }

@@ -130,6 +130,15 @@ func (f *factory) Gauge(options metrics.Options) metrics.Gauge {
 	return NewGauge(gauge)
 }
 
+func (f *factory) Histogram(options metrics.HistogramOptions) metrics.Histogram {
+	name, tagsList := f.nameAndTagsList(options.Name, options.Tags)
+	hist := f.factory.Histogram(name)
+	if len(tagsList) > 0 {
+		hist = hist.With(tagsList...)
+	}
+	return NewHistogram(hist)
+}
+
 func (f *factory) Namespace(scope metrics.NSOptions) metrics.Factory {
 	return &factory{
 		scope:    f.subScope(scope.Name),

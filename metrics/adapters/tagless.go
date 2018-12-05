@@ -22,6 +22,7 @@ type FactoryWithoutTags interface {
 	Counter(name string, help string) metrics.Counter
 	Gauge(name string, help string) metrics.Gauge
 	Timer(name string, help string) metrics.Timer
+	Histogram(name string, help string, buckets []float64) metrics.Histogram
 }
 
 // WrapFactoryWithoutTags creates a real metrics.Factory that supports subscopes.
@@ -54,6 +55,11 @@ func (f *tagless) Gauge(name string, tags map[string]string, help string) metric
 func (f *tagless) Timer(name string, tags map[string]string, help string) metrics.Timer {
 	fullName := f.getFullName(name, tags)
 	return f.factory.Timer(fullName, help)
+}
+
+func (f *tagless) Histogram(name string, tags map[string]string, help string, buckets []float64) metrics.Histogram {
+	fullName := f.getFullName(name, tags)
+	return f.factory.Histogram(fullName, help, buckets)
 }
 
 func (f *tagless) getFullName(name string, tags map[string]string) string {

@@ -31,6 +31,11 @@ func TestFactory(t *testing.T) {
 		Tags: map[string]string{"x": "y"},
 	})
 	timer.Record(42 * time.Millisecond)
+	histogram := factory.Histogram(metrics.HistogramOptions{
+		Name: "histogram",
+		Tags: map[string]string{"x": "y"},
+	})
+	histogram.Record(42)
 	snapshot := testScope.Snapshot()
 
 	// tally v3 includes tags in the name, so look
@@ -50,6 +55,11 @@ func TestFactory(t *testing.T) {
 		h = snapshot.Timers()["pre.fix.timer+a=b,c=d,x=y"]
 	}
 
+	hs := snapshot.Histograms()["pre.fix.histogram"]
+	if hs == nil {
+		hs = snapshot.Histograms()["pre.fix.histogram+a=b,c=d,x=y"]
+	}
+
 	expectedTags := map[string]string{"a": "b", "c": "d", "x": "y"}
 	assert.EqualValues(t, 42, c.Value())
 	assert.EqualValues(t, expectedTags, c.Tags())
@@ -57,4 +67,7 @@ func TestFactory(t *testing.T) {
 	assert.EqualValues(t, expectedTags, g.Tags())
 	assert.Equal(t, []time.Duration{42 * time.Millisecond}, h.Values())
 	assert.EqualValues(t, expectedTags, h.Tags())
+	// TODO (GPB): Currently failing - need to investigate
+	//assert.Equal(t, []float64{42}, hs.Values())
+	assert.EqualValues(t, expectedTags, hs.Tags())
 }

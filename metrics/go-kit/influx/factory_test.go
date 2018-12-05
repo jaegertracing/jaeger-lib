@@ -59,6 +59,22 @@ func TestTimer(t *testing.T) {
 	assert.Contains(t, reportToString(in), "namespace.gokit.infl-timer,x=y p50=1,p90=10,p95=10,p99=10")
 }
 
+func TestHistogram(t *testing.T) {
+	in := influx.New(map[string]string{}, influxdb.BatchPointsConfig{}, log.NewNopLogger())
+	inf := NewFactory(in)
+	wf := xkit.Wrap("namespace", inf)
+
+	histogram := wf.Histogram(metrics.HistogramOptions{
+		Name: "gokit.infl-histogram",
+		Tags: map[string]string{"x": "y"},
+	})
+	histogram.Record(1)
+	histogram.Record(1)
+	histogram.Record(10)
+
+	assert.Contains(t, reportToString(in), "namespace.gokit.infl-histogram,x=y p50=1,p90=10,p95=10,p99=10")
+}
+
 func TestWrapperNamespaces(t *testing.T) {
 	in := influx.New(map[string]string{}, influxdb.BatchPointsConfig{}, log.NewNopLogger())
 	inf := NewFactory(in)

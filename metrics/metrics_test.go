@@ -13,9 +13,10 @@ import (
 
 func TestInitMetrics(t *testing.T) {
 	testMetrics := struct {
-		Gauge   metrics.Gauge   `metric:"gauge" tags:"1=one,2=two"`
-		Counter metrics.Counter `metric:"counter"`
-		Timer   metrics.Timer   `metric:"timer"`
+		Gauge     metrics.Gauge     `metric:"gauge" tags:"1=one,2=two"`
+		Counter   metrics.Counter   `metric:"counter"`
+		Timer     metrics.Timer     `metric:"timer"`
+		Histogram metrics.Histogram `metric:"histogram" buckets:"20,40,60,80"`
 	}{}
 
 	f := metricstest.NewFactory(0)
@@ -29,6 +30,7 @@ func TestInitMetrics(t *testing.T) {
 	testMetrics.Gauge.Update(10)
 	testMetrics.Counter.Inc(5)
 	testMetrics.Timer.Record(time.Duration(time.Second * 35))
+	testMetrics.Histogram.Record(42)
 
 	// wait for metrics
 	for i := 0; i < 1000; i++ {
@@ -44,6 +46,7 @@ func TestInitMetrics(t *testing.T) {
 	assert.EqualValues(t, 5, c["counter|key=value"])
 	assert.EqualValues(t, 10, g["gauge|1=one|2=two|key=value"])
 	assert.EqualValues(t, 36863, g["timer|key=value.P50"])
+	assert.EqualValues(t, 43, g["histogram|key=value.P50"])
 
 	stopwatch := metrics.StartStopwatch(testMetrics.Timer)
 	stopwatch.Stop()
@@ -62,6 +65,10 @@ var (
 	invalidMetricType = struct {
 		InvalidMetricType int64 `metric:"counter"`
 	}{}
+
+	badBucket = struct {
+		BadBucket metrics.Histogram `metric:"histogram" buckets:"1,2,a,4"`
+	}{}
 )
 
 func TestInitMetricsFailures(t *testing.T) {
@@ -72,6 +79,10 @@ func TestInitMetricsFailures(t *testing.T) {
 
 	assert.EqualError(t, metrics.InitOrError(&invalidMetricType, nil, nil),
 		"Field InvalidMetricType is not a pointer to timer, gauge, or counter")
+
+	assert.EqualError(t, metrics.InitOrError(&badBucket, nil, nil),
+		"Field [BadBucket]: Bucket [a] could not be converted to float64 in 'buckets' stirng [1,2,a,4]")
+
 }
 
 func TestInitPanic(t *testing.T) {
@@ -95,6 +106,9 @@ func TestNullMetrics(t *testing.T) {
 	metrics.NullFactory.Gauge(metrics.Options{
 		Name: "name",
 	}).Update(0)
+	metrics.NullFactory.Histogram(metrics.HistogramOptions{
+		Name: "name",
+	}).Record(0)
 	metrics.NullFactory.Namespace(metrics.NSOptions{
 		Name: "name",
 	}).Gauge(metrics.Options{

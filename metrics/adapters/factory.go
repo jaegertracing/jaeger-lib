@@ -23,6 +23,7 @@ type FactoryWithTags interface {
 	Counter(name string, tags map[string]string, help string) metrics.Counter
 	Gauge(name string, tags map[string]string, help string) metrics.Gauge
 	Timer(name string, tags map[string]string, help string) metrics.Timer
+	Histogram(name string, tags map[string]string, help string, buckets []float64) metrics.Histogram
 }
 
 // Options affect how the adapter factory behaves.
@@ -81,6 +82,13 @@ func (f *factory) Timer(options metrics.Options) metrics.Timer {
 	fullName, fullTags, key := f.getKey(options.Name, options.Tags)
 	return f.cache.getOrSetTimer(key, func() metrics.Timer {
 		return f.factory.Timer(fullName, fullTags, options.Help)
+	})
+}
+
+func (f *factory) Histogram(options metrics.HistogramOptions) metrics.Histogram {
+	fullName, fullTags, key := f.getKey(options.Name, options.Tags)
+	return f.cache.getOrSetHistogram(key, func() metrics.Histogram {
+		return f.factory.Histogram(fullName, fullTags, options.Help, options.Buckets)
 	})
 }
 

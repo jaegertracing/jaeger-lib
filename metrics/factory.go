@@ -27,11 +27,20 @@ type Options struct {
 	Help string
 }
 
+// HistogramOptions defines the information associated with a metric
+type HistogramOptions struct {
+	Name    string
+	Tags    map[string]string
+	Help    string
+	Buckets []float64
+}
+
 // Factory creates new metrics
 type Factory interface {
 	Counter(metric Options) Counter
 	Timer(metric Options) Timer
 	Gauge(metric Options) Gauge
+	Histogram(metric HistogramOptions) Histogram
 
 	// Namespace returns a nested metrics factory.
 	Namespace(scope NSOptions) Factory
@@ -50,5 +59,8 @@ func (nullFactory) Timer(options Options) Timer {
 }
 func (nullFactory) Gauge(options Options) Gauge {
 	return NullGauge
+}
+func (nullFactory) Histogram(options HistogramOptions) Histogram {
+	return NullHistogram
 }
 func (nullFactory) Namespace(scope NSOptions) Factory { return NullFactory }

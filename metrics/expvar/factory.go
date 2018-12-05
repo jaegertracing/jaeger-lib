@@ -47,3 +47,7 @@ func (f *factory) Gauge(name string, help string) metrics.Gauge {
 func (f *factory) Timer(name string, help string) metrics.Timer {
 	return xkit.NewTimer(f.factory.Histogram(name))
 }
+
+func (f *factory) Histogram(name string, help string, buckets []float64) metrics.Histogram {
+	return xkit.NewHistogram(f.factory.Histogram(name))
+}

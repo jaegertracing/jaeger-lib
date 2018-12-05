@@ -56,6 +56,14 @@ func (f *factory) Timer(options metrics.Options) metrics.Timer {
 	return NewTimer(scope.Timer(options.Name))
 }
 
+func (f *factory) Histogram(options metrics.HistogramOptions) metrics.Histogram {
+	scope := f.tally
+	if len(options.Tags) > 0 {
+		scope = scope.Tagged(options.Tags)
+	}
+	return NewHistogram(scope.Histogram(options.Name, tally.ValueBuckets(options.Buckets)))
+}
+
 func (f *factory) Namespace(scope metrics.NSOptions) metrics.Factory {
 	return &factory{
 		tally: f.tally.SubScope(scope.Name).Tagged(scope.Tags),
