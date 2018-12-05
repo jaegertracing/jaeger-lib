@@ -32,8 +32,9 @@ func TestFactory(t *testing.T) {
 	})
 	timer.Record(42 * time.Millisecond)
 	histogram := factory.Histogram(metrics.HistogramOptions{
-		Name: "histogram",
-		Tags: map[string]string{"x": "y"},
+		Name:    "histogram",
+		Tags:    map[string]string{"x": "y"},
+		Buckets: []float64{0, 100, 200},
 	})
 	histogram.Record(42)
 	snapshot := testScope.Snapshot()
@@ -67,7 +68,9 @@ func TestFactory(t *testing.T) {
 	assert.EqualValues(t, expectedTags, g.Tags())
 	assert.Equal(t, []time.Duration{42 * time.Millisecond}, h.Values())
 	assert.EqualValues(t, expectedTags, h.Tags())
-	// TODO (GPB): Currently failing - need to investigate
-	//assert.Equal(t, []float64{42}, hs.Values())
+	assert.Len(t, hs.Values(), 4)
+	assert.Equal(t, int64(0), hs.Values()[0])
+	assert.Equal(t, int64(1), hs.Values()[100])
+	assert.Equal(t, int64(0), hs.Values()[200])
 	assert.EqualValues(t, expectedTags, hs.Tags())
 }
