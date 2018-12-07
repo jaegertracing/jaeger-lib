@@ -53,6 +53,7 @@ func (f *factory) Timer(options metrics.TimerOptions) metrics.Timer {
 	if len(options.Tags) > 0 {
 		scope = scope.Tagged(options.Tags)
 	}
+	// TODO: Determine whether buckets can be used
 	return NewTimer(scope.Timer(options.Name))
 }
 

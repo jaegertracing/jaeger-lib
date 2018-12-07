@@ -142,36 +142,36 @@ type fakeTagless struct {
 	histogram string
 }
 
-func (f *fakeTagless) Counter(name string, help string) metrics.Counter {
-	f.counter = name
+func (f *fakeTagless) Counter(options TaglessOptions) metrics.Counter {
+	f.counter = options.Name
 	return f.factory.Counter(metrics.Options{
-		Name: name,
-		Help: help,
+		Name: options.Name,
+		Help: options.Help,
 	})
 }
 
-func (f *fakeTagless) Gauge(name string, help string) metrics.Gauge {
-	f.gauge = name
+func (f *fakeTagless) Gauge(options TaglessOptions) metrics.Gauge {
+	f.gauge = options.Name
 	return f.factory.Gauge(metrics.Options{
-		Name: name,
-		Help: help,
+		Name: options.Name,
+		Help: options.Help,
 	})
 }
 
-func (f *fakeTagless) Timer(name string, help string, buckets []time.Duration) metrics.Timer {
-	f.timer = name
+func (f *fakeTagless) Timer(options TaglessTimerOptions) metrics.Timer {
+	f.timer = options.Name
 	return f.factory.Timer(metrics.TimerOptions{
-		Name:    name,
-		Help:    help,
-		Buckets: buckets,
+		Name:    options.Name,
+		Help:    options.Help,
+		Buckets: options.Buckets,
 	})
 }
 
-func (f *fakeTagless) Histogram(name string, help string, buckets []float64) metrics.Histogram {
-	f.histogram = name
+func (f *fakeTagless) Histogram(options TaglessHistogramOptions) metrics.Histogram {
+	f.histogram = options.Name
 	return f.factory.Histogram(metrics.HistogramOptions{
-		Name:    name,
-		Help:    help,
-		Buckets: buckets,
+		Name:    options.Name,
+		Help:    options.Help,
+		Buckets: options.Buckets,
 	})
 }

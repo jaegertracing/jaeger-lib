@@ -66,8 +66,16 @@ var (
 		InvalidMetricType int64 `metric:"counter"`
 	}{}
 
-	badBucket = struct {
-		BadBucket metrics.Histogram `metric:"histogram" buckets:"1,2,a,4"`
+	badHistogramBucket = struct {
+		BadHistogramBucket metrics.Histogram `metric:"histogram" buckets:"1,2,a,4"`
+	}{}
+
+	badTimerBucket = struct {
+		BadTimerBucket metrics.Timer `metric:"timer" buckets:"1"`
+	}{}
+
+	invalidBuckets = struct {
+		InvalidBuckets metrics.Counter `metric:"counter" buckets:"1"`
 	}{}
 )
 
@@ -80,8 +88,14 @@ func TestInitMetricsFailures(t *testing.T) {
 	assert.EqualError(t, metrics.InitOrError(&invalidMetricType, nil, nil),
 		"Field InvalidMetricType is not a pointer to timer, gauge, or counter")
 
-	assert.EqualError(t, metrics.InitOrError(&badBucket, nil, nil),
-		"Field [BadBucket]: Bucket [a] could not be converted to float64 in 'buckets' stirng [1,2,a,4]")
+	assert.EqualError(t, metrics.InitOrError(&badHistogramBucket, nil, nil),
+		"Field [BadHistogramBucket]: Bucket [a] could not be converted to float64 in 'buckets' stirng [1,2,a,4]")
+
+	assert.EqualError(t, metrics.InitOrError(&badTimerBucket, nil, nil),
+		"Field [BadTimerBucket]: Buckets are not currently initialized for timer metrics")
+
+	assert.EqualError(t, metrics.InitOrError(&invalidBuckets, nil, nil),
+		"Field [InvalidBuckets]: Buckets should only be defined for Timer and Histogram metric types")
 
 }
 
@@ -92,7 +106,7 @@ func TestInitPanic(t *testing.T) {
 		}
 	}()
 
-	metrics.Init(&noMetricTag, metrics.NullFactory, nil)
+	metrics.MustInit(&noMetricTag, metrics.NullFactory, nil)
 }
 
 func TestNullMetrics(t *testing.T) {

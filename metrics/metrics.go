@@ -21,7 +21,7 @@ import (
 	"strings"
 )
 
-// Init initializes the passed in metrics and initializes its fields using the passed in factory.
+// MustInit initializes the passed in metrics and initializes its fields using the passed in factory.
 //
 // It uses reflection to initialize a struct containing metrics fields
 // by assigning new Counter/Gauge/Timer values with the metric name retrieved
@@ -31,7 +31,7 @@ import (
 // of type Counter or Gauge or Timer.
 //
 // Errors during Init lead to a panic.
-func Init(metrics interface{}, factory Factory, globalTags map[string]string) {
+func MustInit(metrics interface{}, factory Factory, globalTags map[string]string) {
 	if err := InitOrError(metrics, factory, globalTags); err != nil {
 		panic(err.Error())
 	}
@@ -76,15 +76,26 @@ func InitOrError(m interface{}, factory Factory, globalTags map[string]string) e
 			}
 		}
 		if bucketString := field.Tag.Get("buckets"); bucketString != "" {
-			bucketValues := strings.Split(bucketString, ",")
-			for _, bucket := range bucketValues {
-				b, err := strconv.ParseFloat(bucket, 64)
-				if err != nil {
-					return fmt.Errorf(
-						"Field [%s]: Bucket [%s] could not be converted to float64 in 'buckets' stirng [%s]",
-						field.Name, bucket, bucketString)
+			if field.Type.AssignableTo(timerPtrType) {
+				// TODO: Parse timer duration buckets
+				return fmt.Errorf(
+					"Field [%s]: Buckets are not currently initialized for timer metrics",
+					field.Name)
+			} else if field.Type.AssignableTo(histogramPtrType) {
+				bucketValues := strings.Split(bucketString, ",")
+				for _, bucket := range bucketValues {
+					b, err := strconv.ParseFloat(bucket, 64)
+					if err != nil {
+						return fmt.Errorf(
+							"Field [%s]: Bucket [%s] could not be converted to float64 in 'buckets' stirng [%s]",
+							field.Name, bucket, bucketString)
+					}
+					buckets = append(buckets, b)
 				}
-				buckets = append(buckets, b)
+			} else {
+				return fmt.Errorf(
+					"Field [%s]: Buckets should only be defined for Timer and Histogram metric types",
+					field.Name)
 			}
 		}
 		help := field.Tag.Get("help")
@@ -102,6 +113,7 @@ func InitOrError(m interface{}, factory Factory, globalTags map[string]string) e
 				Help: help,
 			})
 		} else if field.Type.AssignableTo(timerPtrType) {
+			// TODO: Add buckets once parsed (see TODO above)
 			obj = factory.Timer(TimerOptions{
 				Name: metric,
 				Tags: tags,

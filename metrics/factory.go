@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-// NSOptions defines the name and tags map associated with a metric
+// NSOptions defines the name and tags map associated with a factory namespace
 type NSOptions struct {
 	Name string
 	Tags map[string]string

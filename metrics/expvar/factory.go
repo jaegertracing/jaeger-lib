@@ -15,8 +15,6 @@
 package expvar
 
 import (
-	"time"
-
 	"github.com/uber/jaeger-lib/metrics"
 	"github.com/uber/jaeger-lib/metrics/adapters"
 	xkit "github.com/uber/jaeger-lib/metrics/go-kit"
@@ -38,18 +36,20 @@ type factory struct {
 	factory xkit.Factory
 }
 
-func (f *factory) Counter(name string, help string) metrics.Counter {
-	return xkit.NewCounter(f.factory.Counter(name))
+func (f *factory) Counter(options adapters.TaglessOptions) metrics.Counter {
+	return xkit.NewCounter(f.factory.Counter(options.Name))
 }
 
-func (f *factory) Gauge(name string, help string) metrics.Gauge {
-	return xkit.NewGauge(f.factory.Gauge(name))
+func (f *factory) Gauge(options adapters.TaglessOptions) metrics.Gauge {
+	return xkit.NewGauge(f.factory.Gauge(options.Name))
 }
 
-func (f *factory) Timer(name string, help string, buckets []time.Duration) metrics.Timer {
-	return xkit.NewTimer(f.factory.Histogram(name))
+func (f *factory) Timer(options adapters.TaglessTimerOptions) metrics.Timer {
+	// TODO: Provide support for buckets
+	return xkit.NewTimer(f.factory.Histogram(options.Name))
 }
 
-func (f *factory) Histogram(name string, help string, buckets []float64) metrics.Histogram {
-	return xkit.NewHistogram(f.factory.Histogram(name))
+func (f *factory) Histogram(options adapters.TaglessHistogramOptions) metrics.Histogram {
+	// TODO: Provide support for buckets
+	return xkit.NewHistogram(f.factory.Histogram(options.Name))
 }
