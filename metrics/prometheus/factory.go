@@ -185,7 +185,7 @@ func (f *Factory) Timer(options metrics.TimerOptions) metrics.Timer {
 func asFloatBuckets(buckets []time.Duration) []float64 {
 	data := make([]float64, len(buckets))
 	for i := range data {
-		data[i] = float64(buckets[i])
+		data[i] = float64(buckets[i]) / float64(time.Second)
 	}
 	return data
 }

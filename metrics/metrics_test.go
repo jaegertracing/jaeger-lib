@@ -24,7 +24,7 @@ func TestInitMetrics(t *testing.T) {
 
 	globalTags := map[string]string{"key": "value"}
 
-	err := metrics.InitOrError(&testMetrics, f, globalTags)
+	err := metrics.Init(&testMetrics, f, globalTags)
 	assert.NoError(t, err)
 
 	testMetrics.Gauge.Update(10)
@@ -80,21 +80,21 @@ var (
 )
 
 func TestInitMetricsFailures(t *testing.T) {
-	assert.EqualError(t, metrics.InitOrError(&noMetricTag, nil, nil), "Field NoMetricTag is missing a tag 'metric'")
+	assert.EqualError(t, metrics.Init(&noMetricTag, nil, nil), "Field NoMetricTag is missing a tag 'metric'")
 
-	assert.EqualError(t, metrics.InitOrError(&badTags, nil, nil),
+	assert.EqualError(t, metrics.Init(&badTags, nil, nil),
 		"Field [BadTags]: Tag [noValue] is not of the form key=value in 'tags' string [1=one,noValue]")
 
-	assert.EqualError(t, metrics.InitOrError(&invalidMetricType, nil, nil),
+	assert.EqualError(t, metrics.Init(&invalidMetricType, nil, nil),
 		"Field InvalidMetricType is not a pointer to timer, gauge, or counter")
 
-	assert.EqualError(t, metrics.InitOrError(&badHistogramBucket, nil, nil),
-		"Field [BadHistogramBucket]: Bucket [a] could not be converted to float64 in 'buckets' stirng [1,2,a,4]")
+	assert.EqualError(t, metrics.Init(&badHistogramBucket, nil, nil),
+		"Field [BadHistogramBucket]: Bucket [a] could not be converted to float64 in 'buckets' string [1,2,a,4]")
 
-	assert.EqualError(t, metrics.InitOrError(&badTimerBucket, nil, nil),
+	assert.EqualError(t, metrics.Init(&badTimerBucket, nil, nil),
 		"Field [BadTimerBucket]: Buckets are not currently initialized for timer metrics")
 
-	assert.EqualError(t, metrics.InitOrError(&invalidBuckets, nil, nil),
+	assert.EqualError(t, metrics.Init(&invalidBuckets, nil, nil),
 		"Field [InvalidBuckets]: Buckets should only be defined for Timer and Histogram metric types")
 
 }

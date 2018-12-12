@@ -32,14 +32,14 @@ import (
 //
 // Errors during Init lead to a panic.
 func MustInit(metrics interface{}, factory Factory, globalTags map[string]string) {
-	if err := InitOrError(metrics, factory, globalTags); err != nil {
+	if err := Init(metrics, factory, globalTags); err != nil {
 		panic(err.Error())
 	}
 }
 
-// InitOrError does the same as Init, but returns an error instead of
+// Init does the same as Init, but returns an error instead of
 // panicking.
-func InitOrError(m interface{}, factory Factory, globalTags map[string]string) error {
+func Init(m interface{}, factory Factory, globalTags map[string]string) error {
 	// Allow user to opt out of reporting metrics by passing in nil.
 	if factory == nil {
 		factory = NullFactory
@@ -87,7 +87,7 @@ func InitOrError(m interface{}, factory Factory, globalTags map[string]string) e
 					b, err := strconv.ParseFloat(bucket, 64)
 					if err != nil {
 						return fmt.Errorf(
-							"Field [%s]: Bucket [%s] could not be converted to float64 in 'buckets' stirng [%s]",
+							"Field [%s]: Bucket [%s] could not be converted to float64 in 'buckets' string [%s]",
 							field.Name, bucket, bucketString)
 					}
 					buckets = append(buckets, b)
