@@ -20,9 +20,10 @@ import (
 
 // FactoryWithTags creates metrics with fully qualified name and tags.
 type FactoryWithTags interface {
-	Counter(name string, tags map[string]string, help string) metrics.Counter
-	Gauge(name string, tags map[string]string, help string) metrics.Gauge
-	Timer(name string, tags map[string]string, help string) metrics.Timer
+	Counter(options metrics.Options) metrics.Counter
+	Gauge(options metrics.Options) metrics.Gauge
+	Timer(options metrics.TimerOptions) metrics.Timer
+	Histogram(options metrics.HistogramOptions) metrics.Histogram
 }
 
 // Options affect how the adapter factory behaves.
@@ -66,21 +67,46 @@ type factory struct {
 func (f *factory) Counter(options metrics.Options) metrics.Counter {
 	fullName, fullTags, key := f.getKey(options.Name, options.Tags)
 	return f.cache.getOrSetCounter(key, func() metrics.Counter {
-		return f.factory.Counter(fullName, fullTags, options.Help)
+		return f.factory.Counter(metrics.Options{
+			Name: fullName,
+			Tags: fullTags,
+			Help: options.Help,
+		})
 	})
 }
 
 func (f *factory) Gauge(options metrics.Options) metrics.Gauge {
 	fullName, fullTags, key := f.getKey(options.Name, options.Tags)
 	return f.cache.getOrSetGauge(key, func() metrics.Gauge {
-		return f.factory.Gauge(fullName, fullTags, options.Help)
+		return f.factory.Gauge(metrics.Options{
+			Name: fullName,
+			Tags: fullTags,
+			Help: options.Help,
+		})
 	})
 }
 
-func (f *factory) Timer(options metrics.Options) metrics.Timer {
+func (f *factory) Timer(options metrics.TimerOptions) metrics.Timer {
 	fullName, fullTags, key := f.getKey(options.Name, options.Tags)
 	return f.cache.getOrSetTimer(key, func() metrics.Timer {
-		return f.factory.Timer(fullName, fullTags, options.Help)
+		return f.factory.Timer(metrics.TimerOptions{
+			Name:    fullName,
+			Tags:    fullTags,
+			Help:    options.Help,
+			Buckets: options.Buckets,
+		})
+	})
+}
+
+func (f *factory) Histogram(options metrics.HistogramOptions) metrics.Histogram {
+	fullName, fullTags, key := f.getKey(options.Name, options.Tags)
+	return f.cache.getOrSetHistogram(key, func() metrics.Histogram {
+		return f.factory.Histogram(metrics.HistogramOptions{
+			Name:    fullName,
+			Tags:    fullTags,
+			Help:    options.Help,
+			Buckets: options.Buckets,
+		})
 	})
 }
 

@@ -112,7 +112,7 @@ func (f *factory) Counter(options metrics.Options) metrics.Counter {
 	return NewCounter(counter)
 }
 
-func (f *factory) Timer(options metrics.Options) metrics.Timer {
+func (f *factory) Timer(options metrics.TimerOptions) metrics.Timer {
 	name, tagsList := f.nameAndTagsList(options.Name, options.Tags)
 	hist := f.factory.Histogram(name)
 	if len(tagsList) > 0 {
@@ -128,6 +128,15 @@ func (f *factory) Gauge(options metrics.Options) metrics.Gauge {
 		gauge = gauge.With(tagsList...)
 	}
 	return NewGauge(gauge)
+}
+
+func (f *factory) Histogram(options metrics.HistogramOptions) metrics.Histogram {
+	name, tagsList := f.nameAndTagsList(options.Name, options.Tags)
+	hist := f.factory.Histogram(name)
+	if len(tagsList) > 0 {
+		hist = hist.With(tagsList...)
+	}
+	return NewHistogram(hist)
 }
 
 func (f *factory) Namespace(scope metrics.NSOptions) metrics.Factory {

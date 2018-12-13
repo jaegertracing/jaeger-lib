@@ -163,7 +163,7 @@ func (f *Factory) Gauge(options metrics.Options) metrics.Gauge {
 }
 
 // Timer implements Timer of metrics.Factory.
-func (f *Factory) Timer(options metrics.Options) metrics.Timer {
+func (f *Factory) Timer(options metrics.TimerOptions) metrics.Timer {
 	help := strings.TrimSpace(options.Help)
 	if len(help) == 0 {
 		help = options.Name
@@ -174,10 +174,38 @@ func (f *Factory) Timer(options metrics.Options) metrics.Timer {
 	opts := prometheus.HistogramOpts{
 		Name:    name,
 		Help:    help,
-		Buckets: f.buckets,
+		Buckets: asFloatBuckets(options.Buckets),
 	}
 	hv := f.cache.getOrMakeHistogramVec(opts, labelNames)
 	return &timer{
+		histogram: hv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...),
+	}
+}
+
+func asFloatBuckets(buckets []time.Duration) []float64 {
+	data := make([]float64, len(buckets))
+	for i := range data {
+		data[i] = float64(buckets[i]) / float64(time.Second)
+	}
+	return data
+}
+
+// Histogram implements Histogram of metrics.Factory.
+func (f *Factory) Histogram(options metrics.HistogramOptions) metrics.Histogram {
+	help := strings.TrimSpace(options.Help)
+	if len(help) == 0 {
+		help = options.Name
+	}
+	name := f.subScope(options.Name)
+	tags := f.mergeTags(options.Tags)
+	labelNames := f.tagNames(tags)
+	opts := prometheus.HistogramOpts{
+		Name:    name,
+		Help:    help,
+		Buckets: options.Buckets,
+	}
+	hv := f.cache.getOrMakeHistogramVec(opts, labelNames)
+	return &histogram{
 		histogram: hv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...),
 	}
 }
@@ -213,6 +241,14 @@ type timer struct {
 
 func (t *timer) Record(v time.Duration) {
 	t.histogram.Observe(float64(v.Nanoseconds()) / float64(time.Second/time.Nanosecond))
+}
+
+type histogram struct {
+	histogram observer
+}
+
+func (h *histogram) Record(v float64) {
+	h.histogram.Observe(v)
 }
 
 func (f *Factory) subScope(name string) string {

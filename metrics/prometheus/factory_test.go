@@ -175,17 +175,17 @@ func TestTimer(t *testing.T) {
 	f3 := f2.Namespace(metrics.NSOptions{
 		Tags: map[string]string{"a": "b"},
 	}) // essentially same as f2
-	t1 := f2.Timer(metrics.Options{
+	t1 := f2.Timer(metrics.TimerOptions{
 		Name: "rodriguez",
 		Tags: map[string]string{"x": "y"},
 		Help: "Help message",
 	})
-	t2 := f2.Timer(metrics.Options{
+	t2 := f2.Timer(metrics.TimerOptions{
 		Name: "rodriguez",
 		Tags: map[string]string{"x": "z"},
 		Help: "Help message",
 	})
-	t3 := f3.Timer(metrics.Options{
+	t3 := f3.Timer(metrics.TimerOptions{
 		Name: "rodriguez",
 		Tags: map[string]string{"x": "z"},
 		Help: "Help message",
@@ -230,7 +230,7 @@ func TestTimer(t *testing.T) {
 func TestTimerDefaultHelp(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry))
-	t1 := f1.Timer(metrics.Options{
+	t1 := f1.Timer(metrics.TimerOptions{
 		Name: "rodriguez",
 		Tags: map[string]string{"x": "y"},
 	})
@@ -246,12 +246,111 @@ func TestTimerCustomBuckets(t *testing.T) {
 	registry := prometheus.NewPedanticRegistry()
 	f1 := New(WithRegisterer(registry), WithBuckets([]float64{1.5}))
 	// dot and dash in the metric name will be replaced with underscore
-	t1 := f1.Timer(metrics.Options{
-		Name: "bender.bending-rodriguez",
-		Tags: map[string]string{"x": "y"},
+	t1 := f1.Timer(metrics.TimerOptions{
+		Name:    "bender.bending-rodriguez",
+		Tags:    map[string]string{"x": "y"},
+		Buckets: []time.Duration{time.Nanosecond, 5 * time.Nanosecond},
 	})
 	t1.Record(1 * time.Second)
 	t1.Record(2 * time.Second)
+
+	snapshot, err := registry.Gather()
+	require.NoError(t, err)
+
+	m1 := findMetric(t, snapshot, "bender_bending_rodriguez", map[string]string{"x": "y"})
+	assert.EqualValues(t, 2, m1.GetHistogram().GetSampleCount(), "%+v", m1)
+	assert.EqualValues(t, 3, m1.GetHistogram().GetSampleSum(), "%+v", m1)
+	assert.Len(t, m1.GetHistogram().GetBucket(), 2)
+}
+
+func TestHistogram(t *testing.T) {
+	registry := prometheus.NewPedanticRegistry()
+	f1 := New(WithRegisterer(registry))
+	f2 := f1.Namespace(metrics.NSOptions{
+		Name: "bender",
+		Tags: map[string]string{"a": "b"},
+	})
+	f3 := f2.Namespace(metrics.NSOptions{
+		Tags: map[string]string{"a": "b"},
+	}) // essentially same as f2
+	t1 := f2.Histogram(metrics.HistogramOptions{
+		Name: "rodriguez",
+		Tags: map[string]string{"x": "y"},
+		Help: "Help message",
+	})
+	t2 := f2.Histogram(metrics.HistogramOptions{
+		Name: "rodriguez",
+		Tags: map[string]string{"x": "z"},
+		Help: "Help message",
+	})
+	t3 := f3.Histogram(metrics.HistogramOptions{
+		Name: "rodriguez",
+		Tags: map[string]string{"x": "z"},
+		Help: "Help message",
+	}) // same as t2, but from f3
+	t1.Record(1)
+	t1.Record(2)
+	t2.Record(3)
+	t3.Record(4)
+
+	snapshot, err := registry.Gather()
+	require.NoError(t, err)
+
+	assert.EqualValues(t, "Help message", snapshot[0].GetHelp())
+
+	m1 := findMetric(t, snapshot, "bender_rodriguez", map[string]string{"a": "b", "x": "y"})
+	assert.EqualValues(t, 2, m1.GetHistogram().GetSampleCount(), "%+v", m1)
+	assert.EqualValues(t, 3, m1.GetHistogram().GetSampleSum(), "%+v", m1)
+	for _, bucket := range m1.GetHistogram().GetBucket() {
+		if bucket.GetUpperBound() < 1 {
+			assert.EqualValues(t, 0, bucket.GetCumulativeCount())
+		} else if bucket.GetUpperBound() < 2 {
+			assert.EqualValues(t, 1, bucket.GetCumulativeCount())
+		} else {
+			assert.EqualValues(t, 2, bucket.GetCumulativeCount())
+		}
+	}
+
+	m2 := findMetric(t, snapshot, "bender_rodriguez", map[string]string{"a": "b", "x": "z"})
+	assert.EqualValues(t, 2, m2.GetHistogram().GetSampleCount(), "%+v", m2)
+	assert.EqualValues(t, 7, m2.GetHistogram().GetSampleSum(), "%+v", m2)
+	for _, bucket := range m2.GetHistogram().GetBucket() {
+		if bucket.GetUpperBound() < 3 {
+			assert.EqualValues(t, 0, bucket.GetCumulativeCount())
+		} else if bucket.GetUpperBound() < 4 {
+			assert.EqualValues(t, 1, bucket.GetCumulativeCount())
+		} else {
+			assert.EqualValues(t, 2, bucket.GetCumulativeCount())
+		}
+	}
+}
+
+func TestHistogramDefaultHelp(t *testing.T) {
+	registry := prometheus.NewPedanticRegistry()
+	f1 := New(WithRegisterer(registry))
+	t1 := f1.Histogram(metrics.HistogramOptions{
+		Name: "rodriguez",
+		Tags: map[string]string{"x": "y"},
+	})
+	t1.Record(1)
+
+	snapshot, err := registry.Gather()
+	require.NoError(t, err)
+
+	assert.EqualValues(t, "rodriguez", snapshot[0].GetHelp())
+}
+
+func TestHistogramCustomBuckets(t *testing.T) {
+	registry := prometheus.NewPedanticRegistry()
+	f1 := New(WithRegisterer(registry))
+	// dot and dash in the metric name will be replaced with underscore
+	t1 := f1.Histogram(metrics.HistogramOptions{
+		Name:    "bender.bending-rodriguez",
+		Tags:    map[string]string{"x": "y"},
+		Buckets: []float64{1.5},
+	})
+	t1.Record(1)
+	t1.Record(2)
 
 	snapshot, err := registry.Gather()
 	require.NoError(t, err)

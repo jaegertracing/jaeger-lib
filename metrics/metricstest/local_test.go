@@ -68,11 +68,17 @@ func TestLocalMetrics(t *testing.T) {
 
 	for metric, timing := range timings {
 		for _, d := range timing {
-			f.Timer(metrics.Options{
+			f.Timer(metrics.TimerOptions{
 				Name: metric,
 			}).Record(d)
 		}
 	}
+
+	histogram := f.Histogram(metrics.HistogramOptions{
+		Name: "my-histo",
+	})
+	histogram.Record(321)
+	histogram.Record(42)
 
 	c, g := f.Snapshot()
 	require.NotNil(t, c)
@@ -100,6 +106,12 @@ func TestLocalMetrics(t *testing.T) {
 		"foo-latency.P99":  36863,
 		"foo-latency.P999": 36863,
 		"my-gauge":         43,
+		"my-histo.P50":     43,
+		"my-histo.P75":     335,
+		"my-histo.P90":     335,
+		"my-histo.P95":     335,
+		"my-histo.P99":     335,
+		"my-histo.P999":    335,
 		"other-gauge":      74,
 	}, g)
 
@@ -118,7 +130,7 @@ func TestLocalMetricsInterval(t *testing.T) {
 	f := NewFactory(refreshInterval)
 	defer f.Stop()
 
-	f.Timer(metrics.Options{
+	f.Timer(metrics.TimerOptions{
 		Name: "timer",
 	}).Record(1)
 

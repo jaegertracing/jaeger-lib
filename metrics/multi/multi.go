@@ -64,7 +64,7 @@ func (t *timer) Record(delta time.Duration) {
 }
 
 // Timer implements metrics.Factory interface
-func (f *Factory) Timer(options metrics.Options) metrics.Timer {
+func (f *Factory) Timer(options metrics.TimerOptions) metrics.Timer {
 	timer := &timer{
 		timers: make([]metrics.Timer, len(f.factories)),
 	}
@@ -72,6 +72,27 @@ func (f *Factory) Timer(options metrics.Options) metrics.Timer {
 		timer.timers[i] = factory.Timer(options)
 	}
 	return timer
+}
+
+type histogram struct {
+	histograms []metrics.Histogram
+}
+
+func (h *histogram) Record(value float64) {
+	for _, histogram := range h.histograms {
+		histogram.Record(value)
+	}
+}
+
+// Histogram implements metrics.Factory interface
+func (f *Factory) Histogram(options metrics.HistogramOptions) metrics.Histogram {
+	histogram := &histogram{
+		histograms: make([]metrics.Histogram, len(f.factories)),
+	}
+	for i, factory := range f.factories {
+		histogram.histograms[i] = factory.Histogram(options)
+	}
+	return histogram
 }
 
 type gauge struct {

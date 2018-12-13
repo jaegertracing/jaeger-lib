@@ -44,9 +44,10 @@ func TestSubScope(t *testing.T) {
 
 func TestFactory(t *testing.T) {
 	var (
-		counterPrefix = "counter_"
-		gaugePrefix   = "gauge_"
-		timerPrefix   = "timer_"
+		counterPrefix   = "counter_"
+		gaugePrefix     = "gauge_"
+		timerPrefix     = "timer_"
+		histogramPrefix = "histogram_"
 
 		tagsA = map[string]string{"a": "b"}
 		tagsX = map[string]string{"x": "y"}
@@ -55,6 +56,8 @@ func TestFactory(t *testing.T) {
 	testCases := []struct {
 		name            string
 		tags            map[string]string
+		buckets         []float64
+		durationBuckets []time.Duration
 		namespace       string
 		nsTags          map[string]string
 		fullName        string
@@ -93,9 +96,15 @@ func TestFactory(t *testing.T) {
 				Name: gaugePrefix + testCase.name,
 				Tags: testCase.tags,
 			})
-			timer := f.Timer(metrics.Options{
-				Name: timerPrefix + testCase.name,
-				Tags: testCase.tags,
+			timer := f.Timer(metrics.TimerOptions{
+				Name:    timerPrefix + testCase.name,
+				Tags:    testCase.tags,
+				Buckets: testCase.durationBuckets,
+			})
+			histogram := f.Histogram(metrics.HistogramOptions{
+				Name:    histogramPrefix + testCase.name,
+				Tags:    testCase.tags,
+				Buckets: testCase.buckets,
 			})
 
 			assert.Equal(t, counter, f.Counter(metrics.Options{
@@ -106,45 +115,63 @@ func TestFactory(t *testing.T) {
 				Name: gaugePrefix + testCase.name,
 				Tags: testCase.tags,
 			}))
-			assert.Equal(t, timer, f.Timer(metrics.Options{
-				Name: timerPrefix + testCase.name,
-				Tags: testCase.tags,
+			assert.Equal(t, timer, f.Timer(metrics.TimerOptions{
+				Name:    timerPrefix + testCase.name,
+				Tags:    testCase.tags,
+				Buckets: testCase.durationBuckets,
+			}))
+			assert.Equal(t, histogram, f.Histogram(metrics.HistogramOptions{
+				Name:    histogramPrefix + testCase.name,
+				Tags:    testCase.tags,
+				Buckets: testCase.buckets,
 			}))
 
 			assert.Equal(t, fmt.Sprintf(testCase.fullName, counterPrefix), ff.counter)
 			assert.Equal(t, fmt.Sprintf(testCase.fullName, gaugePrefix), ff.gauge)
 			assert.Equal(t, fmt.Sprintf(testCase.fullName, timerPrefix), ff.timer)
+			assert.Equal(t, fmt.Sprintf(testCase.fullName, histogramPrefix), ff.histogram)
 		})
 	}
 }
 
 type fakeTagless struct {
-	factory metrics.Factory
-	counter string
-	gauge   string
-	timer   string
+	factory   metrics.Factory
+	counter   string
+	gauge     string
+	timer     string
+	histogram string
 }
 
-func (f *fakeTagless) Counter(name string, help string) metrics.Counter {
-	f.counter = name
+func (f *fakeTagless) Counter(options TaglessOptions) metrics.Counter {
+	f.counter = options.Name
 	return f.factory.Counter(metrics.Options{
-		Name: name,
-		Help: help,
+		Name: options.Name,
+		Help: options.Help,
 	})
 }
 
-func (f *fakeTagless) Gauge(name string, help string) metrics.Gauge {
-	f.gauge = name
+func (f *fakeTagless) Gauge(options TaglessOptions) metrics.Gauge {
+	f.gauge = options.Name
 	return f.factory.Gauge(metrics.Options{
-		Name: name,
-		Help: help,
+		Name: options.Name,
+		Help: options.Help,
 	})
 }
 
-func (f *fakeTagless) Timer(name string, help string) metrics.Timer {
-	f.timer = name
-	return f.factory.Timer(metrics.Options{
-		Name: name,
-		Help: help,
+func (f *fakeTagless) Timer(options TaglessTimerOptions) metrics.Timer {
+	f.timer = options.Name
+	return f.factory.Timer(metrics.TimerOptions{
+		Name:    options.Name,
+		Help:    options.Help,
+		Buckets: options.Buckets,
+	})
+}
+
+func (f *fakeTagless) Histogram(options TaglessHistogramOptions) metrics.Histogram {
+	f.histogram = options.Name
+	return f.factory.Histogram(metrics.HistogramOptions{
+		Name:    options.Name,
+		Help:    options.Help,
+		Buckets: options.Buckets,
 	})
 }

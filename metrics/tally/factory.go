@@ -48,12 +48,21 @@ func (f *factory) Gauge(options metrics.Options) metrics.Gauge {
 	return NewGauge(scope.Gauge(options.Name))
 }
 
-func (f *factory) Timer(options metrics.Options) metrics.Timer {
+func (f *factory) Timer(options metrics.TimerOptions) metrics.Timer {
 	scope := f.tally
 	if len(options.Tags) > 0 {
 		scope = scope.Tagged(options.Tags)
 	}
+	// TODO: Determine whether buckets can be used
 	return NewTimer(scope.Timer(options.Name))
+}
+
+func (f *factory) Histogram(options metrics.HistogramOptions) metrics.Histogram {
+	scope := f.tally
+	if len(options.Tags) > 0 {
+		scope = scope.Tagged(options.Tags)
+	}
+	return NewHistogram(scope.Histogram(options.Name, tally.ValueBuckets(options.Buckets)))
 }
 
 func (f *factory) Namespace(scope metrics.NSOptions) metrics.Factory {
