@@ -32,6 +32,9 @@ test-and-lint: test fmt lint
 
 .PHONY: test
 test:
+ifeq ($(USE_DEP),true)
+	dep check
+endif
 	$(GOTEST) $(PACKAGES) | $(COLORIZE)
 
 .PHONY: fmt
@@ -59,7 +62,6 @@ ifeq ($(USE_DEP),true)
 else
 	glide install
 endif
-
 
 .PHONY: cover
 cover:
