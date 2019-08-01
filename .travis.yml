@@ -19,10 +19,6 @@ matrix:
     - TEST=true
     - USE_DEP=true
 
-env:
-  global:
-    - GO15VENDOREXPERIMENT=1
-
 install:
   - if [ "$USE_DEP" == true ]; then make install-dep-ci ; else echo 'skipping installing dep'; fi
   - make install-ci

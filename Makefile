@@ -6,8 +6,6 @@ ALL_SRC := $(shell find . -name "*.go" | grep -v -e vendor -e thrift-gen \
         -e ".*/_.*" \
         -e ".*/mocks.*")
 
-export GO15VENDOREXPERIMENT=1
-
 GOTEST=go test -v $(RACE)
 GOLINT=golint
 GOVET=go vet
