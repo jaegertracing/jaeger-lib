@@ -19,14 +19,12 @@ file for details.
 
 ## Getting Started
 
-This library uses [glide](https://github.com/Masterminds/glide) to manage dependencies.
+This library uses Go modules to manage dependencies.
 
-To get started, make sure you clone the Git repository into the correct location
-`github.com/uber/jaeger-lib` relative to `$GOPATH`:
+To get started, clone the Git repository into any location (does not need to be under `$GOPATH`)
 
 ```
-mkdir -p $GOPATH/src/github.com/uber
-cd $GOPATH/src/github.com/uber
+cd you-dev-root
 git clone git@github.com:jaegertracing/jaeger-lib.git jaeger-lib
 cd jaeger-lib
 ```
@@ -35,7 +33,6 @@ Then install dependencies and run the tests:
 
 ```
 git submodule update --init --recursive
-glide install
 make test
 ```
 

@@ -11,18 +11,15 @@ matrix:
   - go: 1.12.7
     env:
     - COVERAGE=true
-  - go: 1.12.7
-    env:
-    - TEST=true
+    - GO111MODULE=on
   - go: 1.12.7
     env:
     - TEST=true
     - USE_DEP=true
   - go: 1.12.7
     env:
+    - USE_GLIDE=true
     - TEST=true
-    - USE_GO_MOD=true
-    - GO111MODULE=on
 
 install:
   - if [ "$USE_DEP" == true ]; then make install-dep-ci ; else echo 'skipping installing dep'; fi
