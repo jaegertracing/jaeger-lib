@@ -53,10 +53,13 @@ lint:
 
 .PHONY: install
 install:
+	# TODO: replace use of glide for $(PACKAGES) with `go list ./...` and remove this global install
 	glide --version || go get github.com/Masterminds/glide
 ifeq ($(USE_DEP),true)
 	dep ensure
 	dep status
+else ifeq ($(USE_GO_MOD),true)
+	echo 'Yay! No extra dependency installs with go mod'
 else
 	glide install
 endif
