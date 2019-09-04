@@ -1,5 +1,5 @@
 PROJECT_ROOT=github.com/uber/jaeger-lib
-PACKAGES := $(shell glide novendor | grep -v ./thrift-gen/...)
+PACKAGES := $(shell go list ./... | grep -v '^github.com/uber/jaeger-lib$$' | sed 's|github.com/uber/jaeger-lib/||g' | sed 's|/.*$$||g' | sort -u | sed 's|^|./|g' | sed 's|$$|/...|g')
 # all .go files that don't exist in hidden directories
 ALL_SRC := $(shell find . -name "*.go" | grep -v -e vendor -e thrift-gen \
         -e ".*/\..*" \
@@ -53,14 +53,13 @@ lint:
 
 .PHONY: install
 install:
-	# TODO: replace use of glide for $(PACKAGES) with `go list ./...` and remove this global install
-	glide --version || go get github.com/Masterminds/glide
 ifeq ($(USE_DEP),true)
 	dep ensure
 	dep status
 else ifeq ($(USE_GO_MOD),true)
 	echo 'Yay! No extra dependency installs with go mod'
 else
+	glide --version || go get github.com/Masterminds/glide
 	glide install
 endif
 
