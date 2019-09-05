@@ -1,6 +1,15 @@
 Changes by Version
 ==================
 
+2.1.0 (2019-09-05)
+------------------
+
+- Add support for go modules (#75) -- Yuri Shkuro
+- Fix typo in metrics Init method docs (#72) -- Sergei Zimakov
+- Remove GO15VENDOREXPERIMENT variable (#71) -- Takuya N
+- Ensure Gopkg.lock files remain in sync with Gopkg.yaml (#69) -- Prithvi Raj
+
+
 2.0.0 (2018-12-17)
 ------------------
 
@@ -9,7 +18,7 @@ Breaking changes:
 - Add metric description to factory API (#61) <Gary Brown>
 - Remove metrics/go-kit/prometheus as metrics/prometheus now available (#58) <Gary Brown>
 - Add `_total` suffix for counters reported to prometheus (#54) <Gary Brown>
-- LocalBackend / Test factory moved to metrics/metricstest/ package (#46) <Patrick Ohly>, 
+- LocalBackend / Test factory moved to metrics/metricstest/ package (#46) <Patrick Ohly>,
 - Change AssertCounterMetrics/AssertGaugeMetrics to be functions on the test factory (#51) <Yuri Shkuro>
 
 
