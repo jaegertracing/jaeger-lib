@@ -1,5 +1,5 @@
 PROJECT_ROOT=github.com/uber/jaeger-lib
-PACKAGES := $(shell go list ./... | grep -v '^github.com/uber/jaeger-lib$$' | sed 's|github.com/uber/jaeger-lib/||g' | sed 's|/.*$$||g' | sort -u | sed 's|^|./|g' | sed 's|$$|/...|g')
+PACKAGES := $(go list ./... | awk -F/ 'NR>1 {print "./"$4"/..."}' | sort -u)
 # all .go files that don't exist in hidden directories
 ALL_SRC := $(shell find . -name "*.go" | grep -v -e vendor -e thrift-gen \
         -e ".*/\..*" \
