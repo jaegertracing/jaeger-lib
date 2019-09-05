@@ -1,11 +1,12 @@
 PROJECT_ROOT=github.com/uber/jaeger-lib
-PACKAGES := $(shell glide novendor | grep -v ./thrift-gen/...)
+PACKAGES := $(go list ./... | awk -F/ 'NR>1 {print "./"$4"/..."}' | sort -u)
 # all .go files that don't exist in hidden directories
 ALL_SRC := $(shell find . -name "*.go" | grep -v -e vendor -e thrift-gen \
         -e ".*/\..*" \
         -e ".*/_.*" \
         -e ".*/mocks.*")
 
+RACE=-race
 GOTEST=go test -v $(RACE)
 GOLINT=golint
 GOVET=go vet
@@ -42,9 +43,9 @@ fmt:
 
 .PHONY: lint
 lint:
-	$(GOVET) $(PACKAGES)
+	$(GOVET) ./...
 	@cat /dev/null > $(LINT_LOG)
-	@$(foreach pkg, $(PACKAGES), $(GOLINT) $(pkg) | grep -v crossdock/thrift >> $(LINT_LOG) || true;)
+	@$(foreach pkg, $(PACKAGES), $(GOLINT) $(pkg) >> $(LINT_LOG) || true;)
 	@[ ! -s "$(LINT_LOG)" ] || (echo "Lint Failures" | cat - $(LINT_LOG) && false)
 	@$(GOFMT) -e -s -l $(ALL_SRC) > $(FMT_LOG)
 	@./scripts/updateLicenses.sh >> $(FMT_LOG)
@@ -53,17 +54,20 @@ lint:
 
 .PHONY: install
 install:
-	glide --version || go get github.com/Masterminds/glide
 ifeq ($(USE_DEP),true)
 	dep ensure
 	dep status
-else
+else ifeq ($(USE_GLIDE),true)
+	glide --version || go get github.com/Masterminds/glide
 	glide install
 endif
 
 .PHONY: cover
 cover:
-	./scripts/cover.sh $(shell go list $(PACKAGES))
+	$(GOTEST) -cover -coverprofile cover.out ./...
+
+.PHONY: cover-html
+cover-html: cover
 	go tool cover -html=cover.out -o cover.html
 
 
@@ -88,11 +92,9 @@ install-ci: install
 
 
 .PHONY: test-ci
-test-ci:
-	./scripts/cover.sh $(shell go list $(PACKAGES))
-	make lint
+test-ci: cover lint
 
 .PHONY: test-only-ci
 test-only-ci:
-	go test -cover $(PACKAGES)
+	$(GOTEST) -cover ./...
 	make lint

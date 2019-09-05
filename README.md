@@ -9,12 +9,14 @@ This library is *not intended to be used standalone*, and provides *no guarantee
 
 The library's import path is `github.com/uber/jaeger-lib`.
 
+The library uses Go modules for dependency management. For backwards compatibility, Dep and Glide dependency files are still maintained, but will be removed in the future.
+
 ## How to Contribute
 
 Please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
-  
+
 [Apache 2.0 License](./LICENSE).
 
 
