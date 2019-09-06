@@ -19,12 +19,14 @@ file for details.
 
 ## Getting Started
 
-This library uses Go modules to manage dependencies.
+This library uses [dep](https://golang.github.io/dep/) to manage dependencies.
 
-To get started, clone the Git repository into any location (does not need to be under `$GOPATH`)
+To get started, make sure you clone the Git repository into the correct location
+`github.com/uber/jaeger-lib` relative to `$GOPATH`:
 
 ```
-cd you-dev-root
+mkdir -p $GOPATH/src/github.com/uber
+cd $GOPATH/src/github.com/uber
 git clone git@github.com:jaegertracing/jaeger-lib.git jaeger-lib
 cd jaeger-lib
 ```
@@ -32,7 +34,7 @@ cd jaeger-lib
 Then install dependencies and run the tests:
 
 ```
-git submodule update --init --recursive
+make install
 make test
 ```
 

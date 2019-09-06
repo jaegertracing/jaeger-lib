@@ -6,6 +6,8 @@ ALL_SRC := $(shell find . -name "*.go" | grep -v -e vendor -e thrift-gen \
         -e ".*/_.*" \
         -e ".*/mocks.*")
 
+USE_DEP := true
+
 RACE=-race
 GOTEST=go test -v $(RACE)
 GOLINT=golint
@@ -55,6 +57,7 @@ lint:
 .PHONY: install
 install:
 ifeq ($(USE_DEP),true)
+	dep version || make install-dep
 	dep ensure
 	dep status
 else ifeq ($(USE_GLIDE),true)
@@ -78,8 +81,8 @@ idl-submodule:
 thrift-image:
 	$(THRIFT) -version
 
-.PHONY: install-dep-ci
-install-dep-ci:
+.PHONY: install-dep
+install-dep:
 	- curl -L -s https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64 -o $$GOPATH/bin/dep
 	- chmod +x $$GOPATH/bin/dep
 

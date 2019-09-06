@@ -10,11 +10,8 @@ matrix:
   include:
   - go: 1.12.7
     env:
-    - COVERAGE=true
-    - GO111MODULE=on
-  - go: 1.12.7
-    env:
     - TEST=true
+    - COVERAGE=true
     - USE_DEP=true
   - go: 1.12.7
     env:
@@ -23,7 +20,7 @@ matrix:
 
 install:
   - if [ "$USE_DEP" == true ]; then make install-dep-ci ; else echo 'skipping installing dep'; fi
-  - make install-ci
+  - make install-ci USE_DEP=$USE_DEP
 
 script:
   - if [ "$COVERAGE" == true ]; then make test-ci ; else echo 'skipping tests'; fi

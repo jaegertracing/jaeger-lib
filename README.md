@@ -4,12 +4,10 @@
 # jaeger-lib
 
 A collection of shared infrastructure libraries used by different
-components of [Jaeger](https://github.com/uber/jaeger) backend and [jaeger-client-go](https://github.com/uber/jaeger-client-go).
+components of [Jaeger](https://github.com/jaegertracing/jaeger) backend and [jaeger-client-go](https://github.com/uber/jaeger-client-go).
 This library is *not intended to be used standalone*, and provides *no guarantees of backwards compatibility*.
 
 The library's import path is `github.com/uber/jaeger-lib`.
-
-The library uses Go modules for dependency management. For backwards compatibility, Dep and Glide dependency files are still maintained, but will be removed in the future.
 
 ## How to Contribute
 
