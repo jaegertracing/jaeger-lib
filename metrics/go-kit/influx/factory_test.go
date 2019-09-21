@@ -8,13 +8,15 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/influx"
-	influxdb "github.com/influxdata/influxdb/client/v2"
+	influxdb "github.com/influxdata/influxdb1-client/v2"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/uber/jaeger-lib/metrics"
 	"github.com/uber/jaeger-lib/metrics/go-kit"
 )
 
+// "github.com/uber/jaeger-lib/vendor/github.com/influxdata/influxdb/client/v2".BatchPointsConfig
+// "github.com/uber/jaeger-lib/vendor/github.com/influxdata/influxdb1-client/v2".BatchPointsConfig
 func TestCounter(t *testing.T) {
 	in := influx.New(map[string]string{}, influxdb.BatchPointsConfig{}, log.NewNopLogger())
 	inf := NewFactory(in)
