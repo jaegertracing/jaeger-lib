@@ -2,12 +2,12 @@ package: github.com/uber/jaeger-lib
 import:
 - package: github.com/codahale/hdrhistogram
 - package: github.com/go-kit/kit
-  version: v0.9.0
+  version: '~0.9'
   subpackages:
   - metrics/influx
 - package: github.com/uber-go/tally
   version: '>= 2.1.0, < 4'
 - package: github.com/prometheus/client_golang
-  version: v1.1.0
+  version: '^1'
 testImport:
 - package: github.com/stretchr/testify
