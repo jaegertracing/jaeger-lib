@@ -1,6 +1,12 @@
 Changes by Version
 ==================
 
+2.2.0 (2019-09-23)
+------------------
+
+- Upgrade Prometheus client to 1.1 and go-kit to 0.9 (#78) -- Yuri Shkuro
+
+
 2.1.1 (2019-09-06)
 ------------------
 
