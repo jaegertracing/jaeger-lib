@@ -8,6 +8,6 @@ import:
 - package: github.com/uber-go/tally
   version: '>= 2.1.0, < 4'
 - package: github.com/prometheus/client_golang
-  version: '^1'
+  version: '>= 0.8, < 2'
 testImport:
 - package: github.com/stretchr/testify
