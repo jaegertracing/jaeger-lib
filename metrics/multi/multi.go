@@ -42,6 +42,12 @@ func (c *counter) Inc(delta int64) {
 	}
 }
 
+func (c *counter) IncWithExemplar(delta int64, t string) {
+	for _, counter := range c.counters {
+		counter.Inc(delta)
+	}
+}
+
 // Counter implements metrics.Factory interface
 func (f *Factory) Counter(options metrics.Options) metrics.Counter {
 	counter := &counter{
@@ -63,6 +69,12 @@ func (t *timer) Record(delta time.Duration) {
 	}
 }
 
+func (t *timer) RecordWithExemplar(delta time.Duration, traceID string) {
+	for _, timer := range t.timers {
+		timer.Record(delta)
+	}
+}
+
 // Timer implements metrics.Factory interface
 func (f *Factory) Timer(options metrics.TimerOptions) metrics.Timer {
 	timer := &timer{
@@ -79,6 +91,12 @@ type histogram struct {
 }
 
 func (h *histogram) Record(value float64) {
+	for _, histogram := range h.histograms {
+		histogram.Record(value)
+	}
+}
+
+func (h *histogram) RecordWithExemplar(value float64, t string) {
 	for _, histogram := range h.histograms {
 		histogram.Record(value)
 	}

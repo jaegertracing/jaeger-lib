@@ -18,6 +18,7 @@ package metrics
 type Counter interface {
 	// Inc adds the given value to the counter.
 	Inc(int64)
+	IncWithExemplar(int64, string)
 }
 
 // NullCounter counter that does nothing
@@ -26,3 +27,5 @@ var NullCounter Counter = nullCounter{}
 type nullCounter struct{}
 
 func (nullCounter) Inc(int64) {}
+
+func (n nullCounter) IncWithExemplar(int64, string) {}

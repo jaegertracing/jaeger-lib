@@ -23,6 +23,7 @@ import (
 type Timer interface {
 	// Records the time passed in.
 	Record(time.Duration)
+	RecordWithExemplar(time.Duration, string)
 }
 
 // NullTimer timer that does nothing
@@ -31,3 +32,5 @@ var NullTimer Timer = nullTimer{}
 type nullTimer struct{}
 
 func (nullTimer) Record(time.Duration) {}
+
+func (n nullTimer) RecordWithExemplar(time.Duration, string) {}

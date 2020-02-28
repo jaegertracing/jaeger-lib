@@ -49,6 +49,9 @@ const (
 
 	// SeparatorColon uses a colon as separator
 	SeparatorColon = ':'
+
+	traceIDTag = "trace_id"
+	spanIDTag  = "span_id"
 )
 
 // Option is a function that sets some option for the Factory constructor.
@@ -223,6 +226,20 @@ func (c *counter) Inc(v int64) {
 	c.counter.Add(float64(v))
 }
 
+func (c *counter) IncWithExemplar(v int64, traceID string) {
+	ctr, ok := c.counter.(prometheus.ExemplarAdder)
+	if ok {
+		labels := make(map[string]string, 2)
+		t, s := parseTraceID(traceID)
+		labels[traceIDTag] = t
+		if len(s) > 0 {
+			labels[spanIDTag] = s
+		}
+		ctr.AddWithExemplar(float64(v), labels)
+	}
+	c.Inc(v)
+}
+
 type gauge struct {
 	gauge prometheus.Gauge
 }
@@ -243,12 +260,42 @@ func (t *timer) Record(v time.Duration) {
 	t.histogram.Observe(float64(v.Nanoseconds()) / float64(time.Second/time.Nanosecond))
 }
 
+func (t *timer) RecordWithExemplar(v time.Duration, traceID string) {
+	hist, ok := t.histogram.(prometheus.ExemplarObserver)
+	if ok {
+		labels := make(map[string]string, 2)
+		t, s := parseTraceID(traceID)
+		labels[traceIDTag] = t
+		if len(s) > 0 {
+			labels[spanIDTag] = s
+		}
+		hist.ObserveWithExemplar(float64(v.Nanoseconds())/float64(time.Second/time.Nanosecond), labels)
+		return
+	}
+	t.Record(v)
+}
+
 type histogram struct {
 	histogram observer
 }
 
 func (h *histogram) Record(v float64) {
 	h.histogram.Observe(v)
+}
+
+func (h *histogram) RecordWithExemplar(v float64, traceID string) {
+	hist, ok := h.histogram.(prometheus.ExemplarObserver)
+	if ok {
+		labels := make(map[string]string, 2)
+		t, s := parseTraceID(traceID)
+		labels[traceIDTag] = t
+		if len(s) > 0 {
+			labels[spanIDTag] = s
+		}
+		hist.ObserveWithExemplar(v, labels)
+		return
+	}
+	h.Record(v)
 }
 
 func (f *Factory) subScope(name string) string {
@@ -298,4 +345,13 @@ func counterNamingConvention(name string) string {
 		name += "_total"
 	}
 	return name
+}
+
+func parseTraceID(combinedTraceID string) (traceID, spanID string) {
+	parts := strings.Split(combinedTraceID, ":")
+	if len(parts) == 0 || len(parts) == 1 {
+		return combinedTraceID, ""
+	}
+
+	return parts[0], parts[1]
 }
