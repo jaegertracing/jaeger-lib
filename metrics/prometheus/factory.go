@@ -229,12 +229,8 @@ func (c *counter) Inc(v int64) {
 func (c *counter) IncWithExemplar(v int64, traceID string) {
 	ctr, ok := c.counter.(prometheus.ExemplarAdder)
 	if ok {
-		labels := make(map[string]string, 2)
-		t, s := parseTraceID(traceID)
-		labels[traceIDTag] = t
-		if len(s) > 0 {
-			labels[spanIDTag] = s
-		}
+		labels := make(map[string]string, 1)
+		labels[traceIDTag] = traceID
 		ctr.AddWithExemplar(float64(v), labels)
 	}
 	c.Inc(v)
@@ -263,12 +259,8 @@ func (t *timer) Record(v time.Duration) {
 func (t *timer) RecordWithExemplar(v time.Duration, traceID string) {
 	hist, ok := t.histogram.(prometheus.ExemplarObserver)
 	if ok {
-		labels := make(map[string]string, 2)
-		t, s := parseTraceID(traceID)
-		labels[traceIDTag] = t
-		if len(s) > 0 {
-			labels[spanIDTag] = s
-		}
+		labels := make(map[string]string, 1)
+		labels[traceIDTag] = traceID
 		hist.ObserveWithExemplar(float64(v.Nanoseconds())/float64(time.Second/time.Nanosecond), labels)
 		return
 	}
@@ -286,12 +278,8 @@ func (h *histogram) Record(v float64) {
 func (h *histogram) RecordWithExemplar(v float64, traceID string) {
 	hist, ok := h.histogram.(prometheus.ExemplarObserver)
 	if ok {
-		labels := make(map[string]string, 2)
-		t, s := parseTraceID(traceID)
-		labels[traceIDTag] = t
-		if len(s) > 0 {
-			labels[spanIDTag] = s
-		}
+		labels := make(map[string]string, 1)
+		labels[traceIDTag] = traceID
 		hist.ObserveWithExemplar(v, labels)
 		return
 	}

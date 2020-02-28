@@ -42,9 +42,9 @@ func (c *counter) Inc(delta int64) {
 	}
 }
 
-func (c *counter) IncWithExemplar(delta int64, t string) {
+func (c *counter) IncWithExemplar(delta int64, traceID string) {
 	for _, counter := range c.counters {
-		counter.Inc(delta)
+		counter.IncWithExemplar(delta, traceID)
 	}
 }
 
@@ -71,7 +71,7 @@ func (t *timer) Record(delta time.Duration) {
 
 func (t *timer) RecordWithExemplar(delta time.Duration, traceID string) {
 	for _, timer := range t.timers {
-		timer.Record(delta)
+		timer.RecordWithExemplar(delta, traceID)
 	}
 }
 
@@ -96,9 +96,9 @@ func (h *histogram) Record(value float64) {
 	}
 }
 
-func (h *histogram) RecordWithExemplar(value float64, t string) {
+func (h *histogram) RecordWithExemplar(value float64, traceID string) {
 	for _, histogram := range h.histograms {
-		histogram.Record(value)
+		histogram.RecordWithExemplar(value, traceID)
 	}
 }
 

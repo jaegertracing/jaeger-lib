@@ -36,7 +36,7 @@ func (c *Counter) Inc(delta int64) {
 }
 
 // IncWithExemplar adds the given value to the counter.
-func (c *Counter) IncWithExemplar(delta int64, t string) {
+func (c *Counter) IncWithExemplar(delta int64, _ string) {
 	c.counter.Inc(delta)
 }
 
@@ -71,7 +71,7 @@ func (t *Timer) Record(delta time.Duration) {
 }
 
 // RecordWithExemplar saves the time passed in.
-func (t *Timer) RecordWithExemplar(delta time.Duration, traceID string) {
+func (t *Timer) RecordWithExemplar(delta time.Duration, _ string) {
 	t.timer.Record(delta)
 }
 
@@ -91,6 +91,6 @@ func (h *Histogram) Record(value float64) {
 }
 
 // RecordWithExemplar saves the value passed in.
-func (h *Histogram) RecordWithExemplar(value float64, t string) {
+func (h *Histogram) RecordWithExemplar(value float64, _ string) {
 	h.histogram.RecordValue(value)
 }
