@@ -138,8 +138,16 @@ func (f *Factory) Counter(options metrics.Options) metrics.Counter {
 		Help: help,
 	}
 	cv := f.cache.getOrMakeCounterVec(opts, labelNames)
+
+	ctr := cv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...)
+	exemplarAdder, ok := ctr.(prometheus.ExemplarAdder)
+	if !ok {
+		exemplarAdder = nil
+	}
+
 	return &counter{
-		counter: cv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...),
+		counter:       ctr,
+		exemplarAdder: exemplarAdder,
 	}
 }
 
@@ -177,8 +185,14 @@ func (f *Factory) Timer(options metrics.TimerOptions) metrics.Timer {
 		Buckets: asFloatBuckets(options.Buckets),
 	}
 	hv := f.cache.getOrMakeHistogramVec(opts, labelNames)
+	hist := hv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...)
+	exemplarObserver, ok := hist.(prometheus.ExemplarObserver)
+	if !ok {
+		exemplarObserver = nil
+	}
 	return &timer{
-		histogram: hv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...),
+		histogram:        hist,
+		exemplarObserver: exemplarObserver,
 	}
 }
 
@@ -205,8 +219,14 @@ func (f *Factory) Histogram(options metrics.HistogramOptions) metrics.Histogram 
 		Buckets: options.Buckets,
 	}
 	hv := f.cache.getOrMakeHistogramVec(opts, labelNames)
+	hist := hv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...)
+	exemplarObserver, ok := hist.(prometheus.ExemplarObserver)
+	if !ok {
+		exemplarObserver = nil
+	}
 	return &histogram{
-		histogram: hv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...),
+		histogram:        hist,
+		exemplarObserver: exemplarObserver,
 	}
 }
 
@@ -216,11 +236,20 @@ func (f *Factory) Namespace(scope metrics.NSOptions) metrics.Factory {
 }
 
 type counter struct {
-	counter prometheus.Counter
+	counter       prometheus.Counter
+	exemplarAdder prometheus.ExemplarAdder
 }
 
 func (c *counter) Inc(v int64) {
 	c.counter.Add(float64(v))
+}
+
+func (c *counter) IncWithExemplar(v int64, l map[string]string) {
+	if c.exemplarAdder != nil {
+		c.exemplarAdder.AddWithExemplar(float64(v), l)
+		return
+	}
+	c.Inc(v)
 }
 
 type gauge struct {
@@ -236,19 +265,37 @@ type observer interface {
 }
 
 type timer struct {
-	histogram observer
+	histogram        observer
+	exemplarObserver prometheus.ExemplarObserver
 }
 
 func (t *timer) Record(v time.Duration) {
 	t.histogram.Observe(float64(v.Nanoseconds()) / float64(time.Second/time.Nanosecond))
 }
 
+func (t *timer) RecordWithExemplar(v time.Duration, l map[string]string) {
+	if t.exemplarObserver != nil {
+		t.exemplarObserver.ObserveWithExemplar(float64(v.Nanoseconds())/float64(time.Second/time.Nanosecond), l)
+		return
+	}
+	t.Record(v)
+}
+
 type histogram struct {
-	histogram observer
+	histogram        observer
+	exemplarObserver prometheus.ExemplarObserver
 }
 
 func (h *histogram) Record(v float64) {
 	h.histogram.Observe(v)
+}
+
+func (h *histogram) RecordWithExemplar(v float64, l map[string]string) {
+	if h.exemplarObserver != nil {
+		h.exemplarObserver.ObserveWithExemplar(v, l)
+		return
+	}
+	h.Record(v)
 }
 
 func (f *Factory) subScope(name string) string {

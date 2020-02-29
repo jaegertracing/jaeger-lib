@@ -20,9 +20,18 @@ type Histogram interface {
 	Record(float64)
 }
 
+// HistogramWithExemplar that keeps track of a distribution of values and
+// supports exemplars.
+type HistogramWithExemplar interface {
+	Histogram
+	RecordWithExemplar(float64, map[string]string)
+}
+
 // NullHistogram that does nothing
-var NullHistogram Histogram = nullHistogram{}
+var NullHistogram HistogramWithExemplar = nullHistogram{}
 
 type nullHistogram struct{}
 
 func (nullHistogram) Record(float64) {}
+
+func (nullHistogram) RecordWithExemplar(float64, map[string]string) {}
