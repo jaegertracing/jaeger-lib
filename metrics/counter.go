@@ -24,7 +24,7 @@ type Counter interface {
 // supports exemplars
 type CounterWithExemplar interface {
 	Counter
-	IncWithExemplar(int64, string)
+	IncWithExemplar(int64, map[string]string)
 }
 
 // NullCounter counter that does nothing
@@ -34,4 +34,4 @@ type nullCounter struct{}
 
 func (nullCounter) Inc(int64) {}
 
-func (n nullCounter) IncWithExemplar(int64, string) {}
+func (nullCounter) IncWithExemplar(int64, map[string]string) {}

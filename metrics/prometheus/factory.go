@@ -49,8 +49,6 @@ const (
 
 	// SeparatorColon uses a colon as separator
 	SeparatorColon = ':'
-
-	traceIDTag = "trace_id"
 )
 
 // Option is a function that sets some option for the Factory constructor.
@@ -246,11 +244,9 @@ func (c *counter) Inc(v int64) {
 	c.counter.Add(float64(v))
 }
 
-func (c *counter) IncWithExemplar(v int64, traceID string) {
+func (c *counter) IncWithExemplar(v int64, l map[string]string) {
 	if c.exemplarAdder != nil {
-		labels := make(map[string]string, 1)
-		labels[traceIDTag] = traceID
-		c.exemplarAdder.AddWithExemplar(float64(v), labels)
+		c.exemplarAdder.AddWithExemplar(float64(v), l)
 		return
 	}
 	c.Inc(v)
@@ -277,11 +273,9 @@ func (t *timer) Record(v time.Duration) {
 	t.histogram.Observe(float64(v.Nanoseconds()) / float64(time.Second/time.Nanosecond))
 }
 
-func (t *timer) RecordWithExemplar(v time.Duration, traceID string) {
+func (t *timer) RecordWithExemplar(v time.Duration, l map[string]string) {
 	if t.exemplarObserver != nil {
-		labels := make(map[string]string, 1)
-		labels[traceIDTag] = traceID
-		t.exemplarObserver.ObserveWithExemplar(float64(v.Nanoseconds())/float64(time.Second/time.Nanosecond), labels)
+		t.exemplarObserver.ObserveWithExemplar(float64(v.Nanoseconds())/float64(time.Second/time.Nanosecond), l)
 		return
 	}
 	t.Record(v)
@@ -296,11 +290,9 @@ func (h *histogram) Record(v float64) {
 	h.histogram.Observe(v)
 }
 
-func (h *histogram) RecordWithExemplar(v float64, traceID string) {
+func (h *histogram) RecordWithExemplar(v float64, l map[string]string) {
 	if h.exemplarObserver != nil {
-		labels := make(map[string]string, 1)
-		labels[traceIDTag] = traceID
-		h.exemplarObserver.ObserveWithExemplar(v, labels)
+		h.exemplarObserver.ObserveWithExemplar(v, l)
 		return
 	}
 	h.Record(v)
@@ -353,13 +345,4 @@ func counterNamingConvention(name string) string {
 		name += "_total"
 	}
 	return name
-}
-
-func parseTraceID(combinedTraceID string) (traceID, spanID string) {
-	parts := strings.Split(combinedTraceID, ":")
-	if len(parts) == 0 || len(parts) == 1 {
-		return combinedTraceID, ""
-	}
-
-	return parts[0], parts[1]
 }

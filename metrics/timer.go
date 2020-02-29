@@ -29,7 +29,7 @@ type Timer interface {
 // took, maintains a histogram of percentiles and supports exemplars.
 type TimerWithExemplar interface {
 	Timer
-	RecordWithExemplar(time.Duration, string)
+	RecordWithExemplar(time.Duration, map[string]string)
 }
 
 // NullTimer timer that does nothing
@@ -39,4 +39,4 @@ type nullTimer struct{}
 
 func (nullTimer) Record(time.Duration) {}
 
-func (nullTimer) RecordWithExemplar(time.Duration, string) {}
+func (nullTimer) RecordWithExemplar(time.Duration, map[string]string) {}

@@ -24,7 +24,7 @@ type Histogram interface {
 // supports exemplars.
 type HistogramWithExemplar interface {
 	Histogram
-	RecordWithExemplar(float64, string)
+	RecordWithExemplar(float64, map[string]string)
 }
 
 // NullHistogram that does nothing
@@ -34,4 +34,4 @@ type nullHistogram struct{}
 
 func (nullHistogram) Record(float64) {}
 
-func (nullHistogram) RecordWithExemplar(float64, string) {}
+func (nullHistogram) RecordWithExemplar(float64, map[string]string) {}
