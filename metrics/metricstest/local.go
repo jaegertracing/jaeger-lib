@@ -276,7 +276,7 @@ func (l *localTimer) Record(d time.Duration) {
 	l.localBackend.RecordTimer(l.name, l.tags, d)
 }
 
-func (l *localTimer) RecordWithExemplar(d time.Duration, t string) {
+func (l *localTimer) RecordWithExemplar(d time.Duration, _ string) {
 	l.localBackend.RecordTimer(l.name, l.tags, d)
 }
 
@@ -288,7 +288,7 @@ func (l *localHistogram) Record(v float64) {
 	l.localBackend.RecordHistogram(l.name, l.tags, v)
 }
 
-func (l *localHistogram) RecordWithExemplar(v float64, t string) {
+func (l *localHistogram) RecordWithExemplar(v float64, _ string) {
 	l.localBackend.RecordHistogram(l.name, l.tags, v)
 }
 
@@ -300,7 +300,7 @@ func (l *localCounter) Inc(delta int64) {
 	l.localBackend.IncCounter(l.name, l.tags, delta)
 }
 
-func (l *localCounter) IncWithExemplar(delta int64, t string) {
+func (l *localCounter) IncWithExemplar(delta int64, _ string) {
 	l.localBackend.IncCounter(l.name, l.tags, delta)
 }
 

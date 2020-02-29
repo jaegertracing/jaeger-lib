@@ -51,7 +51,6 @@ const (
 	SeparatorColon = ':'
 
 	traceIDTag = "trace_id"
-	spanIDTag  = "span_id"
 )
 
 // Option is a function that sets some option for the Factory constructor.
@@ -141,8 +140,16 @@ func (f *Factory) Counter(options metrics.Options) metrics.Counter {
 		Help: help,
 	}
 	cv := f.cache.getOrMakeCounterVec(opts, labelNames)
+
+	ctr := cv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...)
+	exemplarAdder, ok := ctr.(prometheus.ExemplarAdder)
+	if !ok {
+		exemplarAdder = nil
+	}
+
 	return &counter{
-		counter: cv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...),
+		counter:       ctr,
+		exemplarAdder: exemplarAdder,
 	}
 }
 
@@ -180,8 +187,14 @@ func (f *Factory) Timer(options metrics.TimerOptions) metrics.Timer {
 		Buckets: asFloatBuckets(options.Buckets),
 	}
 	hv := f.cache.getOrMakeHistogramVec(opts, labelNames)
+	hist := hv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...)
+	exemplarObserver, ok := hist.(prometheus.ExemplarObserver)
+	if !ok {
+		exemplarObserver = nil
+	}
 	return &timer{
-		histogram: hv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...),
+		histogram:        hist,
+		exemplarObserver: exemplarObserver,
 	}
 }
 
@@ -208,8 +221,14 @@ func (f *Factory) Histogram(options metrics.HistogramOptions) metrics.Histogram 
 		Buckets: options.Buckets,
 	}
 	hv := f.cache.getOrMakeHistogramVec(opts, labelNames)
+	hist := hv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...)
+	exemplarObserver, ok := hist.(prometheus.ExemplarObserver)
+	if !ok {
+		exemplarObserver = nil
+	}
 	return &histogram{
-		histogram: hv.WithLabelValues(f.tagsAsLabelValues(labelNames, tags)...),
+		histogram:        hist,
+		exemplarObserver: exemplarObserver,
 	}
 }
 
@@ -219,7 +238,8 @@ func (f *Factory) Namespace(scope metrics.NSOptions) metrics.Factory {
 }
 
 type counter struct {
-	counter prometheus.Counter
+	counter       prometheus.Counter
+	exemplarAdder prometheus.ExemplarAdder
 }
 
 func (c *counter) Inc(v int64) {
@@ -227,11 +247,11 @@ func (c *counter) Inc(v int64) {
 }
 
 func (c *counter) IncWithExemplar(v int64, traceID string) {
-	ctr, ok := c.counter.(prometheus.ExemplarAdder)
-	if ok {
+	if c.exemplarAdder != nil {
 		labels := make(map[string]string, 1)
 		labels[traceIDTag] = traceID
-		ctr.AddWithExemplar(float64(v), labels)
+		c.exemplarAdder.AddWithExemplar(float64(v), labels)
+		return
 	}
 	c.Inc(v)
 }
@@ -249,7 +269,8 @@ type observer interface {
 }
 
 type timer struct {
-	histogram observer
+	histogram        observer
+	exemplarObserver prometheus.ExemplarObserver
 }
 
 func (t *timer) Record(v time.Duration) {
@@ -257,18 +278,18 @@ func (t *timer) Record(v time.Duration) {
 }
 
 func (t *timer) RecordWithExemplar(v time.Duration, traceID string) {
-	hist, ok := t.histogram.(prometheus.ExemplarObserver)
-	if ok {
+	if t.exemplarObserver != nil {
 		labels := make(map[string]string, 1)
 		labels[traceIDTag] = traceID
-		hist.ObserveWithExemplar(float64(v.Nanoseconds())/float64(time.Second/time.Nanosecond), labels)
+		t.exemplarObserver.ObserveWithExemplar(float64(v.Nanoseconds())/float64(time.Second/time.Nanosecond), labels)
 		return
 	}
 	t.Record(v)
 }
 
 type histogram struct {
-	histogram observer
+	histogram        observer
+	exemplarObserver prometheus.ExemplarObserver
 }
 
 func (h *histogram) Record(v float64) {
@@ -276,11 +297,10 @@ func (h *histogram) Record(v float64) {
 }
 
 func (h *histogram) RecordWithExemplar(v float64, traceID string) {
-	hist, ok := h.histogram.(prometheus.ExemplarObserver)
-	if ok {
+	if h.exemplarObserver != nil {
 		labels := make(map[string]string, 1)
 		labels[traceIDTag] = traceID
-		hist.ObserveWithExemplar(v, labels)
+		h.exemplarObserver.ObserveWithExemplar(v, labels)
 		return
 	}
 	h.Record(v)
