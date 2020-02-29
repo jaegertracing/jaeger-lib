@@ -18,11 +18,17 @@ package metrics
 type Counter interface {
 	// Inc adds the given value to the counter.
 	Inc(int64)
+}
+
+// CounterWithExemplar tracks the number of times an event has occurred and
+// supports exemplars
+type CounterWithExemplar interface {
+	Counter
 	IncWithExemplar(int64, string)
 }
 
 // NullCounter counter that does nothing
-var NullCounter Counter = nullCounter{}
+var NullCounter CounterWithExemplar = nullCounter{}
 
 type nullCounter struct{}
 

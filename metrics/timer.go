@@ -19,10 +19,16 @@ import (
 )
 
 // Timer accumulates observations about how long some operation took,
-// and also maintains a historgam of percentiles.
+// and also maintains a histogram of percentiles.
 type Timer interface {
 	// Records the time passed in.
 	Record(time.Duration)
+}
+
+// TimerWithExemplar accumulates observations about how long some operation
+// took, maintains a histogram of percentiles and supports exemplars.
+type TimerWithExemplar interface {
+	Timer
 	RecordWithExemplar(time.Duration, string)
 }
 
@@ -33,4 +39,4 @@ type nullTimer struct{}
 
 func (nullTimer) Record(time.Duration) {}
 
-func (n nullTimer) RecordWithExemplar(time.Duration, string) {}
+func (nullTimer) RecordWithExemplar(time.Duration, string) {}

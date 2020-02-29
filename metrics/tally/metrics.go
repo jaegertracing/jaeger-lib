@@ -35,11 +35,6 @@ func (c *Counter) Inc(delta int64) {
 	c.counter.Inc(delta)
 }
 
-// IncWithExemplar adds the given value to the counter.
-func (c *Counter) IncWithExemplar(delta int64, _ string) {
-	c.counter.Inc(delta)
-}
-
 // Gauge is an adapter from go-tally Gauge to jaeger-lib Gauge
 type Gauge struct {
 	gauge tally.Gauge
@@ -70,11 +65,6 @@ func (t *Timer) Record(delta time.Duration) {
 	t.timer.Record(delta)
 }
 
-// RecordWithExemplar saves the time passed in.
-func (t *Timer) RecordWithExemplar(delta time.Duration, _ string) {
-	t.timer.Record(delta)
-}
-
 // Histogram is an adapter from go-tally Histogram to jaeger-lib Histogram
 type Histogram struct {
 	histogram tally.Histogram
@@ -87,10 +77,5 @@ func NewHistogram(histogram tally.Histogram) *Histogram {
 
 // Record saves the value passed in.
 func (h *Histogram) Record(value float64) {
-	h.histogram.RecordValue(value)
-}
-
-// RecordWithExemplar saves the value passed in.
-func (h *Histogram) RecordWithExemplar(value float64, _ string) {
 	h.histogram.RecordValue(value)
 }

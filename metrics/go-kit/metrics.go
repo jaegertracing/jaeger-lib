@@ -35,11 +35,6 @@ func (c *Counter) Inc(delta int64) {
 	c.counter.Add(float64(delta))
 }
 
-// IncWithExemplar adds the given value alongwith the trace ID provided.
-func (c *Counter) IncWithExemplar(delta int64, _ string) {
-	c.counter.Add(float64(delta))
-}
-
 // Gauge is an adapter from go-kit Gauge to jaeger-lib Gauge
 type Gauge struct {
 	gauge kit.Gauge
@@ -70,11 +65,6 @@ func (t *Timer) Record(delta time.Duration) {
 	t.hist.Observe(delta.Seconds())
 }
 
-// RecordWithExemplar saves the time passed in with the trace ID provided.
-func (t *Timer) RecordWithExemplar(delta time.Duration, _ string) {
-	t.hist.Observe(delta.Seconds())
-}
-
 // Histogram is an adapter from go-kit Histogram to jaeger-lib Histogram
 type Histogram struct {
 	hist kit.Histogram
@@ -87,10 +77,5 @@ func NewHistogram(hist kit.Histogram) *Histogram {
 
 // Record saves the value passed in.
 func (t *Histogram) Record(value float64) {
-	t.hist.Observe(value)
-}
-
-// RecordWithExemplar saves the time passed in with the trace ID provided.
-func (t *Histogram) RecordWithExemplar(value float64, _ string) {
 	t.hist.Observe(value)
 }
