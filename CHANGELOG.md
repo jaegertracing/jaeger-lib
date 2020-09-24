@@ -1,6 +1,13 @@
 Changes by Version
 ==================
 
+2.3.0 (2020-09-23)
+------------------
+
+- Change codahale/hdrhistogram dependency to HdrHistogram/hdrhistogram (#82)  -- filipe oliveira
+- Upgrade Go to 1.15 (#83) -- Yuri Shkuro
+
+
 2.2.0 (2019-09-23)
 ------------------
 
