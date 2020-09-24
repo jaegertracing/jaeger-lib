@@ -8,12 +8,12 @@ go_import_path: github.com/uber/jaeger-lib
 
 matrix:
   include:
-  - go: 1.12.7
+  - go: 1.15.x
     env:
     - TEST=true
     - COVERAGE=true
     - USE_DEP=true
-  - go: 1.12.7
+  - go: 1.15.x
     env:
     - USE_GLIDE=true
     - USE_DEP=false
