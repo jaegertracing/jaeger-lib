@@ -60,6 +60,48 @@ func TestForkFactory(t *testing.T) {
 		Value: 666,
 	})
 
+	// Get default namespaced factory
+	defaultNamespacedFactory := ff.Namespace(metrics.NSOptions{
+		Name: "default",
+		Tags: nil,
+	})
+
+	// Add some metrics
+	defaultNamespacedFactory.Counter(metrics.Options{
+		Name: "somenamespacedcounter",
+		Tags: nil,
+		Help: "",
+	}).Inc(111)
+	defaultNamespacedFactory.Gauge(metrics.Options{
+		Name: "somenamespacedgauge",
+		Tags: nil,
+		Help: "",
+	}).Update(222)
+	defaultNamespacedFactory.Histogram(metrics.HistogramOptions{
+		Name:    "somenamespacedhist",
+		Tags:    nil,
+		Help:    "",
+		Buckets: nil,
+	}).Record(1)
+	defaultNamespacedFactory.Timer(metrics.TimerOptions{
+		Name:    "somenamespacedtimer",
+		Tags:    nil,
+		Help:    "",
+		Buckets: nil,
+	}).Record(time.Millisecond)
+
+	// Check values in default namespaced factory backend
+	defaultFactory.AssertCounterMetrics(t, metricstest.ExpectedMetric{
+		Name:  "default.somenamespacedcounter",
+		Tags:  nil,
+		Value: 111,
+	})
+	defaultFactory.AssertGaugeMetrics(t, metricstest.ExpectedMetric{
+		Name:  "default.somenamespacedgauge",
+		Tags:  nil,
+		Value: 222,
+	})
+
 	// Get factory with forkNamespace and add some metrics
 	internalFactory := ff.Namespace(metrics.NSOptions{
 		Name: forkNamespace,
