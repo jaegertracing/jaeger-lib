@@ -164,6 +164,22 @@
   version = "v3.3.12"
 
 [[projects]]
+  digest = "1:abbb7762b4200f8b1d82193dcc02a3d8a62efc0a0ffc8ec4f4e9ef8abf797a9c"
+  name = "github.com/uber/jaeger-lib"
+  packages = [
+    "metrics",
+    "metrics/adapters",
+    "metrics/expvar",
+    "metrics/go-kit",
+    "metrics/go-kit/expvar",
+    "metrics/metricstest",
+    "metrics/prometheus",
+  ]
+  pruneopts = "UT"
+  revision = "a87ae9d84fb038a8d79266298970720be7c80fcd"
+  version = "v2.2.0"
+
+[[projects]]
   branch = "master"
   digest = "1:6f104e30a35d62427b90130710ff507d6b9fc95ca76ceafb0025cd2809d93232"
   name = "golang.org/x/sys"
@@ -196,6 +212,13 @@
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
     "github.com/uber-go/tally",
+    "github.com/uber/jaeger-lib/metrics",
+    "github.com/uber/jaeger-lib/metrics/adapters",
+    "github.com/uber/jaeger-lib/metrics/expvar",
+    "github.com/uber/jaeger-lib/metrics/go-kit",
+    "github.com/uber/jaeger-lib/metrics/go-kit/expvar",
+    "github.com/uber/jaeger-lib/metrics/metricstest",
+    "github.com/uber/jaeger-lib/metrics/prometheus",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
