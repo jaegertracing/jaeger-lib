@@ -18,16 +18,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/uber/jaeger-lib/metrics"
 	"github.com/uber/jaeger-lib/metrics/metricstest"
 )
 
-func TestAPICheck(t *testing.T) {
-	var v interface{} = &Factory{}
-	_, ok := v.(metrics.Factory)
-	assert.True(t, ok)
-}
+var _ metrics.Factory = (*Factory)(nil)
 
 func TestForkFactory(t *testing.T) {
 	forkNamespace := "internal"
