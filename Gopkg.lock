@@ -164,12 +164,11 @@
   version = "v3.3.12"
 
 [[projects]]
-  digest = "1:abbb7762b4200f8b1d82193dcc02a3d8a62efc0a0ffc8ec4f4e9ef8abf797a9c"
+  digest = "1:dcdd0a1ffcf3a64a4f023d6be5af744e587ce364130f0695cadc1432b5f94610"
   name = "github.com/uber/jaeger-lib"
   packages = [
     "metrics",
     "metrics/adapters",
-    "metrics/expvar",
     "metrics/go-kit",
     "metrics/go-kit/expvar",
     "metrics/metricstest",
@@ -214,7 +213,6 @@
     "github.com/uber-go/tally",
     "github.com/uber/jaeger-lib/metrics",
     "github.com/uber/jaeger-lib/metrics/adapters",
-    "github.com/uber/jaeger-lib/metrics/expvar",
     "github.com/uber/jaeger-lib/metrics/go-kit",
     "github.com/uber/jaeger-lib/metrics/go-kit/expvar",
     "github.com/uber/jaeger-lib/metrics/metricstest",
