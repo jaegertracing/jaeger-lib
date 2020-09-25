@@ -19,7 +19,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/codahale/hdrhistogram"
+	"github.com/HdrHistogram/hdrhistogram-go"
 	"github.com/uber/jaeger-lib/metrics"
 )
 

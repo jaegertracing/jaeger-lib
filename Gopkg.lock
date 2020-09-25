@@ -18,12 +18,12 @@
   version = "v1.0.1"
 
 [[projects]]
-  branch = "master"
   digest = "1:4c4c33075b704791d6a7f09dfb55c66769e8a1dc6adf87026292d274fe8ad113"
-  name = "github.com/codahale/hdrhistogram"
+  name = "github.com/HdrHistogram/hdrhistogram-go"
   packages = ["."]
   pruneopts = "UT"
   revision = "3a0bb77429bd3a61596f5e8a3172445844342120"
+  version = "0.9.0"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -198,7 +198,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/codahale/hdrhistogram",
+    "github.com/HdrHistogram/hdrhistogram-go",
     "github.com/go-kit/kit/log",
     "github.com/go-kit/kit/log/level",
     "github.com/go-kit/kit/metrics",
