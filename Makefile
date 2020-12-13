@@ -52,10 +52,12 @@ lint:
 install:
 ifeq ($(USE_DEP),true)
 	dep version || make install-dep
+	dep version
 	dep ensure
 	dep status
 else ifeq ($(USE_GLIDE),true)
 	glide --version || go get github.com/Masterminds/glide
+	glide --version
 	glide install
 endif
 
@@ -67,7 +69,6 @@ cover:
 cover-html: cover
 	go tool cover -html=cover.out -o cover.html
 
-
 idl-submodule:
 	git submodule init
 	git submodule update
@@ -77,7 +78,7 @@ thrift-image:
 
 .PHONY: install-dep
 install-dep:
-	- curl -L -s https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64 -o $$GOPATH/bin/dep
+	- curl -L -s https://github.com/golang/dep/releases/download/v0.5.4/dep-linux-amd64 -o $$GOPATH/bin/dep
 	- chmod +x $$GOPATH/bin/dep
 
 .PHONY: install-ci
