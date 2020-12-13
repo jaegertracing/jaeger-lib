@@ -87,11 +87,5 @@ install-ci: install
 	go get golang.org/x/tools/cmd/cover
 	go get golang.org/x/lint/golint
 
-
 .PHONY: test-ci
 test-ci: cover lint
-
-.PHONY: test-only-ci
-test-only-ci:
-	$(GOTEST) -cover ./...
-	make lint
