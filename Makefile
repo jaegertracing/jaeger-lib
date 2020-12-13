@@ -53,7 +53,7 @@ install:
 ifeq ($(USE_DEP),true)
 	dep version || make install-dep
 	dep version
-	dep ensure
+	dep ensure -vendor-only
 	dep status
 else ifeq ($(USE_GLIDE),true)
 	glide --version || go get github.com/Masterminds/glide
