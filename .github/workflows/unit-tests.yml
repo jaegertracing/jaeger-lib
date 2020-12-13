@@ -34,7 +34,7 @@ jobs:
       - name: Run tests
         run: |
           cd $PROJECT
-          make test-ci
+          make test-ci USE_DEP=${{ matrix.job.dep }} USE_GLIDE=${{ matrix.job.glide }}
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v1
         with:
