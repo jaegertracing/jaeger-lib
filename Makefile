@@ -25,11 +25,14 @@ COLORIZE=sed ''/PASS/s//$(PASS)/'' | sed ''/FAIL/s//$(FAIL)/''
 .PHONY: test-and-lint
 test-and-lint: test fmt lint
 
-.PHONY: test
-test:
+.PHONY: dep-check
+dep-check:
 ifeq ($(USE_DEP),true)
 	dep check
 endif
+
+.PHONY: test
+test: dep-check
 	$(GOTEST) $(PACKAGES) | $(COLORIZE)
 
 .PHONY: fmt
@@ -89,4 +92,4 @@ install-ci: install
 	go get golang.org/x/lint/golint
 
 .PHONY: test-ci
-test-ci: cover lint
+test-ci: dep-check cover lint
