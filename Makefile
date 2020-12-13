@@ -25,11 +25,14 @@ COLORIZE=sed ''/PASS/s//$(PASS)/'' | sed ''/FAIL/s//$(FAIL)/''
 .PHONY: test-and-lint
 test-and-lint: test fmt lint
 
-.PHONY: test
-test:
+.PHONY: dep-check
+dep-check:
 ifeq ($(USE_DEP),true)
 	dep check
 endif
+
+.PHONY: test
+test: dep-check
 	$(GOTEST) $(PACKAGES) | $(COLORIZE)
 
 .PHONY: fmt
@@ -52,10 +55,12 @@ lint:
 install:
 ifeq ($(USE_DEP),true)
 	dep version || make install-dep
-	dep ensure
+	dep version
+	dep ensure -vendor-only
 	dep status
 else ifeq ($(USE_GLIDE),true)
 	glide --version || go get github.com/Masterminds/glide
+	glide --version
 	glide install
 endif
 
@@ -67,7 +72,6 @@ cover:
 cover-html: cover
 	go tool cover -html=cover.out -o cover.html
 
-
 idl-submodule:
 	git submodule init
 	git submodule update
@@ -77,7 +81,7 @@ thrift-image:
 
 .PHONY: install-dep
 install-dep:
-	- curl -L -s https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64 -o $$GOPATH/bin/dep
+	- curl -L -s https://github.com/golang/dep/releases/download/v0.5.4/dep-linux-amd64 -o $$GOPATH/bin/dep
 	- chmod +x $$GOPATH/bin/dep
 
 .PHONY: install-ci
@@ -88,4 +92,4 @@ install-ci: install
 	go get golang.org/x/lint/golint
 
 .PHONY: test-ci
-test-ci: cover lint
+test-ci: dep-check cover lint

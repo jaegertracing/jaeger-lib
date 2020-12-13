@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:4c4c33075b704791d6a7f09dfb55c66769e8a1dc6adf87026292d274fe8ad113"
+  name = "github.com/HdrHistogram/hdrhistogram-go"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3a0bb77429bd3a61596f5e8a3172445844342120"
+  version = "0.9.0"
+
+[[projects]]
   digest = "1:8515c0ca4381246cf332cee05fc84070bbbb07bd679b639161506ba532f47128"
   name = "github.com/VividCortex/gohistogram"
   packages = ["."]
@@ -16,14 +24,6 @@
   pruneopts = "UT"
   revision = "37c8de3658fcb183f997c4e13e8337516ab753e6"
   version = "v1.0.1"
-
-[[projects]]
-  digest = "1:4c4c33075b704791d6a7f09dfb55c66769e8a1dc6adf87026292d274fe8ad113"
-  name = "github.com/HdrHistogram/hdrhistogram-go"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "3a0bb77429bd3a61596f5e8a3172445844342120"
-  version = "0.9.0"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -164,21 +164,6 @@
   version = "v3.3.12"
 
 [[projects]]
-  digest = "1:dcdd0a1ffcf3a64a4f023d6be5af744e587ce364130f0695cadc1432b5f94610"
-  name = "github.com/uber/jaeger-lib"
-  packages = [
-    "metrics",
-    "metrics/adapters",
-    "metrics/go-kit",
-    "metrics/go-kit/expvar",
-    "metrics/metricstest",
-    "metrics/prometheus",
-  ]
-  pruneopts = "UT"
-  revision = "a87ae9d84fb038a8d79266298970720be7c80fcd"
-  version = "v2.2.0"
-
-[[projects]]
   branch = "master"
   digest = "1:6f104e30a35d62427b90130710ff507d6b9fc95ca76ceafb0025cd2809d93232"
   name = "golang.org/x/sys"
@@ -211,12 +196,6 @@
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
     "github.com/uber-go/tally",
-    "github.com/uber/jaeger-lib/metrics",
-    "github.com/uber/jaeger-lib/metrics/adapters",
-    "github.com/uber/jaeger-lib/metrics/go-kit",
-    "github.com/uber/jaeger-lib/metrics/go-kit/expvar",
-    "github.com/uber/jaeger-lib/metrics/metricstest",
-    "github.com/uber/jaeger-lib/metrics/prometheus",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

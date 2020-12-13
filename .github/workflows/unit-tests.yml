@@ -15,11 +15,9 @@ jobs:
         job:
         - dep: true
           glide: false
-          cov: true
           name: unit-tests with dep
         - dep: false
           glide: true
-          cov: false
           name: unit-tests with glide
     name: ${{ matrix.job.name }}
     steps:
@@ -36,11 +34,10 @@ jobs:
       - name: Run tests
         run: |
           cd $PROJECT
-          make test-ci
+          make test-ci USE_DEP=${{ matrix.job.dep }} USE_GLIDE=${{ matrix.job.glide }}
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v1
         with:
           file: cover.out
           fail_ci_if_error: true
           verbose: true
-        if: matrix.job.cov == 'true'
