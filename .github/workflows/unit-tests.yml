@@ -12,6 +12,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
+        job:
         - dep: true
           glide: false
           cov: true
@@ -20,7 +21,7 @@ jobs:
           glide: true
           cov: false
           name: unit-tests with glide
-    name: ${{ matrix.name }}
+    name: ${{ matrix.job.name }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
@@ -31,7 +32,7 @@ jobs:
       - name: Install dependencies and tools
         run: |
           cd $PROJECT
-          make install-ci USE_DEP=${{ matrix.dep }} USE_GLIDE=${{ matrix.glide }}
+          make install-ci USE_DEP=${{ matrix.job.dep }} USE_GLIDE=${{ matrix.job.glide }}
       - name: Run tests
         run: |
           cd $PROJECT
@@ -42,4 +43,4 @@ jobs:
           file: cover.out
           fail_ci_if_error: true
           verbose: true
-        if: matrix.cov == 'true'
+        if: matrix.job.cov == 'true'
