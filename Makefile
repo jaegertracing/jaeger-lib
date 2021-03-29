@@ -1,5 +1,7 @@
 PROJECT_ROOT=github.com/uber/jaeger-lib
-PACKAGES := $(shell go list ./... | awk -F/ 'NR>1 {print "./"$$4"/..."}' | sort -u)
+export GO111MODULE=off
+
+PACKAGES := $(shell GO111MODULE=off go list ./... | awk -F/ 'NR>1 {print "./"$$4"/..."}' | sort -u)
 # all .go files that don't exist in hidden directories
 ALL_SRC := $(shell find . -name "*.go" | grep -v -e vendor \
         -e ".*/\..*" \
