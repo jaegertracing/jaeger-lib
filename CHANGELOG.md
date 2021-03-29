@@ -1,6 +1,12 @@
 Changes by Version
 ==================
 
+2.4.1 (2021-03-29)
+------------------
+
+- [bug fix] Apply default buckets in Prometheus Factory (#90) -- Konstantinos Moraitis
+
+
 2.4.0 (2020-10-01)
 ------------------
 
