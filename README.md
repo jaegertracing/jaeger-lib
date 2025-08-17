@@ -3,6 +3,8 @@
 
 # jaeger-lib
 
+🛑 DEPRECATED: The Jaeger repository no longer has direct dependency on `jaeger-lib` so this repository is archived.
+
 A collection of shared infrastructure libraries used by different
 components of [Jaeger](https://github.com/jaegertracing/jaeger) backend and [jaeger-client-go](https://github.com/uber/jaeger-client-go).
 This library is *not intended to be used standalone*, and provides *no guarantees of backwards compatibility*.
